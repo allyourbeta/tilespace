@@ -1,6 +1,13 @@
 import { supabase } from './supabase';
 import { Tile, Link, DEFAULT_EMOJIS, getColorFromPalette, getPalette, getGridCapacity } from '../types';
 
+// Helper to get current user ID
+async function getCurrentUserId(): Promise<string> {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) throw new Error('Not authenticated');
+  return user.id;
+}
+
 function isValidUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
@@ -27,10 +34,11 @@ function normalizeUrl(url: string): string {
 }
 
 export async function fetchCurrentPalette(): Promise<string> {
+  const userId = await getCurrentUserId();
   const { data, error } = await supabase
     .from('user_preferences')
     .select('current_palette')
-    .eq('id', 1)
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error) throw error;
@@ -38,9 +46,14 @@ export async function fetchCurrentPalette(): Promise<string> {
 }
 
 export async function updateCurrentPalette(paletteId: string): Promise<void> {
+  const userId = await getCurrentUserId();
   const { error } = await supabase
     .from('user_preferences')
-    .upsert({ id: 1, current_palette: paletteId, updated_at: new Date().toISOString() });
+    .upsert({ 
+      user_id: userId, 
+      current_palette: paletteId, 
+      updated_at: new Date().toISOString() 
+    });
 
   if (error) throw error;
 }
@@ -91,6 +104,8 @@ export async function fetchTiles(): Promise<Tile[]> {
 }
 
 export async function createTile(paletteId: string): Promise<Tile> {
+  const userId = await getCurrentUserId();
+  
   // Get current tiles to find first empty slot
   const { data: tiles, error: fetchError } = await supabase
     .from('tiles')
@@ -120,6 +135,7 @@ export async function createTile(paletteId: string): Promise<Tile> {
   const { data, error } = await supabase
     .from('tiles')
     .insert({
+      user_id: userId,
       title: 'New Tile',
       emoji: DEFAULT_EMOJIS[emojiIndex],
       accent_color: color,
@@ -204,9 +220,12 @@ export async function swapTilePositions(tileAId: string, tileBId: string): Promi
 }
 
 export async function createLink(tileId: string, position: number, title: string, url: string, summary: string): Promise<Link> {
+  const userId = await getCurrentUserId();
+  
   const { data, error } = await supabase
     .from('links')
     .insert({
+      user_id: userId,
       tile_id: tileId,
       title,
       url: normalizeUrl(url),
@@ -223,9 +242,12 @@ export async function createLink(tileId: string, position: number, title: string
 }
 
 export async function createDocument(tileId: string, position: number, title: string, content: string, summary: string): Promise<Link> {
+  const userId = await getCurrentUserId();
+  
   const { data, error } = await supabase
     .from('links')
     .insert({
+      user_id: userId,
       tile_id: tileId,
       title,
       url: null,
