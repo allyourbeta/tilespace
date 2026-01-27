@@ -23,9 +23,13 @@ import { TilePanel } from './components/TilePanel';
 import { FloatingActions } from './components/FloatingActions';
 import { PasteLinkModal } from './components/PasteLinkModal';
 import { DocumentEditor } from './components/DocumentEditor';
+import { UserMenu } from './components/UserMenu';
 import { Loader2 } from 'lucide-react';
+import { AuthProvider, useAuth } from './auth/AuthContext';
+import { LoginPage } from './pages/LoginPage';
 
-function App() {
+function AppContent() {
+  const { user, loading: authLoading } = useAuth();
   const [tiles, setTiles] = useState<Tile[]>([]);
   // Store only the ID, derive the full object from tiles
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
@@ -59,8 +63,10 @@ function App() {
 
   useEffect(() => {
     document.title = APP_CONFIG.TITLE;
-    loadData();
-  }, [loadData]);
+    if (user) {
+      loadData();
+    }
+  }, [loadData, user]);
 
   // Debounce ref for palette changes
   const paletteDebounceRef = useRef<number | null>(null);
@@ -372,6 +378,20 @@ function App() {
     }
   };
 
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+      </div>
+    );
+  }
+
+  // Show login if not authenticated
+  if (!user) {
+    return <LoginPage />;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-stone-100 flex items-center justify-center">
@@ -476,6 +496,8 @@ function App() {
         onSelectPalette={handlePaletteChange}
       />
 
+      <UserMenu />
+
       {showPasteLink && (
         <PasteLinkModal
           onClose={() => setShowPasteLink(false)}
@@ -492,6 +514,14 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

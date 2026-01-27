@@ -41,3 +41,4 @@ supabase/.temp
 # Added by setup script
 __pycache__/
 venv/
+.vercel

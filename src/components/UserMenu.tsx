@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@/auth';
+import { useAuth } from '../auth/AuthContext';
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
@@ -7,59 +7,41 @@ export function UserMenu() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
-    };
+    }
+
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
   if (!user) return null;
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
-
-  // Get initials as fallback for avatar
-  const initials = user.name
-    ? user.name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
-    : user.email?.slice(0, 2).toUpperCase() ?? '??';
-
   return (
-    <div ref={menuRef} className="fixed bottom-4 right-4 z-40">
+    <div className="fixed bottom-4 right-4 z-40" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-lg hover:shadow-xl transition-shadow"
       >
-        {user.avatarUrl ? (
-          <img
-            src={user.avatarUrl}
-            alt={user.name || 'User'}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-600 flex items-center justify-center text-white font-medium text-sm">
-            {initials}
-          </div>
-        )}
+        <img 
+          src={user.user_metadata.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.email || 'U')}`} 
+          alt="" 
+          className="w-full h-full object-cover" 
+        />
       </button>
-
+      
       {isOpen && (
-        <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border p-2 min-w-[200px]">
-          <p className="px-3 py-2 text-sm text-gray-600 truncate">{user.email}</p>
-          <hr className="my-1" />
+        <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-[200px]">
+          <p className="px-4 py-2 text-sm text-gray-600 truncate border-b border-gray-100">
+            {user.email}
+          </p>
           <button
-            onClick={handleSignOut}
-            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded"
+            onClick={() => { signOut(); setIsOpen(false); }}
+            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
           >
             Sign Out
           </button>
