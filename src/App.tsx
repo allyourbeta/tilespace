@@ -589,7 +589,7 @@ function AppContent() {
       {...swipeHandlers}
     >
       {/* Page Title Display */}
-      <PageTitleDisplay currentPage={currentPage} />
+      <PageTitleDisplay currentPage={currentPage} currentPageId={currentPageId} />
       
       {/* Tile Grid */}
       <div className="h-full w-full grid gap-4 p-4" style={gridStyle}>
