@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
+import { usePageNavigation, useKeyboardNavigation } from './hooks';
 import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette } from './types';
 import { Page } from './types/page';
 import {
@@ -68,14 +69,6 @@ function AppContent() {
     return tiles.find(t => t.id === selectedTileId) ?? null;
   }, [tiles, selectedTileId]);
 
-  const sortedPages = useMemo(() => {
-    return [...pages].sort((a, b) => a.position - b.position);
-  }, [pages]);
-
-  const currentPageIndex = useMemo(() => {
-    if (!currentPageId) return 0;
-    return sortedPages.findIndex(p => p.id === currentPageId);
-  }, [sortedPages, currentPageId]);
 
   // Load pages on mount
   const loadPages = useCallback(async () => {
@@ -126,24 +119,12 @@ function AppContent() {
   }, [currentPageId, loadTiles]);
 
   // Page navigation
-  const goToNextPage = useCallback(() => {
-    if (currentPageIndex < sortedPages.length - 1) {
-      setSelectedTileId(null);
-      setCurrentPageId(sortedPages[currentPageIndex + 1].id);
-    }
-  }, [currentPageIndex, sortedPages]);
-
-  const goToPrevPage = useCallback(() => {
-    if (currentPageIndex > 0) {
-      setSelectedTileId(null);
-      setCurrentPageId(sortedPages[currentPageIndex - 1].id);
-    }
-  }, [currentPageIndex, sortedPages]);
-
-  const goToPage = useCallback((pageId: string) => {
-    setSelectedTileId(null);
-    setCurrentPageId(pageId);
-  }, []);
+  const { sortedPages, currentPageIndex, goToNextPage, goToPrevPage, goToPage } = usePageNavigation({
+    pages,
+    currentPageId,
+    setCurrentPageId,
+    setSelectedTileId,
+  });
 
   // Swipe handlers
   const swipeHandlers = useSwipeable({
@@ -155,23 +136,8 @@ function AppContent() {
   });
 
   // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't navigate if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-      
-      if (e.key === 'ArrowLeft') {
-        goToPrevPage();
-      } else if (e.key === 'ArrowRight') {
-        goToNextPage();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goToNextPage, goToPrevPage]);
+  // Keyboard navigation
+  useKeyboardNavigation(goToPrevPage, goToNextPage);
 
   // Page handlers
   const handleUpdatePageTitle = async (pageId: string, title: string) => {
