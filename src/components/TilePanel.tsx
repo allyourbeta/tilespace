@@ -443,7 +443,7 @@ function LinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd, onOpenDocu
     if (!trimmedUrl) {
       setIsEditing(false);
       setTitle(link.title);
-      setUrl(link.url);
+      setUrl(link.url || '');
       setSummary(link.summary);
       return;
     }
@@ -473,7 +473,7 @@ function LinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd, onOpenDocu
       handleSave();
     } else if (e.key === 'Escape') {
       setTitle(link.title);
-      setUrl(link.url);
+      setUrl(link.url || '');
       setSummary(link.summary);
       setIsEditing(false);
     }
@@ -482,7 +482,7 @@ function LinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd, onOpenDocu
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       setTitle(link.title);
-      setUrl(link.url);
+      setUrl(link.url || '');
       setSummary(link.summary);
       setIsEditing(false);
     }
@@ -586,7 +586,7 @@ function LinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd, onOpenDocu
         <button
           onClick={() => {
             setTitle(link.title);
-            setUrl(link.url);
+            setUrl(link.url || '');
             setSummary(link.summary);
             setIsEditing(false);
           }}
