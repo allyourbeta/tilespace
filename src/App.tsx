@@ -1,15 +1,18 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSwipeable } from 'react-swipeable';
 import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette, MIN_GRID_SIZE } from './types';
+import { Page } from './types/page';
 import {
-  fetchCurrentPalette,
-  updateCurrentPalette,
+  fetchPages,
+  updatePage,
+  updatePagePalette,
   recolorAllTiles,
   createTile,
   updateTile,
   updateTileColor,
   deleteTile,
-  moveTileToPosition,
   swapTilePositions,
+  moveTileToPosition,
   createLink,
   createDocument,
   updateLink,
@@ -24,67 +27,177 @@ import { FloatingActions } from './components/FloatingActions';
 import { PasteLinkModal } from './components/PasteLinkModal';
 import { DocumentEditor } from './components/DocumentEditor';
 import { UserMenu } from './components/UserMenu';
+import { PageDots } from './components/PageDots';
+import { PageTitle } from './components/PageTitle';
 import { Loader2 } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 
 function AppContent() {
   const { user, loading: authLoading } = useAuth();
+  
+  // Page state
+  const [pages, setPages] = useState<Page[]>([]);
+  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
+  
+  // Tile state (for current page)
   const [tiles, setTiles] = useState<Tile[]>([]);
-  // Store only the ID, derive the full object from tiles
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
   const [draggedTileId, setDraggedTileId] = useState<string | null>(null);
-  const [currentPaletteId, setCurrentPaletteId] = useState<string>('ocean');
+  
+  // UI state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showPasteLink, setShowPasteLink] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Link | null>(null);
 
-  // Derive selectedTile from tiles - this ensures it's always in sync
+  // Derived state
+  const currentPage = useMemo(() => {
+    if (!currentPageId) return null;
+    return pages.find(p => p.id === currentPageId) ?? null;
+  }, [pages, currentPageId]);
+
+  const currentPaletteId = currentPage?.palette_id ?? 'ocean';
+
   const selectedTile = useMemo(() => {
     if (!selectedTileId) return null;
     return tiles.find(t => t.id === selectedTileId) ?? null;
   }, [tiles, selectedTileId]);
 
-  const loadData = useCallback(async () => {
+  const sortedPages = useMemo(() => {
+    return [...pages].sort((a, b) => a.position - b.position);
+  }, [pages]);
+
+  const currentPageIndex = useMemo(() => {
+    if (!currentPageId) return 0;
+    return sortedPages.findIndex(p => p.id === currentPageId);
+  }, [sortedPages, currentPageId]);
+
+  // Load pages on mount
+  const loadPages = useCallback(async () => {
     try {
       setError(null);
-      const paletteId = await fetchCurrentPalette();
-      setCurrentPaletteId(paletteId);
-      const data = await fetchTiles();
-      setTiles(data);
+      const pagesData = await fetchPages();
+      setPages(pagesData);
+      
+      // Set current page to first page if not set
+      if (pagesData.length > 0 && !currentPageId) {
+        const sorted = [...pagesData].sort((a, b) => a.position - b.position);
+        setCurrentPageId(sorted[0].id);
+      }
+    } catch (err) {
+      setError('Failed to load pages');
+      console.error(err);
+    }
+  }, [currentPageId]);
+
+  // Load tiles when current page changes
+  const loadTiles = useCallback(async () => {
+    if (!currentPageId) return;
+    
+    try {
+      setError(null);
+      const tilesData = await fetchTiles(currentPageId);
+      setTiles(tilesData);
     } catch (err) {
       setError('Failed to load tiles');
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentPageId]);
 
   useEffect(() => {
     document.title = APP_CONFIG.TITLE;
     if (user) {
-      loadData();
+      loadPages();
     }
-  }, [loadData, user]);
+  }, [user, loadPages]);
 
-  // Debounce ref for palette changes
+  useEffect(() => {
+    if (currentPageId) {
+      setLoading(true);
+      loadTiles();
+    }
+  }, [currentPageId, loadTiles]);
+
+  // Page navigation
+  const goToNextPage = useCallback(() => {
+    if (currentPageIndex < sortedPages.length - 1) {
+      setSelectedTileId(null);
+      setCurrentPageId(sortedPages[currentPageIndex + 1].id);
+    }
+  }, [currentPageIndex, sortedPages]);
+
+  const goToPrevPage = useCallback(() => {
+    if (currentPageIndex > 0) {
+      setSelectedTileId(null);
+      setCurrentPageId(sortedPages[currentPageIndex - 1].id);
+    }
+  }, [currentPageIndex, sortedPages]);
+
+  const goToPage = useCallback((pageId: string) => {
+    setSelectedTileId(null);
+    setCurrentPageId(pageId);
+  }, []);
+
+  // Swipe handlers
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: goToNextPage,
+    onSwipedRight: goToPrevPage,
+    preventScrollOnSwipe: true,
+    trackMouse: false,
+    delta: 50,
+  });
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't navigate if user is typing in an input
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      if (e.key === 'ArrowLeft') {
+        goToPrevPage();
+      } else if (e.key === 'ArrowRight') {
+        goToNextPage();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goToNextPage, goToPrevPage]);
+
+  // Page handlers
+  const handleUpdatePageTitle = async (pageId: string, title: string) => {
+    try {
+      await updatePage(pageId, { title });
+      setPages(prev => prev.map(p => p.id === pageId ? { ...p, title } : p));
+    } catch (err) {
+      console.error('Failed to update page title:', err);
+    }
+  };
+
+  // Palette change (now per-page)
   const paletteDebounceRef = useRef<number | null>(null);
 
   const handlePaletteChange = async (paletteId: string) => {
-    // Update UI immediately
-    setCurrentPaletteId(paletteId);
+    if (!currentPageId) return;
     
-    // Debounce the actual recolor operation
+    // Update page's palette
+    setPages(prev => prev.map(p => 
+      p.id === currentPageId ? { ...p, palette_id: paletteId } : p
+    ));
+    
     if (paletteDebounceRef.current) {
       clearTimeout(paletteDebounceRef.current);
     }
     
     paletteDebounceRef.current = window.setTimeout(async () => {
       try {
-        await updateCurrentPalette(paletteId);
-        const recoloredTiles = await recolorAllTiles(paletteId);
-        // Full replace from server is fine here
+        await updatePagePalette(currentPageId, paletteId);
+        const recoloredTiles = await recolorAllTiles(currentPageId, paletteId);
         setTiles(recoloredTiles);
       } catch (err) {
         console.error('Failed to change palette:', err);
@@ -92,10 +205,12 @@ function AppContent() {
     }, TIMING.DEBOUNCE_DELAY_MS);
   };
 
+  // Tile handlers (same as before, but using currentPageId)
   const handleCreateTile = async () => {
+    if (!currentPageId) return;
+    
     try {
-      const newTile = await createTile(currentPaletteId);
-      // Use functional update to avoid stale closure
+      const newTile = await createTile(currentPageId, currentPaletteId);
       setTiles(prev => [...prev, newTile]);
       setSelectedTileId(newTile.id);
     } catch (err) {
@@ -106,9 +221,7 @@ function AppContent() {
   const handleUpdateTile = async (id: string, updates: Partial<Tile>) => {
     try {
       await updateTile(id, updates);
-      // Use functional update to avoid stale closure
       setTiles(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-      // No need to update selectedTile - it's derived from tiles
     } catch (err) {
       console.error('Failed to update tile:', err);
     }
@@ -119,17 +232,17 @@ function AppContent() {
       await updateTileColor(id, colorIndex, currentPaletteId);
       const newColor = getColorFromPalette(currentPaletteId, colorIndex);
       const updates = { color_index: colorIndex, accent_color: newColor };
-      // Use functional update to avoid stale closure
       setTiles(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
-      // No need to update selectedTile - it's derived from tiles
     } catch (err) {
       console.error('Failed to update tile color:', err);
     }
   };
 
   const handleResetTile = async (id: string) => {
+    if (!currentPageId) return;
+    
     try {
-      const updatedTiles = await deleteTile(id);
+      const updatedTiles = await deleteTile(id, currentPageId);
       setTiles(updatedTiles);
       setSelectedTileId(null);
     } catch (err) {
@@ -154,7 +267,6 @@ function AppContent() {
       return;
     }
 
-    // Use functional approach for reading current state
     setTiles(prev => {
       const draggedTile = prev.find(t => t.id === draggedTileId);
       if (!draggedTile) return prev;
@@ -172,8 +284,7 @@ function AppContent() {
       await swapTilePositions(draggedTileId, targetTile.id);
     } catch (err) {
       console.error('Failed to swap tiles:', err);
-      // Rollback by reloading from server
-      loadData();
+      loadTiles();
     }
   };
 
@@ -181,7 +292,6 @@ function AppContent() {
     e.preventDefault();
     if (!draggedTileId) return;
 
-    // Use functional approach for reading current state
     setTiles(prev => {
       const draggedTile = prev.find(t => t.id === draggedTileId);
       if (!draggedTile) return prev;
@@ -197,16 +307,13 @@ function AppContent() {
       await moveTileToPosition(draggedTileId, targetPosition);
     } catch (err) {
       console.error('Failed to move tile:', err);
-      // Rollback by reloading from server
-      loadData();
+      loadTiles();
     }
   };
 
   const handleCreateLink = async (tileId: string, data: { title: string; url: string; summary: string }): Promise<Link> => {
-    // Read current tile from state for validation
     const tile = tiles.find(t => t.id === tileId);
     
-    // Check for duplicate URL in this tile
     const normalizedUrl = data.url.trim().toLowerCase();
     const existingLink = tile?.links?.find(l => 
       l.url && l.url.toLowerCase() === normalizedUrl
@@ -219,7 +326,6 @@ function AppContent() {
       const position = tile?.links?.length || 0;
       const newLink = await createLink(tileId, position, data.title, data.url, data.summary);
 
-      // Use functional update to avoid stale closure
       setTiles(prev => prev.map(t =>
         t.id === tileId
           ? { ...t, links: [...(t.links || []), newLink] }
@@ -237,13 +343,11 @@ function AppContent() {
     try {
       await updateLink(id, updates);
 
-      // Use functional update to avoid stale closure
       setTiles(prev => prev.map(t => ({
         ...t,
         links: t.links?.map(l => l.id === id ? { ...l, ...updates } : l)
       })));
 
-      // Update editingDocument if it's the one being edited
       if (editingDocument?.id === id) {
         setEditingDocument(prev => prev ? { ...prev, ...updates } : null);
       }
@@ -256,13 +360,11 @@ function AppContent() {
     try {
       await deleteLink(id);
 
-      // Use functional update to avoid stale closure
       setTiles(prev => prev.map(t => ({
         ...t,
         links: t.links?.filter(l => l.id !== id)
       })));
 
-      // Clear editing document if it was deleted
       if (editingDocument?.id === id) {
         setEditingDocument(null);
       }
@@ -279,13 +381,11 @@ function AppContent() {
     try {
       await updateLink(id, updates);
 
-      // Use functional update to avoid stale closure
       setTiles(prev => prev.map(t => ({
         ...t,
         links: t.links?.map(l => l.id === id ? { ...l, ...updates } : l)
       })));
 
-      // Update the editing document state
       if (editingDocument?.id === id) {
         setEditingDocument(prev => prev ? { ...prev, ...updates } : null);
       }
@@ -295,18 +395,16 @@ function AppContent() {
   };
 
   const handleAddNote = async (forTile?: Tile) => {
-    // Get target tile - use the passed tile, or current selectedTile, or find Inbox
+    if (!currentPageId) return;
+    
     let targetTileId: string | null = forTile?.id ?? selectedTileId;
     
     if (!targetTileId) {
-      // No tile selected - find Inbox or first tile
-      const currentTiles = tiles; // Safe to read here, we're not in an async gap yet
-      const inboxTile = currentTiles.find(t => t.title === INBOX_TILE.TITLE);
+      const inboxTile = tiles.find(t => t.title === INBOX_TILE.TITLE);
       
-      if (currentTiles.length === 0) {
-        // No tiles at all - create a new tile first
+      if (tiles.length === 0) {
         try {
-          const newTile = await createTile(currentPaletteId);
+          const newTile = await createTile(currentPageId, currentPaletteId);
           setTiles(prev => [...prev, newTile]);
           setSelectedTileId(newTile.id);
           
@@ -323,17 +421,15 @@ function AppContent() {
         return;
       }
       
-      targetTileId = inboxTile?.id ?? currentTiles[0].id;
+      targetTileId = inboxTile?.id ?? tiles[0].id;
     }
 
     try {
-      // Get current link count for position
       const targetTile = tiles.find(t => t.id === targetTileId);
       const position = targetTile?.links?.length || 0;
       
       const newDoc = await createDocument(targetTileId, position, '', '', '');
 
-      // Use functional update to avoid stale closure
       setTiles(prev => prev.map(t =>
         t.id === targetTileId
           ? { ...t, links: [...(t.links || []), newDoc] }
@@ -348,7 +444,6 @@ function AppContent() {
   };
 
   const handleLinkDrop = async (linkId: string, targetTileId: string) => {
-    // Find source tile
     let sourceTileId: string | null = null;
     for (const t of tiles) {
       if (t.links?.some(l => l.id === linkId)) {
@@ -362,8 +457,7 @@ function AppContent() {
     try {
       const movedLink = await moveLink(linkId, targetTileId);
 
-      // Use functional update to avoid stale closure
-      const sourceId = sourceTileId; // Capture for closure
+      const sourceId = sourceTileId;
       setTiles(prev => prev.map(t => {
         if (t.id === sourceId) {
           return { ...t, links: t.links?.filter(l => l.id !== linkId) };
@@ -392,7 +486,7 @@ function AppContent() {
     return <LoginPage />;
   }
 
-  if (loading) {
+  if (loading || !currentPage) {
     return (
       <div className="min-h-screen bg-stone-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
@@ -406,7 +500,7 @@ function AppContent() {
         <div className="text-center">
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={loadData}
+            onClick={() => { loadPages(); loadTiles(); }}
             className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
           >
             Try Again
@@ -416,10 +510,7 @@ function AppContent() {
     );
   }
 
-  // Grid capacity based on tile count only
-  // Positions are always within the valid range for the current tile count
   const gridCapacity = getGridCapacity(tiles.length);
-  
   const canAddMore = tiles.length < APP_CONFIG.MAX_TILES;
   const { cols, rows } = getGridConfig(gridCapacity);
 
@@ -466,10 +557,25 @@ function AppContent() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden" style={{ backgroundColor: bgColor }}>
-      <div className="h-full w-full grid gap-4 p-4" style={gridStyle}>
+    <div 
+      className="h-screen w-screen overflow-hidden" 
+      style={{ backgroundColor: bgColor }}
+      {...swipeHandlers}
+    >
+      {/* Page Title */}
+      <PageTitle page={currentPage} onUpdateTitle={handleUpdatePageTitle} />
+      
+      {/* Tile Grid */}
+      <div className="h-full w-full grid gap-4 p-4 pt-16" style={gridStyle}>
         {gridCells}
       </div>
+
+      {/* Page Dots */}
+      <PageDots 
+        pages={pages} 
+        currentPageId={currentPageId!} 
+        onPageSelect={goToPage} 
+      />
 
       {selectedTile && (
         <TilePanel
@@ -501,7 +607,7 @@ function AppContent() {
       {showPasteLink && (
         <PasteLinkModal
           onClose={() => setShowPasteLink(false)}
-          onLinkAdded={loadData}
+          onLinkAdded={loadTiles}
         />
       )}
 
