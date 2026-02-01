@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette, MIN_GRID_SIZE } from './types';
+import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette } from './types';
 import { Page } from './types/page';
 import {
   fetchPages,
   updatePage,
   updatePagePalette,
   recolorAllTiles,
+  swapPagePositions,
+  resetPage,
   createTile,
   updateTile,
   updateTileColor,
@@ -28,8 +30,8 @@ import { PasteLinkModal } from './components/PasteLinkModal';
 import { DocumentEditor } from './components/DocumentEditor';
 import { UserMenu } from './components/UserMenu';
 import { PageDots } from './components/PageDots';
-import { PageTitle } from './components/PageTitle';
-import { Loader2 } from 'lucide-react';
+import { OverviewMode } from './components/OverviewMode';
+import { Loader2, LayoutGrid } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 
@@ -50,6 +52,7 @@ function AppContent() {
   const [error, setError] = useState<string | null>(null);
   const [showPasteLink, setShowPasteLink] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Link | null>(null);
+  const [showOverview, setShowOverview] = useState(false);
 
   // Derived state
   const currentPage = useMemo(() => {
@@ -176,6 +179,28 @@ function AppContent() {
       setPages(prev => prev.map(p => p.id === pageId ? { ...p, title } : p));
     } catch (err) {
       console.error('Failed to update page title:', err);
+    }
+  };
+
+  const handleSwapPages = async (pageAId: string, pageBId: string) => {
+    try {
+      await swapPagePositions(pageAId, pageBId);
+      // Reload pages to get updated positions
+      await loadPages();
+    } catch (err) {
+      console.error('Failed to swap pages:', err);
+    }
+  };
+
+  const handleResetPage = async (pageId: string) => {
+    try {
+      await resetPage(pageId);
+      // If we're currently on this page, reload tiles
+      if (currentPageId === pageId) {
+        await loadTiles();
+      }
+    } catch (err) {
+      console.error('Failed to reset page:', err);
     }
   };
 
@@ -562,9 +587,6 @@ function AppContent() {
       style={{ backgroundColor: bgColor }}
       {...swipeHandlers}
     >
-      {/* Page Title */}
-      <PageTitle page={currentPage} onUpdateTitle={handleUpdatePageTitle} />
-      
       {/* Tile Grid */}
       <div className="h-full w-full grid gap-4 p-4 pt-16" style={gridStyle}>
         {gridCells}
@@ -604,6 +626,15 @@ function AppContent() {
 
       <UserMenu />
 
+      {/* Overview Toggle Button */}
+      <button
+        onClick={() => setShowOverview(true)}
+        className="fixed bottom-6 right-20 z-20 bg-black/20 backdrop-blur text-white p-3 rounded-full hover:bg-black/30 transition-colors"
+        aria-label="Overview Mode"
+      >
+        <LayoutGrid className="w-6 h-6" />
+      </button>
+
       {showPasteLink && (
         <PasteLinkModal
           onClose={() => setShowPasteLink(false)}
@@ -617,6 +648,18 @@ function AppContent() {
           onClose={() => setEditingDocument(null)}
           onSave={handleSaveDocument}
           onDelete={handleDeleteLink}
+        />
+      )}
+
+      {showOverview && (
+        <OverviewMode
+          pages={pages}
+          currentPageId={currentPageId!}
+          onClose={() => setShowOverview(false)}
+          onPageSelect={goToPage}
+          onSwapPages={handleSwapPages}
+          onUpdatePageTitle={handleUpdatePageTitle}
+          onResetPage={handleResetPage}
         />
       )}
     </div>
