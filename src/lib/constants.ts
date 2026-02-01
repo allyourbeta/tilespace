@@ -13,6 +13,26 @@ export const APP_CONFIG = {
   MAX_TILES: 25,
 } as const;
 
+// Grid configuration
+export const GRID_CONFIG = {
+  BREAKPOINTS: [16, 20, 25] as const,
+  MAX_TILES: 25,
+  COLORS_PER_PALETTE: 12,
+  TEMP_POSITION: -1, // Used for position swapping
+} as const;
+
+// Page title overlay
+export const PAGE_TITLE_OVERLAY = {
+  HOVER_ZONE_WIDTH_PX: 300,
+  HOVER_ZONE_HEIGHT_PX: 160,
+  FADE_TIMEOUT_MS: 2000,
+} as const;
+
+// Overview mode
+export const OVERVIEW_MODE = {
+  GRID_COLUMNS: 4,
+} as const;
+
 // Timing
 export const TIMING = {
   AUTOSAVE_DELAY_MS: 1000,

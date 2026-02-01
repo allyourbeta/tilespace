@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Page } from '../types/page';
+import { PAGE_TITLE_OVERLAY } from '../lib/constants';
 
 interface PageTitleDisplayProps {
   currentPage: Page | null;
@@ -29,7 +30,7 @@ export function PageTitleDisplay({ currentPage, currentPageId }: PageTitleDispla
       // Hide after 2 seconds
       timeoutRef.current = window.setTimeout(() => {
         setShowFromPageChange(false);
-      }, 2000);
+      }, PAGE_TITLE_OVERLAY.FADE_TIMEOUT_MS);
     }
   }, [currentPageId]);
 
@@ -52,7 +53,8 @@ export function PageTitleDisplay({ currentPage, currentPageId }: PageTitleDispla
     <>
       {/* Hover detection area */}
       <div
-        className="fixed top-0 left-0 w-[300px] h-[160px] z-20"
+        className="fixed top-0 left-0 z-20"
+        style={{ width: `${PAGE_TITLE_OVERLAY.HOVER_ZONE_WIDTH_PX}px`, height: `${PAGE_TITLE_OVERLAY.HOVER_ZONE_HEIGHT_PX}px` }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       />

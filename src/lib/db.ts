@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import { Tile, Link, DEFAULT_EMOJIS, getColorFromPalette, getPalette, getGridCapacity } from '../types';
 import { Page } from '../types/page';
+import { GRID_CONFIG } from './constants';
 
 // Helper to get current user ID
 async function getCurrentUserId(): Promise<string> {
@@ -80,7 +81,7 @@ export async function swapPagePositions(pageAId: string, pageBId: string): Promi
   if (!pageA || !pageB) throw new Error('Pages not found');
 
   // Swap positions using a temporary position to avoid unique constraint
-  const tempPosition = -1;
+  const tempPosition = GRID_CONFIG.TEMP_POSITION;
   
   await supabase.from('pages').update({ position: tempPosition }).eq('id', pageAId);
   await supabase.from('pages').update({ position: pageA.position }).eq('id', pageBId);
@@ -150,9 +151,9 @@ export async function createTile(pageId: string, paletteId: string): Promise<Til
   
   // Find capacity based on tile count
   const count = tiles?.length || 0;
-  if (count >= 25) throw new Error('Maximum tile limit (25) reached');
+  if (count >= GRID_CONFIG.MAX_TILES) throw new Error(`Maximum tile limit (${GRID_CONFIG.MAX_TILES}) reached`);
   
-  const capacity = count < 16 ? 16 : count < 20 ? 20 : 25;
+  const capacity = count < GRID_CONFIG.BREAKPOINTS[0] ? GRID_CONFIG.BREAKPOINTS[0] : count < GRID_CONFIG.BREAKPOINTS[1] ? GRID_CONFIG.BREAKPOINTS[1] : GRID_CONFIG.BREAKPOINTS[2];
   
   // Find first empty position
   const occupied = new Set(tiles?.map(t => t.position) || []);
@@ -162,7 +163,7 @@ export async function createTile(pageId: string, paletteId: string): Promise<Til
   }
   
   // Create tile at that position
-  const colorIndex = position % 12;
+  const colorIndex = position % GRID_CONFIG.COLORS_PER_PALETTE;
   const color = getColorFromPalette(paletteId, colorIndex);
   const emojiIndex = position % DEFAULT_EMOJIS.length;
   

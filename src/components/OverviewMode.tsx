@@ -144,7 +144,7 @@ export function OverviewMode({
         <X className="w-6 h-6" />
       </button>
 
-      {/* Page Grid */}
+      {/* Page Grid - 4 columns per OVERVIEW_MODE.GRID_COLUMNS */}
       <div className="grid grid-cols-4 gap-6 max-w-4xl w-full">
         {sortedPages.map((page) => {
           const palette = getPalette(page.palette_id);
