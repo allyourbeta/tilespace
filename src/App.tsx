@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { usePageNavigation, useKeyboardNavigation } from './hooks';
 import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette } from './types';
