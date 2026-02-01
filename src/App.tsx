@@ -31,7 +31,7 @@ import { DocumentEditor } from './components/DocumentEditor';
 import { UserMenu } from './components/UserMenu';
 import { PageDots } from './components/PageDots';
 import { OverviewMode } from './components/OverviewMode';
-import { Loader2, LayoutGrid } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 
@@ -597,6 +597,7 @@ function AppContent() {
         pages={pages} 
         currentPageId={currentPageId!} 
         onPageSelect={goToPage} 
+        onShowOverview={() => setShowOverview(true)}
       />
 
       {selectedTile && (
@@ -626,14 +627,6 @@ function AppContent() {
 
       <UserMenu />
 
-      {/* Overview Toggle Button */}
-      <button
-        onClick={() => setShowOverview(true)}
-        className="fixed bottom-6 right-20 z-20 bg-black/20 backdrop-blur text-white p-3 rounded-full hover:bg-black/30 transition-colors"
-        aria-label="Overview Mode"
-      >
-        <LayoutGrid className="w-6 h-6" />
-      </button>
 
       {showPasteLink && (
         <PasteLinkModal
