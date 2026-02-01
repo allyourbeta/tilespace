@@ -17,7 +17,6 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
   const [isPreview, setIsPreview] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
-  const contentRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -30,12 +29,11 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
     }
   }, [document]);
 
-  // For new/empty notes, focus the content area instead of title
   useEffect(() => {
-    if (document && !document.content && !isPreview) {
-      setTimeout(() => contentRef.current?.focus(), 100);
+    if (!document) {
+      setTimeout(() => titleRef.current?.focus(), 100);
     }
-  }, [document, isPreview]);
+  }, [document]);
 
   const saveChanges = useCallback(() => {
     if (!document || !hasChanges) return;
@@ -155,7 +153,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
                 type="text"
                 value={title}
                 onChange={(e) => handleChange('title', e.target.value)}
-                placeholder="Add a title..."
+                placeholder="Title"
                 className="text-3xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none bg-transparent mb-2"
               />
               <input
@@ -166,7 +164,6 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
                 className="text-gray-500 placeholder-gray-300 border-none outline-none bg-transparent mb-4 italic"
               />
               <textarea
-                ref={contentRef}
                 value={content}
                 onChange={(e) => handleChange('content', e.target.value)}
                 placeholder="Write your note here... (Markdown supported)"

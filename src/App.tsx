@@ -1,20 +1,15 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useSwipeable } from 'react-swipeable';
-import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette } from './types';
-import { Page } from './types/page';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette, MIN_GRID_SIZE } from './types';
 import {
-  fetchPages,
-  updatePage,
-  updatePagePalette,
+  fetchCurrentPalette,
+  updateCurrentPalette,
   recolorAllTiles,
-  swapPagePositions,
-  resetPage,
   createTile,
   updateTile,
   updateTileColor,
   deleteTile,
-  swapTilePositions,
   moveTileToPosition,
+  swapTilePositions,
   createLink,
   createDocument,
   updateLink,
@@ -22,222 +17,80 @@ import {
   moveLink,
   fetchTiles
 } from './lib/db';
-import { APP_CONFIG, INBOX_TILE, TIMING } from './lib/constants';
 import { TileCard } from './components/TileCard';
 import { TilePanel } from './components/TilePanel';
+import { QuickAdd } from './components/QuickAdd';
+import { BookmarkletSetup } from './components/BookmarkletSetup';
 import { FloatingActions } from './components/FloatingActions';
 import { PasteLinkModal } from './components/PasteLinkModal';
 import { DocumentEditor } from './components/DocumentEditor';
-import { UserMenu } from './components/UserMenu';
-import { PageDots } from './components/PageDots';
-import { OverviewMode } from './components/OverviewMode';
-import { Loader2, LayoutGrid } from 'lucide-react';
-import { AuthProvider, useAuth } from './auth/AuthContext';
-import { LoginPage } from './pages/LoginPage';
+import { Loader2 } from 'lucide-react';
 
-function AppContent() {
-  const { user, loading: authLoading } = useAuth();
-  
-  // Page state
-  const [pages, setPages] = useState<Page[]>([]);
-  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
-  
-  // Tile state (for current page)
+const MAX_TILES = 25;
+const APP_TITLE = 'TileSpace';
+
+function useQuickAddParams() {
+  return useMemo(() => {
+    const params = new URLSearchParams(window.location.search);
+    const quickAdd = params.get('quickadd') === '1';
+    const url = params.get('url') || '';
+    const title = params.get('title') || '';
+    return { quickAdd, url, title };
+  }, []);
+}
+
+function App() {
+  const { quickAdd, url: quickAddUrl, title: quickAddTitle } = useQuickAddParams();
   const [tiles, setTiles] = useState<Tile[]>([]);
-  const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
+  const [selectedTile, setSelectedTile] = useState<Tile | null>(null);
   const [draggedTileId, setDraggedTileId] = useState<string | null>(null);
-  
-  // UI state
+  const [currentPaletteId, setCurrentPaletteId] = useState<string>('ocean');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showBookmarklet, setShowBookmarklet] = useState(false);
   const [showPasteLink, setShowPasteLink] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Link | null>(null);
-  const [showOverview, setShowOverview] = useState(false);
 
-  // Derived state
-  const currentPage = useMemo(() => {
-    if (!currentPageId) return null;
-    return pages.find(p => p.id === currentPageId) ?? null;
-  }, [pages, currentPageId]);
-
-  const currentPaletteId = currentPage?.palette_id ?? 'ocean';
-
-  const selectedTile = useMemo(() => {
-    if (!selectedTileId) return null;
-    return tiles.find(t => t.id === selectedTileId) ?? null;
-  }, [tiles, selectedTileId]);
-
-  const sortedPages = useMemo(() => {
-    return [...pages].sort((a, b) => a.position - b.position);
-  }, [pages]);
-
-  const currentPageIndex = useMemo(() => {
-    if (!currentPageId) return 0;
-    return sortedPages.findIndex(p => p.id === currentPageId);
-  }, [sortedPages, currentPageId]);
-
-  // Load pages on mount
-  const loadPages = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
       setError(null);
-      const pagesData = await fetchPages();
-      setPages(pagesData);
-      
-      // Set current page to first page if not set
-      if (pagesData.length > 0 && !currentPageId) {
-        const sorted = [...pagesData].sort((a, b) => a.position - b.position);
-        setCurrentPageId(sorted[0].id);
-      }
-    } catch (err) {
-      setError('Failed to load pages');
-      console.error(err);
-    }
-  }, [currentPageId]);
-
-  // Load tiles when current page changes
-  const loadTiles = useCallback(async () => {
-    if (!currentPageId) return;
-    
-    try {
-      setError(null);
-      const tilesData = await fetchTiles(currentPageId);
-      setTiles(tilesData);
+      const paletteId = await fetchCurrentPalette();
+      setCurrentPaletteId(paletteId);
+      const data = await fetchTiles();
+      setTiles(data);
     } catch (err) {
       setError('Failed to load tiles');
       console.error(err);
     } finally {
       setLoading(false);
     }
-  }, [currentPageId]);
-
-  useEffect(() => {
-    document.title = APP_CONFIG.TITLE;
-    if (user) {
-      loadPages();
-    }
-  }, [user, loadPages]);
-
-  useEffect(() => {
-    if (currentPageId) {
-      setLoading(true);
-      loadTiles();
-    }
-  }, [currentPageId, loadTiles]);
-
-  // Page navigation
-  const goToNextPage = useCallback(() => {
-    if (currentPageIndex < sortedPages.length - 1) {
-      setSelectedTileId(null);
-      setCurrentPageId(sortedPages[currentPageIndex + 1].id);
-    }
-  }, [currentPageIndex, sortedPages]);
-
-  const goToPrevPage = useCallback(() => {
-    if (currentPageIndex > 0) {
-      setSelectedTileId(null);
-      setCurrentPageId(sortedPages[currentPageIndex - 1].id);
-    }
-  }, [currentPageIndex, sortedPages]);
-
-  const goToPage = useCallback((pageId: string) => {
-    setSelectedTileId(null);
-    setCurrentPageId(pageId);
   }, []);
 
-  // Swipe handlers
-  const swipeHandlers = useSwipeable({
-    onSwipedLeft: goToNextPage,
-    onSwipedRight: goToPrevPage,
-    preventScrollOnSwipe: true,
-    trackMouse: false,
-    delta: 50,
-  });
-
-  // Keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't navigate if user is typing in an input
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-        return;
-      }
-      
-      if (e.key === 'ArrowLeft') {
-        goToPrevPage();
-      } else if (e.key === 'ArrowRight') {
-        goToNextPage();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goToNextPage, goToPrevPage]);
-
-  // Page handlers
-  const handleUpdatePageTitle = async (pageId: string, title: string) => {
-    try {
-      await updatePage(pageId, { title });
-      setPages(prev => prev.map(p => p.id === pageId ? { ...p, title } : p));
-    } catch (err) {
-      console.error('Failed to update page title:', err);
-    }
-  };
-
-  const handleSwapPages = async (pageAId: string, pageBId: string) => {
-    try {
-      await swapPagePositions(pageAId, pageBId);
-      // Reload pages to get updated positions
-      await loadPages();
-    } catch (err) {
-      console.error('Failed to swap pages:', err);
-    }
-  };
-
-  const handleResetPage = async (pageId: string) => {
-    try {
-      await resetPage(pageId);
-      // If we're currently on this page, reload tiles
-      if (currentPageId === pageId) {
-        await loadTiles();
-      }
-    } catch (err) {
-      console.error('Failed to reset page:', err);
-    }
-  };
-
-  // Palette change (now per-page)
-  const paletteDebounceRef = useRef<number | null>(null);
+    document.title = APP_TITLE;
+    loadData();
+  }, [loadData]);
 
   const handlePaletteChange = async (paletteId: string) => {
-    if (!currentPageId) return;
-    
-    // Update page's palette
-    setPages(prev => prev.map(p => 
-      p.id === currentPageId ? { ...p, palette_id: paletteId } : p
-    ));
-    
-    if (paletteDebounceRef.current) {
-      clearTimeout(paletteDebounceRef.current);
-    }
-    
-    paletteDebounceRef.current = window.setTimeout(async () => {
-      try {
-        await updatePagePalette(currentPageId, paletteId);
-        const recoloredTiles = await recolorAllTiles(currentPageId, paletteId);
-        setTiles(recoloredTiles);
-      } catch (err) {
-        console.error('Failed to change palette:', err);
+    try {
+      setCurrentPaletteId(paletteId);
+      await updateCurrentPalette(paletteId);
+      const recoloredTiles = await recolorAllTiles(paletteId);
+      setTiles(recoloredTiles);
+      if (selectedTile) {
+        const updated = recoloredTiles.find(t => t.id === selectedTile.id);
+        if (updated) setSelectedTile(updated);
       }
-    }, TIMING.DEBOUNCE_DELAY_MS);
+    } catch (err) {
+      console.error('Failed to change palette:', err);
+    }
   };
 
-  // Tile handlers (same as before, but using currentPageId)
   const handleCreateTile = async () => {
-    if (!currentPageId) return;
-    
     try {
-      const newTile = await createTile(currentPageId, currentPaletteId);
-      setTiles(prev => [...prev, newTile]);
-      setSelectedTileId(newTile.id);
+      const newTile = await createTile(currentPaletteId);
+      setTiles([...tiles, newTile]);
+      setSelectedTile(newTile);
     } catch (err) {
       console.error('Failed to create tile:', err);
     }
@@ -246,7 +99,10 @@ function AppContent() {
   const handleUpdateTile = async (id: string, updates: Partial<Tile>) => {
     try {
       await updateTile(id, updates);
-      setTiles(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+      setTiles(tiles.map(t => t.id === id ? { ...t, ...updates } : t));
+      if (selectedTile?.id === id) {
+        setSelectedTile({ ...selectedTile, ...updates });
+      }
     } catch (err) {
       console.error('Failed to update tile:', err);
     }
@@ -257,19 +113,20 @@ function AppContent() {
       await updateTileColor(id, colorIndex, currentPaletteId);
       const newColor = getColorFromPalette(currentPaletteId, colorIndex);
       const updates = { color_index: colorIndex, accent_color: newColor };
-      setTiles(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t));
+      setTiles(tiles.map(t => t.id === id ? { ...t, ...updates } : t));
+      if (selectedTile?.id === id) {
+        setSelectedTile({ ...selectedTile, ...updates });
+      }
     } catch (err) {
       console.error('Failed to update tile color:', err);
     }
   };
 
   const handleResetTile = async (id: string) => {
-    if (!currentPageId) return;
-    
     try {
-      const updatedTiles = await deleteTile(id, currentPageId);
+      const updatedTiles = await deleteTile(id);
       setTiles(updatedTiles);
-      setSelectedTileId(null);
+      setSelectedTile(null);
     } catch (err) {
       console.error('Failed to reset tile:', err);
     }
@@ -292,24 +149,26 @@ function AppContent() {
       return;
     }
 
-    setTiles(prev => {
-      const draggedTile = prev.find(t => t.id === draggedTileId);
-      if (!draggedTile) return prev;
+    const draggedTile = tiles.find(t => t.id === draggedTileId);
+    if (!draggedTile) {
+      setDraggedTileId(null);
+      return;
+    }
 
-      return prev.map(t => {
-        if (t.id === draggedTileId) return { ...t, position: targetTile.position };
-        if (t.id === targetTile.id) return { ...t, position: draggedTile.position };
-        return t;
-      }).sort((a, b) => a.position - b.position);
-    });
+    const newTiles = tiles.map(t => {
+      if (t.id === draggedTileId) return { ...t, position: targetTile.position };
+      if (t.id === targetTile.id) return { ...t, position: draggedTile.position };
+      return t;
+    }).sort((a, b) => a.position - b.position);
 
+    setTiles(newTiles);
     setDraggedTileId(null);
 
     try {
       await swapTilePositions(draggedTileId, targetTile.id);
     } catch (err) {
       console.error('Failed to swap tiles:', err);
-      loadTiles();
+      loadData();
     }
   };
 
@@ -317,28 +176,31 @@ function AppContent() {
     e.preventDefault();
     if (!draggedTileId) return;
 
-    setTiles(prev => {
-      const draggedTile = prev.find(t => t.id === draggedTileId);
-      if (!draggedTile) return prev;
+    const draggedTile = tiles.find(t => t.id === draggedTileId);
+    if (!draggedTile) {
+      setDraggedTileId(null);
+      return;
+    }
 
-      return prev.map(t =>
-        t.id === draggedTileId ? { ...t, position: targetPosition } : t
-      ).sort((a, b) => a.position - b.position);
-    });
+    const newTiles = tiles.map(t =>
+      t.id === draggedTileId ? { ...t, position: targetPosition } : t
+    ).sort((a, b) => a.position - b.position);
 
+    setTiles(newTiles);
     setDraggedTileId(null);
 
     try {
       await moveTileToPosition(draggedTileId, targetPosition);
     } catch (err) {
       console.error('Failed to move tile:', err);
-      loadTiles();
+      loadData();
     }
   };
 
   const handleCreateLink = async (tileId: string, data: { title: string; url: string; summary: string }): Promise<Link> => {
     const tile = tiles.find(t => t.id === tileId);
     
+    // Check for duplicate URL in this tile
     const normalizedUrl = data.url.trim().toLowerCase();
     const existingLink = tile?.links?.find(l => 
       l.url && l.url.toLowerCase() === normalizedUrl
@@ -347,34 +209,41 @@ function AppContent() {
       throw new Error('This URL already exists in this tile');
     }
     
-    try {
-      const position = tile?.links?.length || 0;
-      const newLink = await createLink(tileId, position, data.title, data.url, data.summary);
+    const position = tile?.links?.length || 0;
+    const newLink = await createLink(tileId, position, data.title, data.url, data.summary);
 
-      setTiles(prev => prev.map(t =>
-        t.id === tileId
-          ? { ...t, links: [...(t.links || []), newLink] }
-          : t
-      ));
+    const updatedTiles = tiles.map(t =>
+      t.id === tileId
+        ? { ...t, links: [...(t.links || []), newLink] }
+        : t
+    );
+    setTiles(updatedTiles);
 
-      return newLink;
-    } catch (err) {
-      console.error('Failed to create link:', err);
-      throw err;
+    if (selectedTile?.id === tileId) {
+      setSelectedTile({
+        ...selectedTile,
+        links: [...(selectedTile.links || []), newLink]
+      });
     }
+
+    return newLink;
   };
 
   const handleUpdateLink = async (id: string, updates: Partial<Link>) => {
     try {
       await updateLink(id, updates);
 
-      setTiles(prev => prev.map(t => ({
+      const updatedTiles = tiles.map(t => ({
         ...t,
         links: t.links?.map(l => l.id === id ? { ...l, ...updates } : l)
-      })));
+      }));
+      setTiles(updatedTiles);
 
-      if (editingDocument?.id === id) {
-        setEditingDocument(prev => prev ? { ...prev, ...updates } : null);
+      if (selectedTile) {
+        setSelectedTile({
+          ...selectedTile,
+          links: selectedTile.links?.map(l => l.id === id ? { ...l, ...updates } : l)
+        });
       }
     } catch (err) {
       console.error('Failed to update link:', err);
@@ -385,13 +254,17 @@ function AppContent() {
     try {
       await deleteLink(id);
 
-      setTiles(prev => prev.map(t => ({
+      const updatedTiles = tiles.map(t => ({
         ...t,
         links: t.links?.filter(l => l.id !== id)
-      })));
+      }));
+      setTiles(updatedTiles);
 
-      if (editingDocument?.id === id) {
-        setEditingDocument(null);
+      if (selectedTile) {
+        setSelectedTile({
+          ...selectedTile,
+          links: selectedTile.links?.filter(l => l.id !== id)
+        });
       }
     } catch (err) {
       console.error('Failed to delete link:', err);
@@ -406,13 +279,21 @@ function AppContent() {
     try {
       await updateLink(id, updates);
 
-      setTiles(prev => prev.map(t => ({
+      const updatedTiles = tiles.map(t => ({
         ...t,
         links: t.links?.map(l => l.id === id ? { ...l, ...updates } : l)
-      })));
+      }));
+      setTiles(updatedTiles);
+
+      if (selectedTile) {
+        setSelectedTile({
+          ...selectedTile,
+          links: selectedTile.links?.map(l => l.id === id ? { ...l, ...updates } : l)
+        });
+      }
 
       if (editingDocument?.id === id) {
-        setEditingDocument(prev => prev ? { ...prev, ...updates } : null);
+        setEditingDocument({ ...editingDocument, ...updates });
       }
     } catch (err) {
       console.error('Failed to save document:', err);
@@ -420,52 +301,70 @@ function AppContent() {
   };
 
   const handleAddNote = async (forTile?: Tile) => {
-    if (!currentPageId) return;
+    const targetTile = forTile || selectedTile;
     
-    let targetTileId: string | null = forTile?.id ?? selectedTileId;
-    
-    if (!targetTileId) {
-      const inboxTile = tiles.find(t => t.title === INBOX_TILE.TITLE);
+    if (!targetTile) {
+      // No tile selected - add to Inbox
+      const inboxTile = tiles.find(t => t.title === 'Inbox');
       
       if (tiles.length === 0) {
-        try {
-          const newTile = await createTile(currentPageId, currentPaletteId);
-          setTiles(prev => [...prev, newTile]);
-          setSelectedTileId(newTile.id);
-          
-          const newDoc = await createDocument(newTile.id, 0, '', '', '');
-          setTiles(prev => prev.map(t =>
-            t.id === newTile.id
-              ? { ...t, links: [newDoc] }
-              : t
-          ));
-          setEditingDocument(newDoc);
-        } catch (err) {
-          console.error('Failed to create tile and note:', err);
-        }
-        return;
+        // No tiles at all - create a new tile
+        const newTile = await createTile(currentPaletteId);
+        setTiles([newTile]);
+        setSelectedTile(newTile);
+        const newDoc = await createDocument(newTile.id, 0, '', '', '');
+        const updatedTile = { ...newTile, links: [newDoc] };
+        setTiles([updatedTile]);
+        setSelectedTile(updatedTile);
+        setEditingDocument(newDoc);
+      } else if (inboxTile) {
+        // Add to Inbox tile
+        setShowPasteLink(false);
+        setShowBookmarklet(false);
+        const position = inboxTile.links?.length || 0;
+        const newDoc = await createDocument(inboxTile.id, position, '', '', '');
+        const updatedTiles = tiles.map(t =>
+          t.id === inboxTile.id
+            ? { ...t, links: [...(t.links || []), newDoc] }
+            : t
+        );
+        setTiles(updatedTiles);
+        setEditingDocument(newDoc);
+      } else {
+        // No Inbox tile - use first tile
+        setShowPasteLink(false);
+        setShowBookmarklet(false);
+        const firstTile = tiles[0];
+        const position = firstTile.links?.length || 0;
+        const newDoc = await createDocument(firstTile.id, position, '', '', '');
+        const updatedTiles = tiles.map(t =>
+          t.id === firstTile.id
+            ? { ...t, links: [...(t.links || []), newDoc] }
+            : t
+        );
+        setTiles(updatedTiles);
+        setEditingDocument(newDoc);
       }
-      
-      targetTileId = inboxTile?.id ?? tiles[0].id;
+      return;
     }
 
-    try {
-      const targetTile = tiles.find(t => t.id === targetTileId);
-      const position = targetTile?.links?.length || 0;
-      
-      const newDoc = await createDocument(targetTileId, position, '', '', '');
+    const position = targetTile.links?.length || 0;
+    const newDoc = await createDocument(targetTile.id, position, '', '', '');
 
-      setTiles(prev => prev.map(t =>
-        t.id === targetTileId
-          ? { ...t, links: [...(t.links || []), newDoc] }
-          : t
-      ));
-      
-      setShowPasteLink(false);
-      setEditingDocument(newDoc);
-    } catch (err) {
-      console.error('Failed to add note:', err);
+    const updatedTiles = tiles.map(t =>
+      t.id === targetTile.id
+        ? { ...t, links: [...(t.links || []), newDoc] }
+        : t
+    );
+    setTiles(updatedTiles);
+    
+    if (selectedTile?.id === targetTile.id) {
+      setSelectedTile({
+        ...selectedTile,
+        links: [...(selectedTile.links || []), newDoc]
+      });
     }
+    setEditingDocument(newDoc);
   };
 
   const handleLinkDrop = async (linkId: string, targetTileId: string) => {
@@ -477,41 +376,55 @@ function AppContent() {
       }
     }
 
-    if (!sourceTileId || sourceTileId === targetTileId) return;
+    if (sourceTileId === targetTileId) return;
 
     try {
       const movedLink = await moveLink(linkId, targetTileId);
 
-      const sourceId = sourceTileId;
-      setTiles(prev => prev.map(t => {
-        if (t.id === sourceId) {
+      const updatedTiles = tiles.map(t => {
+        if (t.id === sourceTileId) {
           return { ...t, links: t.links?.filter(l => l.id !== linkId) };
         }
         if (t.id === targetTileId) {
           return { ...t, links: [...(t.links || []), movedLink] };
         }
         return t;
-      }));
+      });
+      setTiles(updatedTiles);
+
+      if (selectedTile) {
+        if (selectedTile.id === sourceTileId) {
+          setSelectedTile({
+            ...selectedTile,
+            links: selectedTile.links?.filter(l => l.id !== linkId)
+          });
+        } else if (selectedTile.id === targetTileId) {
+          setSelectedTile({
+            ...selectedTile,
+            links: [...(selectedTile.links || []), movedLink]
+          });
+        }
+      }
     } catch (err) {
       console.error('Failed to move link:', err);
     }
   };
 
-  // Show loading while checking auth
-  if (authLoading) {
+  const handleCloseQuickAdd = () => {
+    window.location.href = window.location.origin;
+  };
+
+  if (quickAdd) {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-      </div>
+      <QuickAdd
+        url={quickAddUrl}
+        title={quickAddTitle}
+        onClose={handleCloseQuickAdd}
+      />
     );
   }
 
-  // Show login if not authenticated
-  if (!user) {
-    return <LoginPage />;
-  }
-
-  if (loading || !currentPage) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-stone-100 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
@@ -525,7 +438,7 @@ function AppContent() {
         <div className="text-center">
           <p className="text-gray-600 mb-4">{error}</p>
           <button
-            onClick={() => { loadPages(); loadTiles(); }}
+            onClick={loadData}
             className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
           >
             Try Again
@@ -535,8 +448,8 @@ function AppContent() {
     );
   }
 
-  const gridCapacity = getGridCapacity(tiles.length);
-  const canAddMore = tiles.length < APP_CONFIG.MAX_TILES;
+  const canAddMore = tiles.length < MAX_TILES;
+  const gridCapacity = getGridCapacity(Math.max(tiles.length, MIN_GRID_SIZE));
   const { cols, rows } = getGridConfig(gridCapacity);
 
   const gridStyle = {
@@ -559,7 +472,7 @@ function AppContent() {
           key={tile.id}
           tile={tile}
           borderColor={borderColor}
-          onClick={() => setSelectedTileId(tile.id)}
+          onClick={() => setSelectedTile(tile)}
           onDragStart={handleDragStart}
           onDragOver={handleDragOver}
           onDrop={handleDropOnTile}
@@ -582,28 +495,16 @@ function AppContent() {
   }
 
   return (
-    <div 
-      className="h-screen w-screen overflow-hidden" 
-      style={{ backgroundColor: bgColor }}
-      {...swipeHandlers}
-    >
-      {/* Tile Grid */}
-      <div className="h-full w-full grid gap-4 p-4 pt-16" style={gridStyle}>
+    <div className="h-screen w-screen overflow-hidden" style={{ backgroundColor: bgColor }}>
+      <div className="h-full w-full grid gap-4 p-4" style={gridStyle}>
         {gridCells}
       </div>
-
-      {/* Page Dots */}
-      <PageDots 
-        pages={pages} 
-        currentPageId={currentPageId!} 
-        onPageSelect={goToPage} 
-      />
 
       {selectedTile && (
         <TilePanel
           tile={selectedTile}
           currentPaletteId={currentPaletteId}
-          onClose={() => setSelectedTileId(null)}
+          onClose={() => setSelectedTile(null)}
           onUpdateTile={handleUpdateTile}
           onUpdateTileColor={handleUpdateTileColor}
           onResetTile={handleResetTile}
@@ -617,6 +518,7 @@ function AppContent() {
 
       <FloatingActions
         onAddTile={handleCreateTile}
+        onShowBookmarklet={() => setShowBookmarklet(true)}
         onPasteLink={() => setShowPasteLink(true)}
         onAddNote={() => handleAddNote()}
         canAddTile={canAddMore}
@@ -624,21 +526,15 @@ function AppContent() {
         onSelectPalette={handlePaletteChange}
       />
 
-      <UserMenu />
 
-      {/* Overview Toggle Button */}
-      <button
-        onClick={() => setShowOverview(true)}
-        className="fixed bottom-6 right-20 z-20 bg-black/20 backdrop-blur text-white p-3 rounded-full hover:bg-black/30 transition-colors"
-        aria-label="Overview Mode"
-      >
-        <LayoutGrid className="w-6 h-6" />
-      </button>
+      {showBookmarklet && (
+        <BookmarkletSetup onClose={() => setShowBookmarklet(false)} />
+      )}
 
       {showPasteLink && (
         <PasteLinkModal
           onClose={() => setShowPasteLink(false)}
-          onLinkAdded={loadTiles}
+          onLinkAdded={loadData}
         />
       )}
 
@@ -650,27 +546,7 @@ function AppContent() {
           onDelete={handleDeleteLink}
         />
       )}
-
-      {showOverview && (
-        <OverviewMode
-          pages={pages}
-          currentPageId={currentPageId!}
-          onClose={() => setShowOverview(false)}
-          onPageSelect={goToPage}
-          onSwapPages={handleSwapPages}
-          onUpdatePageTitle={handleUpdatePageTitle}
-          onResetPage={handleResetPage}
-        />
-      )}
     </div>
-  );
-}
-
-function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
   );
 }
 
