@@ -31,6 +31,7 @@ import { DocumentEditor } from './components/DocumentEditor';
 import { UserMenu } from './components/UserMenu';
 import { PageDots } from './components/PageDots';
 import { OverviewMode } from './components/OverviewMode';
+import { PageTitleDisplay } from './components/PageTitleDisplay';
 import { Loader2 } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
@@ -587,6 +588,9 @@ function AppContent() {
       style={{ backgroundColor: bgColor }}
       {...swipeHandlers}
     >
+      {/* Page Title Display */}
+      <PageTitleDisplay currentPage={currentPage} />
+      
       {/* Tile Grid */}
       <div className="h-full w-full grid gap-4 p-4" style={gridStyle}>
         {gridCells}
