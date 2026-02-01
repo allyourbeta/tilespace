@@ -2,6 +2,7 @@ import { supabase } from './supabase';
 import { Tile, Link, DEFAULT_EMOJIS, getColorFromPalette, getPalette, getGridCapacity } from '../types';
 import { Page } from '../types/page';
 import { GRID_CONFIG } from './constants';
+import { isValidUrl, normalizeUrl } from '../utils/url';
 
 // Helper to get current user ID
 async function getCurrentUserId(): Promise<string> {
@@ -10,30 +11,6 @@ async function getCurrentUserId(): Promise<string> {
   return user.id;
 }
 
-function isValidUrl(url: string): boolean {
-  try {
-    const parsed = new URL(url);
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
-
-function normalizeUrl(url: string): string {
-  const trimmed = url.trim();
-  if (!trimmed) return trimmed;
-
-  let normalized = trimmed;
-  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
-    normalized = `https://${trimmed}`;
-  }
-
-  if (!isValidUrl(normalized)) {
-    throw new Error('Invalid URL format');
-  }
-
-  return normalized;
-}
 
 // ============ PAGE FUNCTIONS ============
 
