@@ -15,38 +15,50 @@ export function PageTitleDisplay({ currentPage, onPageChange }: PageTitleDisplay
 
   // Handle page change detection
   useEffect(() => {
-    if (currentPage && prevPageIdRef.current !== null && currentPage.id !== prevPageIdRef.current) {
+    const currentPageId = currentPage?.id;
+    console.log('PageTitleDisplay useEffect triggered:', {
+      currentPageId,
+      currentTitle: currentPage?.title,
+      prevPageId: prevPageIdRef.current
+    });
+    
+    if (currentPageId && prevPageIdRef.current !== null && currentPageId !== prevPageIdRef.current) {
       // Page changed - trigger fade in for 2 seconds
-      console.log('Page changed from', prevPageIdRef.current, 'to', currentPage.id);
+      console.log('✅ Page changed detected! From:', prevPageIdRef.current, 'to:', currentPageId);
       setShowFromPageChange(true);
+      console.log('✅ setShowFromPageChange(true) called');
       
       // Clear any existing timeout
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       
-      // Set timeout to hide after 2 seconds (only if not hovered)
+      // Set timeout to hide after 2 seconds
       timeoutRef.current = window.setTimeout(() => {
+        console.log('⏰ Timeout: hiding title after 2 seconds');
         setShowFromPageChange(false);
       }, 2000);
+      
+      // Update reference after showing
+      prevPageIdRef.current = currentPageId;
+    } else if (currentPageId && prevPageIdRef.current === null) {
+      // Initial load - just set the reference without showing
+      console.log('🆕 Initial load - setting prevPageIdRef to:', currentPageId);
+      prevPageIdRef.current = currentPageId;
     }
-    
-    // Update previous page reference (but not on initial load)
-    if (currentPage) {
-      if (prevPageIdRef.current === null) {
-        // Initial load - just set the reference without showing
-        prevPageIdRef.current = currentPage.id;
-      } else {
-        // Subsequent changes - update after the check above
-        prevPageIdRef.current = currentPage.id;
-      }
-    }
-  }, [currentPage]);
+  }, [currentPage?.id, currentPage?.title]);
 
   // Update visibility based on both hover and page change states
   useEffect(() => {
-    setIsVisible(isHovered || showFromPageChange);
-  }, [isHovered, showFromPageChange]);
+    const newVisibility = isHovered || showFromPageChange;
+    console.log('👁️ Visibility update:', {
+      isHovered,
+      showFromPageChange,
+      newVisibility,
+      currentTitle: currentPage?.title
+    });
+    setIsVisible(newVisibility);
+  }, [isHovered, showFromPageChange, currentPage?.title]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -70,8 +82,16 @@ export function PageTitleDisplay({ currentPage, onPageChange }: PageTitleDisplay
   };
 
   if (!currentPage) {
+    console.log('❌ No currentPage - not rendering');
     return null;
   }
+
+  console.log('🎨 Rendering PageTitleDisplay:', {
+    title: currentPage.title,
+    isVisible,
+    showFromPageChange,
+    isHovered
+  });
 
   return (
     <>
