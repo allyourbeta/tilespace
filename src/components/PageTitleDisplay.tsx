@@ -15,8 +15,9 @@ export function PageTitleDisplay({ currentPage, onPageChange }: PageTitleDisplay
 
   // Handle page change detection
   useEffect(() => {
-    if (currentPage && prevPageIdRef.current && currentPage.id !== prevPageIdRef.current) {
+    if (currentPage && prevPageIdRef.current !== null && currentPage.id !== prevPageIdRef.current) {
       // Page changed - trigger fade in for 2 seconds
+      console.log('Page changed from', prevPageIdRef.current, 'to', currentPage.id);
       setShowFromPageChange(true);
       
       // Clear any existing timeout
@@ -26,17 +27,21 @@ export function PageTitleDisplay({ currentPage, onPageChange }: PageTitleDisplay
       
       // Set timeout to hide after 2 seconds (only if not hovered)
       timeoutRef.current = window.setTimeout(() => {
-        if (!isHovered) {
-          setShowFromPageChange(false);
-        }
+        setShowFromPageChange(false);
       }, 2000);
     }
     
-    // Update previous page reference
+    // Update previous page reference (but not on initial load)
     if (currentPage) {
-      prevPageIdRef.current = currentPage.id;
+      if (prevPageIdRef.current === null) {
+        // Initial load - just set the reference without showing
+        prevPageIdRef.current = currentPage.id;
+      } else {
+        // Subsequent changes - update after the check above
+        prevPageIdRef.current = currentPage.id;
+      }
     }
-  }, [currentPage, isHovered]);
+  }, [currentPage]);
 
   // Update visibility based on both hover and page change states
   useEffect(() => {
@@ -72,7 +77,7 @@ export function PageTitleDisplay({ currentPage, onPageChange }: PageTitleDisplay
     <>
       {/* Hover detection area - invisible but generous size */}
       <div
-        className="fixed top-0 left-0 w-[150px] h-[80px] z-20"
+        className="fixed top-0 left-0 w-[300px] h-[160px] z-20"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       />
@@ -80,12 +85,13 @@ export function PageTitleDisplay({ currentPage, onPageChange }: PageTitleDisplay
       {/* Title display */}
       <div
         className={`
-          fixed top-4 left-4 z-30 
+          fixed top-6 left-6 z-30 
           bg-black/20 backdrop-blur 
-          text-white text-sm font-medium 
-          px-3 py-2 rounded-lg
+          text-white text-2xl font-semibold 
+          px-8 py-6 rounded-2xl
           transition-opacity duration-300 ease-in-out
           pointer-events-none
+          min-w-[200px]
           ${isVisible ? 'opacity-100' : 'opacity-0'}
         `}
       >
