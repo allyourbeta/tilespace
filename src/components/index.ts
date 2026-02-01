@@ -1,6 +1,5 @@
 export { TileCard } from './TileCard';
 export { TilePanel } from './TilePanel';
-export { LinkItem } from './LinkItem';
 export { TempLinkItem, type TempLink } from './TempLinkItem';
 export { DocumentEditor } from './DocumentEditor';
 export { FloatingActions } from './FloatingActions';
