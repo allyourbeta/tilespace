@@ -48,7 +48,11 @@ export function OverviewMode({
     }
   };
 
-  const handlePageClick = (pageId: string) => {
+  const handlePageClick = (e: React.MouseEvent, pageId: string) => {
+    // Only handle click if it wasn't a drag operation
+    if (draggedPageId) {
+      return;
+    }
     onPageSelect(pageId);
     onClose();
   };
@@ -56,6 +60,7 @@ export function OverviewMode({
   const handleDragStart = (e: React.DragEvent, pageId: string) => {
     setDraggedPageId(pageId);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', pageId);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -68,6 +73,10 @@ export function OverviewMode({
     if (draggedPageId && draggedPageId !== targetPageId) {
       onSwapPages(draggedPageId, targetPageId);
     }
+    setDraggedPageId(null);
+  };
+
+  const handleDragEnd = () => {
     setDraggedPageId(null);
   };
 
@@ -146,15 +155,16 @@ export function OverviewMode({
             <div
               key={page.id}
               draggable
-              onClick={() => handlePageClick(page.id)}
+              onClick={(e) => handlePageClick(e, page.id)}
               onDragStart={(e) => handleDragStart(e, page.id)}
+              onDragEnd={handleDragEnd}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, page.id)}
               onContextMenu={(e) => handleContextMenu(e, page.id)}
               className={`
-                relative aspect-square rounded-2xl p-4 cursor-pointer transition-all
+                relative aspect-square rounded-2xl p-4 transition-all
                 ${isCurrentPage ? 'ring-4 ring-white' : ''}
-                ${isDragging ? 'opacity-50 scale-95' : 'hover:scale-105'}
+                ${isDragging ? 'opacity-50 scale-95 cursor-grabbing' : 'hover:scale-105 cursor-grab'}
                 shadow-lg hover:shadow-xl
               `}
               style={{ backgroundColor: palette.background }}
@@ -171,12 +181,12 @@ export function OverviewMode({
                   }}
                   onBlur={handleSubmitRename}
                   autoFocus
-                  className="absolute top-2 left-2 right-8 bg-white/90 text-gray-900 text-sm font-medium px-2 py-1 rounded border-none outline-none"
+                  className="absolute top-2 left-2 right-8 bg-white/90 text-gray-900 text-lg font-semibold px-3 py-2 rounded border-none outline-none"
                   maxLength={30}
                 />
               ) : (
                 <div className="absolute top-2 left-2 right-8">
-                  <h3 className="text-white text-sm font-medium truncate">
+                  <h3 className="text-white text-lg font-semibold truncate">
                     {page.title}
                   </h3>
                 </div>
