@@ -176,17 +176,33 @@ export function OverviewMode({
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSubmitRename();
-                    if (e.key === 'Escape') setEditingPageId(null);
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSubmitRename();
+                    }
+                    if (e.key === 'Escape') {
+                      e.preventDefault();
+                      setEditingPageId(null);
+                      setEditValue('');
+                    }
                   }}
                   onBlur={handleSubmitRename}
                   autoFocus
                   className="absolute top-2 left-2 right-8 bg-white/90 text-gray-900 text-lg font-semibold px-3 py-2 rounded border-none outline-none"
-                  maxLength={30}
+                  maxLength={75}
                 />
               ) : (
                 <div className="absolute top-2 left-2 right-8">
-                  <h3 className="text-white text-lg font-semibold truncate">
+                  <h3 
+                    title={page.title}
+                    className="text-white text-lg font-semibold truncate"
+                    onClick={(e) => e.stopPropagation()}
+                    onDoubleClick={(e) => {
+                      e.stopPropagation();
+                      setEditingPageId(page.id);
+                      setEditValue(page.title);
+                    }}
+                  >
                     {page.title}
                   </h3>
                 </div>
