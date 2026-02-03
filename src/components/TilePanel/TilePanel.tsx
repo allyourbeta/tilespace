@@ -8,6 +8,7 @@ import { PanelTempLinkItem, type TempLink } from './PanelTempLinkItem';
 interface TilePanelProps {
   tile: Tile;
   currentPaletteId: string;
+  isNewTile?: boolean;
   onClose: () => void;
   onUpdateTile: (id: string, updates: Partial<Tile>) => void;
   onUpdateTileColor: (id: string, colorIndex: number) => void;
@@ -31,6 +32,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 export function TilePanel({
   tile,
   currentPaletteId,
+  isNewTile = false,
   onClose,
   onUpdateTile,
   onUpdateTileColor,
@@ -59,6 +61,29 @@ export function TilePanel({
   useEffect(() => {
     setTitle(tile.title);
   }, [tile.title]);
+
+  // Auto-focus and select title for new tiles
+  useEffect(() => {
+    if (isNewTile && titleRef.current) {
+      titleRef.current.focus();
+      titleRef.current.select();
+    }
+  }, [isNewTile]);
+
+  // Escape key closes the panel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !showEmojiPicker && !showColorPicker) {
+        // Save title if changed before closing
+        if (title !== tile.title) {
+          onUpdateTile(tile.id, { title });
+        }
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, showEmojiPicker, showColorPicker, title, tile.title, tile.id, onUpdateTile]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {

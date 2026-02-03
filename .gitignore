@@ -42,3 +42,4 @@ supabase/.temp
 __pycache__/
 venv/
 .vercel
+*.zip

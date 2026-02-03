@@ -47,6 +47,7 @@ function AppContent() {
   // Tile state (for current page)
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null);
+  const [isNewTile, setIsNewTile] = useState(false);
   const [draggedTileId, setDraggedTileId] = useState<string | null>(null);
   
   // UI state
@@ -204,6 +205,7 @@ function AppContent() {
     try {
       const newTile = await createTile(currentPageId, currentPaletteId);
       setTiles(prev => [...prev, newTile]);
+      setIsNewTile(true);
       setSelectedTileId(newTile.id);
     } catch (err) {
       console.error('Failed to create tile:', err);
@@ -574,7 +576,8 @@ function AppContent() {
         <TilePanel
           tile={selectedTile}
           currentPaletteId={currentPaletteId}
-          onClose={() => setSelectedTileId(null)}
+          isNewTile={isNewTile}
+          onClose={() => { setSelectedTileId(null); setIsNewTile(false); }}
           onUpdateTile={handleUpdateTile}
           onUpdateTileColor={handleUpdateTileColor}
           onResetTile={handleResetTile}

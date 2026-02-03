@@ -186,7 +186,14 @@ export function OverviewMode({
                 />
               ) : (
                 <div className="absolute top-2 left-2 right-8">
-                  <h3 className="text-white text-lg font-semibold truncate">
+                  <h3 
+                    className="text-white text-lg font-semibold truncate cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingPageId(page.id);
+                      setEditValue(page.title);
+                    }}
+                  >
                     {page.title}
                   </h3>
                 </div>
