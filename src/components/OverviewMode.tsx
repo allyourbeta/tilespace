@@ -29,6 +29,7 @@ export function OverviewMode({
   onResetPage
 }: OverviewModeProps) {
   const [draggedPageId, setDraggedPageId] = useState<string | null>(null);
+  const [dragOverPageId, setDragOverPageId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({ pageId: null, x: 0, y: 0 });
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -63,9 +64,12 @@ export function OverviewMode({
     e.dataTransfer.setData('text/plain', pageId);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, pageId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    if (pageId !== draggedPageId) {
+      setDragOverPageId(pageId);
+    }
   };
 
   const handleDrop = (e: React.DragEvent, targetPageId: string) => {
@@ -74,10 +78,16 @@ export function OverviewMode({
       onSwapPages(draggedPageId, targetPageId);
     }
     setDraggedPageId(null);
+    setDragOverPageId(null);
   };
 
   const handleDragEnd = () => {
     setDraggedPageId(null);
+    setDragOverPageId(null);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverPageId(null);
   };
 
   const handleContextMenu = (e: React.MouseEvent, pageId: string) => {
@@ -150,6 +160,7 @@ export function OverviewMode({
           const palette = getPalette(page.palette_id);
           const isCurrentPage = page.id === currentPageId;
           const isDragging = draggedPageId === page.id;
+          const isDragOver = dragOverPageId === page.id && !isDragging;
 
           return (
             <div
@@ -158,14 +169,15 @@ export function OverviewMode({
               onClick={(e) => handlePageClick(e, page.id)}
               onDragStart={(e) => handleDragStart(e, page.id)}
               onDragEnd={handleDragEnd}
-              onDragOver={handleDragOver}
+              onDragOver={(e) => handleDragOver(e, page.id)}
+              onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, page.id)}
               onContextMenu={(e) => handleContextMenu(e, page.id)}
               className={`
-                relative aspect-square rounded-2xl p-4 transition-all
+                relative aspect-square rounded-2xl p-4 transition-all duration-150
                 ${isCurrentPage ? 'ring-4 ring-white' : ''}
                 ${isDragging ? 'opacity-50 scale-95 cursor-grabbing' : 'hover:scale-105 cursor-grab'}
-                shadow-lg hover:shadow-xl
+                ${isDragOver ? 'scale-110 shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-4 ring-amber-400' : 'shadow-lg hover:shadow-xl'}
               `}
               style={{ backgroundColor: palette.background }}
             >
@@ -182,7 +194,7 @@ export function OverviewMode({
                   onBlur={handleSubmitRename}
                   autoFocus
                   className="absolute top-2 left-2 right-8 bg-white/90 text-gray-900 text-lg font-semibold px-3 py-2 rounded border-none outline-none"
-                  maxLength={30}
+                  maxLength={75}
                 />
               ) : (
                 <div className="absolute top-2 left-2 right-8">

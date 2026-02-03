@@ -16,6 +16,7 @@ interface TileCardProps {
 export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
   const linkCount = tile.links?.length || 0;
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
+  const [isTileDragOver, setIsTileDragOver] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     const linkData = e.dataTransfer.types.includes('application/link-id');
@@ -25,11 +26,15 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
       setIsLinkDragOver(true);
     } else {
       onDragOver(e);
+      if (!isDragging) {
+        setIsTileDragOver(true);
+      }
     }
   };
 
   const handleDragLeave = () => {
     setIsLinkDragOver(false);
+    setIsTileDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -39,6 +44,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
       setIsLinkDragOver(false);
       onLinkDrop(linkId, tile.id);
     } else {
+      setIsTileDragOver(false);
       onDrop(e, tile);
     }
   };
@@ -62,6 +68,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
         hover:shadow-xl hover:-translate-y-1
         ${isDragging ? 'opacity-50 scale-95' : 'opacity-100'}
         ${isLinkDragOver ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
+        ${isTileDragOver ? 'scale-105 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-4 ring-amber-400 ring-offset-2 ring-offset-white' : ''}
       `}
       style={{ borderColor }}
     >
