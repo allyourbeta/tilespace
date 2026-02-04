@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Page } from '../types/page';
 import { PAGE_TITLE_OVERLAY } from '../lib/constants';
+import { useIsMobile } from '../hooks';
 
 interface PageTitleDisplayProps {
   currentPage: Page | null;
@@ -12,6 +13,7 @@ export function PageTitleDisplay({ currentPage, currentPageId }: PageTitleDispla
   const [showFromPageChange, setShowFromPageChange] = useState(false);
   const timeoutRef = useRef<number | null>(null);
   const prevPageIdRef = useRef<string | null>(null);
+  const isMobile = useIsMobile();
 
   // Handle page change detection
   useEffect(() => {
@@ -49,6 +51,16 @@ export function PageTitleDisplay({ currentPage, currentPageId }: PageTitleDispla
 
   const isVisible = isHovered || showFromPageChange;
 
+  // Mobile: always-visible compact title bar
+  if (isMobile) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-30 bg-black/20 backdrop-blur text-white text-base font-semibold px-4 py-2 text-center pointer-events-none">
+        {currentPage.title}
+      </div>
+    );
+  }
+
+  // Desktop: hover/fade behavior
   return (
     <>
       {/* Hover detection area */}

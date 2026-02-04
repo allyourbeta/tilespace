@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, MoreVertical } from 'lucide-react';
 import { Page } from '../types/page';
 import { getPalette } from '../types';
+import { useIsMobile } from '../hooks';
 
 interface OverviewModeProps {
   pages: Page[];
@@ -30,6 +31,7 @@ export function OverviewMode({
 }: OverviewModeProps) {
   const [draggedPageId, setDraggedPageId] = useState<string | null>(null);
   const [dragOverPageId, setDragOverPageId] = useState<string | null>(null);
+  const isMobile = useIsMobile();
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({ pageId: null, x: 0, y: 0 });
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
@@ -143,7 +145,7 @@ export function OverviewMode({
 
   return (
     <div
-      className="fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center p-8"
+      className={`fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center ${isMobile ? 'p-3' : 'p-8'}`}
       onClick={handleBackdropClick}
     >
       {/* Close Button */}
@@ -154,8 +156,8 @@ export function OverviewMode({
         <X className="w-6 h-6" />
       </button>
 
-      {/* Page Grid - 4 columns per OVERVIEW_MODE.GRID_COLUMNS */}
-      <div className="grid grid-cols-4 gap-6 max-w-4xl w-full">
+      {/* Page Grid */}
+      <div className={`grid ${isMobile ? 'grid-cols-2 gap-3 p-4 overflow-y-auto max-h-[80vh]' : 'grid-cols-4 gap-6'} max-w-4xl w-full`}>
         {sortedPages.map((page) => {
           const palette = getPalette(page.palette_id);
           const isCurrentPage = page.id === currentPageId;

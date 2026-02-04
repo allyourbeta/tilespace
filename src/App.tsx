@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import { usePageNavigation, useKeyboardNavigation } from './hooks';
+import { usePageNavigation, useKeyboardNavigation, useIsMobile } from './hooks';
 import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette } from './types';
 import { Page } from './types/page';
 import {
@@ -39,6 +39,7 @@ import { LoginPage } from './pages/LoginPage';
 
 function AppContent() {
   const { user, loading: authLoading } = useAuth();
+  const isMobile = useIsMobile();
   
   // Page state
   const [pages, setPages] = useState<Page[]>([]);
@@ -513,6 +514,12 @@ function AppContent() {
     gridTemplateRows: `repeat(${rows}, 1fr)`,
   };
 
+  // Mobile grid: 2 columns, auto rows
+  const mobileGridStyle = {
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateRows: 'auto',
+  };
+
   const currentPalette = getPalette(currentPaletteId);
   const bgColor = currentPalette.background;
   const borderColor = currentPalette.border;
@@ -560,7 +567,10 @@ function AppContent() {
       <PageTitleDisplay currentPage={currentPage} currentPageId={currentPageId} />
       
       {/* Tile Grid */}
-      <div className="h-full w-full grid gap-4 p-4" style={gridStyle}>
+      <div 
+        className={`h-full w-full grid ${isMobile ? 'gap-2 p-2 pt-10 pb-16 overflow-y-auto' : 'gap-4 p-4'}`}
+        style={isMobile ? mobileGridStyle : gridStyle}
+      >
         {gridCells}
       </div>
 

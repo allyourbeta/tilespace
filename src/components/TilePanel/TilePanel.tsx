@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Plus, ExternalLink, Trash2, FileText } from 'lucide-react';
 import { Tile, Link, EMOJI_CATEGORIES, getPalette } from '../../types';
 import { getButtonStyles } from '../../lib/constants';
+import { useIsMobile } from '../../hooks';
 import { PanelLinkItem } from './PanelLinkItem';
 import { PanelTempLinkItem, type TempLink } from './PanelTempLinkItem';
 
@@ -55,6 +56,7 @@ export function TilePanel({
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const colorPickerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   const palette = getPalette(currentPaletteId);
 
@@ -213,15 +215,20 @@ export function TilePanel({
       />
       <div 
         ref={panelRef}
-        className="fixed w-full max-w-md bg-white shadow-2xl z-50 flex flex-col rounded-l-2xl overflow-hidden"
-        style={{
+        className={`fixed bg-white shadow-2xl z-50 flex flex-col overflow-hidden ${
+          isMobile 
+            ? 'inset-0 rounded-none' 
+            : 'w-full max-w-md rounded-l-2xl'
+        }`}
+        style={isMobile ? {} : {
           right: -panelPosition.x,
           top: Math.max(8, panelPosition.y),
           bottom: Math.max(8, -panelPosition.y),
           cursor: isDragging ? 'grabbing' : 'default'
         }}
       >
-        {/* Drag handle bar */}
+        {/* Drag handle bar - desktop only */}
+        {!isMobile && (
         <div
           onMouseDown={handleDragStart}
           className="h-6 bg-gray-100 cursor-grab active:cursor-grabbing flex items-center justify-center hover:bg-gray-200 transition-colors"
@@ -229,6 +236,7 @@ export function TilePanel({
         >
           <div className="w-12 h-1 bg-gray-300 rounded-full" />
         </div>
+        )}
         
         <div
           className="px-4 py-3 border-b border-gray-100 flex items-center gap-2"
