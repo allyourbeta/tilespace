@@ -606,6 +606,7 @@ function AppContent() {
         canAddTile={canAddMore}
         currentPaletteId={currentPaletteId}
         onSelectPalette={handlePaletteChange}
+        onShowOverview={() => setShowOverview(true)}
       />
 
       <UserMenu />

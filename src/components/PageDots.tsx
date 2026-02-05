@@ -1,5 +1,6 @@
 import { Page } from '../types/page';
 import { Grid3x3 } from 'lucide-react';
+import { useIsMobile } from '../hooks';
 
 interface PageDotsProps {
   pages: Page[];
@@ -9,6 +10,11 @@ interface PageDotsProps {
 }
 
 export function PageDots({ pages, currentPageId, onPageSelect, onShowOverview }: PageDotsProps) {
+  const isMobile = useIsMobile();
+
+  // Hidden on mobile — overview icon moves to FloatingActions, swipe replaces dots
+  if (isMobile) return null;
+
   // Sort pages by position
   const sortedPages = [...pages].sort((a, b) => a.position - b.position);
 

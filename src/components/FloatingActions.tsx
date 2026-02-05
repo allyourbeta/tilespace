@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus, X, Link as LinkIcon, FileText } from 'lucide-react';
+import { Plus, X, Link as LinkIcon, FileText, Grid3x3 } from 'lucide-react';
 import { PaletteSelector } from './PaletteSelector';
+import { useIsMobile } from '../hooks';
 
 interface FloatingActionsProps {
   onAddTile: () => void;
@@ -9,11 +10,13 @@ interface FloatingActionsProps {
   canAddTile: boolean;
   currentPaletteId: string;
   onSelectPalette: (paletteId: string) => void;
+  onShowOverview?: () => void;
 }
 
-export function FloatingActions({ onAddTile, onPasteLink, onAddNote, canAddTile, currentPaletteId, onSelectPalette }: FloatingActionsProps) {
+export function FloatingActions({ onAddTile, onPasteLink, onAddNote, canAddTile, currentPaletteId, onSelectPalette, onShowOverview }: FloatingActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -116,6 +119,17 @@ export function FloatingActions({ onAddTile, onPasteLink, onAddNote, canAddTile,
         currentPaletteId={currentPaletteId}
         onSelectPalette={onSelectPalette}
       />
+
+      {/* Overview button — mobile only (replaces PageDots overview icon) */}
+      {isMobile && onShowOverview && (
+        <button
+          onClick={onShowOverview}
+          className="p-3.5 rounded-full shadow-lg bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white transition-all"
+          title="Page overview"
+        >
+          <Grid3x3 className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 }
