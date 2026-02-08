@@ -20,13 +20,27 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
   const contentRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<number | null>(null);
 
+  // Track which document ID we've initialized, so we only set
+  // the initial preview state when opening a *different* document,
+  // not when the same document's prop updates from autosave.
+  const initializedDocIdRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (document) {
-      setTitle(document.title);
-      setContent(document.content || '');
-      setSummary(document.summary || '');
-      setHasChanges(false);
-      setIsPreview(!!document.content);
+      const isNewDocument = document.id !== initializedDocIdRef.current;
+      if (isNewDocument) {
+        // Only initialize state when opening a different document,
+        // not when the same document's prop updates from autosave
+        setTitle(document.title);
+        setContent(document.content || '');
+        setSummary(document.summary || '');
+        setHasChanges(false);
+        setIsPreview(!!document.content);
+        initializedDocIdRef.current = document.id;
+      }
+    } else {
+      // Document closed — reset so next open gets fresh init
+      initializedDocIdRef.current = null;
     }
   }, [document]);
 
