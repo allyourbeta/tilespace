@@ -22,7 +22,7 @@ export function UserMenu() {
   if (!user) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-40" ref={menuRef}>
+    <div className="fixed bottom-4 right-4 z-40 group/build" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-10 h-10 rounded-full overflow-hidden border-2 border-white shadow-lg hover:shadow-xl transition-shadow"
@@ -33,6 +33,11 @@ export function UserMenu() {
           className="w-full h-full object-cover" 
         />
       </button>
+
+      {/* Build info tooltip on hover */}
+      <div className="absolute bottom-full right-0 mb-1 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow-lg whitespace-nowrap opacity-0 group-hover/build:opacity-100 transition-opacity pointer-events-none">
+        Build: {__BUILD_HASH__} · {__BUILD_TIME__}
+      </div>
       
       {isOpen && (
         <div className="absolute bottom-full right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-[200px]">
