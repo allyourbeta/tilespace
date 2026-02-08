@@ -131,7 +131,7 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
             }}
             className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-600 font-medium text-sm"
           >
-            Edit
+            {isDocument ? 'View' : 'Edit'}
           </button>
           <button
             onClick={() => onDelete(link.id)}
