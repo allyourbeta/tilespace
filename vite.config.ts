@@ -3,10 +3,16 @@ import react from '@vitejs/plugin-react';
 import { execSync } from 'child_process';
 
 const buildHash = (() => {
+  // Vercel auto-prefixes env vars per framework; check both
+  const sha = process.env.VERCEL_GIT_COMMIT_SHA 
+           || process.env.VITE_VERCEL_GIT_COMMIT_SHA;
+  if (sha) {
+    return sha.slice(0, 7);
+  }
   try {
     return execSync('git rev-parse --short HEAD').toString().trim();
   } catch {
-    return 'unknown';
+    return 'dev';
   }
 })();
 
