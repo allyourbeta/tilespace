@@ -242,6 +242,7 @@ export function TilePanel({
         onClick={onClose}
       />
       <div 
+        data-testid="tile-panel"
         ref={panelRef}
         className={`fixed bg-white shadow-2xl z-50 flex flex-col overflow-hidden ${
           isMobile 

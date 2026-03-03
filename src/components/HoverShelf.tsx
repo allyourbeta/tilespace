@@ -52,7 +52,7 @@ export function HoverShelf({ pages, currentPageId, isOpen, onPageSelect, onCreat
           : 'opacity-0 translate-y-2 pointer-events-none'
       }`}
     >
-      <div className="bg-black/40 backdrop-blur rounded-xl p-4 grid grid-cols-4 gap-3 w-[800px] max-w-[90vw] max-h-[60vh] overflow-y-auto">
+      <div data-testid="hover-shelf" className="bg-black/40 backdrop-blur rounded-xl p-4 grid grid-cols-4 gap-3 w-[800px] max-w-[90vw] max-h-[60vh] overflow-y-auto">
         {sortedPages.map((page) => {
           const palette = getPalette(page.palette_id);
           const isCurrent = page.id === currentPageId;
@@ -60,6 +60,7 @@ export function HoverShelf({ pages, currentPageId, isOpen, onPageSelect, onCreat
           return (
             <button
               key={page.id}
+              data-testid="shelf-page-card"
               onMouseEnter={() => handleCardMouseEnter(page.id)}
               onMouseLeave={handleCardMouseLeave}
               onClick={(e) => {
@@ -67,7 +68,7 @@ export function HoverShelf({ pages, currentPageId, isOpen, onPageSelect, onCreat
                 cancelNavTimer();
                 onPageSelect(page.id);
               }}
-              className={`rounded-lg transition-all duration-150 flex items-end p-3 overflow-hidden ${
+              className={`rounded-lg transition-all duration-150 flex items-end p-4 overflow-hidden ${
                 isCurrent ? 'ring-2 ring-white' : 'ring-1 ring-white/20 hover:ring-white/50'
               } hover:scale-105`}
               style={{
@@ -76,7 +77,7 @@ export function HoverShelf({ pages, currentPageId, isOpen, onPageSelect, onCreat
               }}
               title={page.title}
             >
-              <span className="text-white text-sm font-medium truncate w-full text-left drop-shadow-sm">
+              <span className="text-white text-base font-semibold truncate w-full text-left drop-shadow-sm">
                 {page.title}
               </span>
             </button>

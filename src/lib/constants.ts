@@ -38,8 +38,8 @@ export const HOVER_SHELF = {
   OPEN_DELAY_MS: 600,
   NAV_DELAY_MS: 2000,
   CLOSE_GRACE_MS: 200,
-  CARD_WIDTH_PX: 175,
-  CARD_HEIGHT_PX: 122,
+  CARD_WIDTH_PX: 263,
+  CARD_HEIGHT_PX: 183,
 } as const;
 
 // Timing

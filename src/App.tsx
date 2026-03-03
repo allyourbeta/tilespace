@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { usePageNavigation, useKeyboardNavigation, useIsMobile } from './hooks';
 import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette } from './types';
+import { isValidUrl } from './utils/url';
 import { Page } from './types/page';
 import {
   fetchPages,
@@ -455,6 +456,55 @@ function AppContent() {
     }
   };
 
+  const handlePasteLink = async () => {
+    const inboxTile = tiles.find(t => t.title === INBOX_TILE.TITLE);
+
+    if (!inboxTile && tiles.length === 0) {
+      if (!currentPageId) return;
+      try {
+        const newTile = await createTile(currentPageId, currentPaletteId);
+        setTiles(prev => [...prev, newTile]);
+
+        let clipUrl: string | null = null;
+        try {
+          const text = await navigator.clipboard.readText();
+          const trimmed = text?.trim();
+          if (trimmed) {
+            const candidate = (!trimmed.startsWith('http://') && !trimmed.startsWith('https://'))
+              ? `https://${trimmed}` : trimmed;
+            if (isValidUrl(candidate)) clipUrl = candidate;
+          }
+        } catch { /* clipboard denied */ }
+
+        if (clipUrl) {
+          await handleCreateLink(newTile.id, { title: clipUrl, url: clipUrl, summary: '' });
+        }
+        setSelectedTileId(newTile.id);
+      } catch (err) {
+        console.error('Failed to create tile and link:', err);
+      }
+      return;
+    }
+
+    if (inboxTile) {
+      try {
+        const text = await navigator.clipboard.readText();
+        const trimmed = text?.trim();
+        if (trimmed) {
+          const candidate = (!trimmed.startsWith('http://') && !trimmed.startsWith('https://'))
+            ? `https://${trimmed}` : trimmed;
+          if (isValidUrl(candidate)) {
+            await handleCreateLink(inboxTile.id, { title: candidate, url: candidate, summary: '' });
+            setSelectedTileId(inboxTile.id);
+            return;
+          }
+        }
+      } catch { /* clipboard denied — fall through */ }
+    }
+
+    setShowPasteLink(true);
+  };
+
   const handleLinkDrop = async (linkId: string, targetTileId: string) => {
     let sourceTileId: string | null = null;
     for (const t of tiles) {
@@ -619,12 +669,15 @@ function AppContent() {
 
       <FloatingActions
         onAddTile={handleCreateTile}
-        onPasteLink={() => setShowPasteLink(true)}
+        onPasteLink={handlePasteLink}
         onAddNote={() => handleAddNote()}
         canAddTile={canAddMore}
         currentPaletteId={currentPaletteId}
         onSelectPalette={handlePaletteChange}
         onShowOverview={() => setShowOverview(true)}
+        tiles={tiles}
+        onCreateLink={handleCreateLink}
+        onSelectTile={(id) => { setSelectedTileId(id); setIsNewTile(false); }}
       />
 
       <UserMenu />

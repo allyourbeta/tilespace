@@ -105,7 +105,7 @@ export function PageDots({ pages, currentPageId, onPageSelect, onShowOverview, o
           }}
         />
 
-      <div className="flex items-center gap-3 bg-black/20 backdrop-blur rounded-full px-3 py-2">
+      <div data-testid="page-dots-bar" className="flex items-center gap-3 bg-black/20 backdrop-blur rounded-full px-3 py-2">
         <button
           onClick={onShowOverview}
           className="w-6 h-6 bg-white/60 rounded-full flex items-center justify-center hover:bg-white/75 transition-all active:scale-95"
