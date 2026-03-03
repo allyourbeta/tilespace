@@ -3,6 +3,7 @@ import { X, Plus, ExternalLink, Trash2, FileText } from 'lucide-react';
 import { Tile, Link, EMOJI_CATEGORIES, getPalette } from '../../types';
 import { getButtonStyles } from '../../lib/constants';
 import { useIsMobile } from '../../hooks';
+import { isValidUrl } from '../../utils/url';
 import { PanelLinkItem } from './PanelLinkItem';
 import { PanelTempLinkItem, type TempLink } from './PanelTempLinkItem';
 
@@ -49,6 +50,7 @@ export function TilePanel({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [emojiCategory, setEmojiCategory] = useState<keyof typeof EMOJI_CATEGORIES>('nature');
   const [tempLinks, setTempLinks] = useState<TempLink[]>([]);
+  const [pasteFlash, setPasteFlash] = useState(false);
   const [panelPosition, setPanelPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
@@ -71,6 +73,32 @@ export function TilePanel({
       titleRef.current.select();
     }
   }, [isNewTile]);
+
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      const tag = (document.activeElement?.tagName || '').toLowerCase();
+      const isEditable = tag === 'input' || tag === 'textarea' || (document.activeElement as HTMLElement)?.isContentEditable;
+      if (isEditable) return;
+
+      const text = e.clipboardData?.getData('text/plain')?.trim();
+      if (!text) return;
+
+      const urlCandidate = (!text.startsWith('http://') && !text.startsWith('https://'))
+        ? `https://${text}` : text;
+      if (!isValidUrl(urlCandidate)) return;
+
+      e.preventDefault();
+      try {
+        await onCreateLink(tile.id, { title: urlCandidate, url: urlCandidate, summary: '' });
+        setPasteFlash(true);
+        setTimeout(() => setPasteFlash(false), 1500);
+      } catch (err) {
+        console.error('Auto-link paste failed:', err);
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [tile.id, onCreateLink]);
 
   // Escape key closes the panel
   useEffect(() => {
@@ -340,6 +368,11 @@ export function TilePanel({
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
+          {pasteFlash && (
+            <div className="mb-2 px-3 py-2 bg-green-50 text-green-700 text-sm font-medium rounded-lg text-center">
+              Link added from clipboard
+            </div>
+          )}
           {!hasAnyLinks ? (
             <div className="text-center py-8">
               <p className="text-gray-500 text-base font-medium mb-4">No links yet</p>
