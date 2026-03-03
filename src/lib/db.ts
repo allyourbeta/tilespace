@@ -24,6 +24,24 @@ export async function fetchPages(): Promise<Page[]> {
   return data || [];
 }
 
+export async function createPage(title: string, position: number, paletteId: string): Promise<Page> {
+  const userId = await getCurrentUserId();
+
+  const { data, error } = await supabase
+    .from('pages')
+    .insert({
+      user_id: userId,
+      title,
+      position,
+      palette_id: paletteId,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function updatePage(id: string, updates: Partial<Page>): Promise<void> {
   const { error } = await supabase
     .from('pages')

@@ -10,9 +10,10 @@ interface PageDotsProps {
   currentPageId: string;
   onPageSelect: (pageId: string) => void;
   onShowOverview: () => void;
+  onCreatePage: () => void;
 }
 
-export function PageDots({ pages, currentPageId, onPageSelect, onShowOverview }: PageDotsProps) {
+export function PageDots({ pages, currentPageId, onPageSelect, onShowOverview, onCreatePage }: PageDotsProps) {
   const isMobile = useIsMobile();
   const [isShelfOpen, setShelfOpen] = useState(false);
   const openTimerRef = useRef<number | null>(null);
@@ -94,11 +95,15 @@ export function PageDots({ pages, currentPageId, onPageSelect, onShowOverview }:
         onMouseLeave={handleMouseLeave}
       >
         <HoverShelf
-        pages={pages}
-        currentPageId={currentPageId}
-        isOpen={isShelfOpen}
-        onPageSelect={onPageSelect}
-      />
+          pages={pages}
+          currentPageId={currentPageId}
+          isOpen={isShelfOpen}
+          onPageSelect={onPageSelect}
+          onCreatePage={() => {
+            onCreatePage();
+            closeShelf();
+          }}
+        />
 
       <div className="flex items-center gap-3 bg-black/20 backdrop-blur rounded-full px-3 py-2">
         <button

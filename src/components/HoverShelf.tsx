@@ -2,15 +2,17 @@ import { useRef, useEffect, useCallback } from 'react';
 import { Page } from '../types/page';
 import { getPalette } from '../types/palette';
 import { HOVER_SHELF } from '../lib/constants';
+import { Plus } from 'lucide-react';
 
 interface HoverShelfProps {
   pages: Page[];
   currentPageId: string;
   isOpen: boolean;
   onPageSelect: (pageId: string) => void;
+  onCreatePage: () => void;
 }
 
-export function HoverShelf({ pages, currentPageId, isOpen, onPageSelect }: HoverShelfProps) {
+export function HoverShelf({ pages, currentPageId, isOpen, onPageSelect, onCreatePage }: HoverShelfProps) {
   const navTimerRef = useRef<number | null>(null);
   const hoveredPageRef = useRef<string | null>(null);
 
@@ -80,6 +82,18 @@ export function HoverShelf({ pages, currentPageId, isOpen, onPageSelect }: Hover
             </button>
           );
         })}
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onCreatePage();
+          }}
+          className="rounded-lg border-2 border-dashed border-white/30 bg-white/10 hover:bg-white/20 transition-all duration-150 flex items-center justify-center overflow-hidden"
+          style={{ minHeight: HOVER_SHELF.CARD_HEIGHT_PX }}
+          title="Add new page"
+        >
+          <Plus className="w-6 h-6 text-white/60" />
+        </button>
       </div>
     </div>
   );

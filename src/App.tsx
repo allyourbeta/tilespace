@@ -5,6 +5,7 @@ import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPal
 import { Page } from './types/page';
 import {
   fetchPages,
+  createPage,
   updatePage,
   updatePagePalette,
   recolorAllTiles,
@@ -158,6 +159,22 @@ function AppContent() {
       await loadPages();
     } catch (err) {
       console.error('Failed to swap pages:', err);
+    }
+  };
+
+  const handleCreatePage = async () => {
+    try {
+      const nextPosition = pages.length > 0
+        ? Math.max(...pages.map(p => p.position)) + 1
+        : 0;
+      const title = `Page ${nextPosition + 1}`;
+      const newPage = await createPage(title, nextPosition, currentPaletteId);
+      setPages(prev => [...prev, newPage]);
+      setCurrentPageId(newPage.id);
+      setTiles([]);
+      setSelectedTileId(null);
+    } catch (err) {
+      console.error('Failed to create page:', err);
     }
   };
 
@@ -580,6 +597,7 @@ function AppContent() {
         currentPageId={currentPageId!} 
         onPageSelect={goToPage} 
         onShowOverview={() => setShowOverview(true)}
+        onCreatePage={handleCreatePage}
       />
 
       {selectedTile && (
