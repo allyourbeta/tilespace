@@ -2,7 +2,6 @@ export { TileCard } from './TileCard';
 export { TilePanel } from './TilePanel';
 export { DocumentEditor } from './DocumentEditor';
 export { FloatingActions } from './FloatingActions';
-export { HoverShelf } from './HoverShelf';
 export { TileSubmenu } from './TileSubmenu';
 export { OverviewMode } from './OverviewMode';
 export { PageDots } from './PageDots';

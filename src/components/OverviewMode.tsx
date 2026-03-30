@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { X, MoreVertical } from 'lucide-react';
 import { Page } from '../types/page';
 import { getPalette } from '../types';
@@ -37,7 +37,14 @@ export function OverviewMode({
   const [editValue, setEditValue] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState<string | null>(null);
 
-  const sortedPages = pages.sort((a, b) => a.position - b.position);
+  const sortedPages = [...pages].sort((a, b) => a.position - b.position);
+
+  const desktopCols = useMemo(() => {
+    const n = pages.length;
+    const aspect = window.innerWidth / window.innerHeight;
+    const cols = Math.ceil(Math.sqrt(n * aspect));
+    return Math.max(2, Math.min(cols, 6));
+  }, [pages.length]);
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -157,7 +164,10 @@ export function OverviewMode({
       </button>
 
       {/* Page Grid */}
-      <div className={`grid ${isMobile ? 'grid-cols-2 gap-3 p-4 overflow-y-auto max-h-[80vh]' : 'grid-cols-4 gap-6'} max-w-4xl w-full`}>
+      <div
+        className={`grid ${isMobile ? 'grid-cols-2 gap-3 p-4 overflow-y-auto max-h-[80vh] w-full' : 'gap-6 w-[85vw] max-w-screen-xl'}`}
+        style={!isMobile ? { gridTemplateColumns: `repeat(${desktopCols}, 1fr)` } : undefined}
+      >
         {sortedPages.map((page) => {
           const palette = getPalette(page.palette_id);
           const isCurrentPage = page.id === currentPageId;

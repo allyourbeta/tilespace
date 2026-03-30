@@ -33,13 +33,10 @@ export const OVERVIEW_MODE = {
   GRID_COLUMNS: 4,
 } as const;
 
-// Hover shelf (page navigation)
-export const HOVER_SHELF = {
-  OPEN_DELAY_MS: 600,
-  NAV_DELAY_MS: 2000,
-  CLOSE_GRACE_MS: 200,
-  CARD_WIDTH_PX: 263,
-  CARD_HEIGHT_PX: 183,
+// Welcome-back overview
+export const WELCOME_BACK = {
+  IDLE_THRESHOLD_MS: 30000, // 30 seconds
+  LAST_ACTIVE_KEY: 'tilespace_last_active',
 } as const;
 
 // Timing
@@ -60,7 +57,7 @@ function getLuminance(hexColor: string): number {
   const g = parseInt(hex.substr(2, 2), 16) / 255;
   const b = parseInt(hex.substr(4, 2), 16) / 255;
 
-  const toLinear = (c: number) => 
+  const toLinear = (c: number) =>
     c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
@@ -83,7 +80,7 @@ export function getButtonStyles(accentColor: string): {
   secondary: { borderColor: string; color: string; backgroundColor: string };
 } {
   const light = isLightColor(accentColor);
-  
+
   if (light) {
     // Light accent color - use dark gray for primary, accent for secondary with dark text
     return {
@@ -98,7 +95,7 @@ export function getButtonStyles(accentColor: string): {
       },
     };
   }
-  
+
   // Dark accent color - use accent color normally
   return {
     primary: {
