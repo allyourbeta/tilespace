@@ -3,6 +3,7 @@ import { useSwipeable } from 'react-swipeable';
 import { usePageNavigation, useKeyboardNavigation, useIsMobile } from './hooks';
 import { Tile, Link, getGridConfig, getGridCapacity, getColorFromPalette, getPalette } from './types';
 import { isValidUrl } from './utils/url';
+import { darkenColor } from './utils/color';
 import { Page } from './types/page';
 import {
   fetchPages,
@@ -59,6 +60,8 @@ function AppContent() {
   const [showPasteLink, setShowPasteLink] = useState(false);
   const [editingDocument, setEditingDocument] = useState<Link | null>(null);
   const [showOverview, setShowOverview] = useState(false);
+  const [isPageTransitioning, setIsPageTransitioning] = useState(false);
+  const prevPageIdRef2 = useRef<string | null>(null);
 
   // Derived state
   const currentPage = useMemo(() => {
@@ -160,6 +163,15 @@ function AppContent() {
       loadPages();
     }
   }, [user, loadPages]);
+
+  useEffect(() => {
+    if (prevPageIdRef2.current && prevPageIdRef2.current !== currentPageId) {
+      setIsPageTransitioning(true);
+      const timer = setTimeout(() => setIsPageTransitioning(false), 150);
+      return () => clearTimeout(timer);
+    }
+    prevPageIdRef2.current = currentPageId;
+  }, [currentPageId]);
 
   useEffect(() => {
     if (currentPageId) {
@@ -662,7 +674,8 @@ function AppContent() {
           key={`empty-${position}`}
           onDragOver={handleDragOver}
           onDrop={(e) => handleDropOnEmpty(e, position)}
-          className="rounded-3xl bg-white/20 border-2 border-dashed border-white/30 flex items-center justify-center hover:bg-white/30 hover:border-white/50 transition-all"
+          className="rounded-2xl bg-black/5 shadow-inner border border-white/10 flex items-center justify-center hover:bg-white/15 hover:shadow-none hover:border-white/25 transition-all"
+          style={{ transform: 'translateZ(-10px)' }}
         >
           <span className="text-white/50 text-2xl font-light">-</span>
         </div>
@@ -673,7 +686,7 @@ function AppContent() {
   return (
     <div 
       className="h-screen w-screen overflow-hidden" 
-      style={{ backgroundColor: bgColor }}
+      style={{ background: `radial-gradient(ellipse at center, ${bgColor} 0%, ${darkenColor(bgColor, 25)} 100%)` }}
       {...swipeHandlers}
     >
       {/* Page Title Display */}
@@ -681,8 +694,15 @@ function AppContent() {
       
       {/* Tile Grid */}
       <div 
-        className={`h-full w-full grid ${isMobile ? 'gap-2 p-2 pt-10 pb-16 overflow-y-auto' : 'gap-4 p-4'}`}
-        style={isMobile ? mobileGridStyle : gridStyle}
+        className={`h-full w-full grid ${isMobile ? 'gap-2 p-2 pt-10 pb-16 overflow-y-auto' : 'gap-4 p-4'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
+        style={{
+          ...(isMobile ? mobileGridStyle : gridStyle),
+          ...(!isMobile ? {
+            perspective: '1200px',
+            perspectiveOrigin: '50% 50%',
+            transformStyle: 'preserve-3d' as const,
+          } : {}),
+        }}
       >
         {gridCells}
       </div>

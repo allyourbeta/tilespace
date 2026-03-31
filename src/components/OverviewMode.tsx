@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { X, MoreVertical } from 'lucide-react';
 import { Page } from '../types/page';
 import { getPalette } from '../types';
 import { useIsMobile } from '../hooks';
+import { darkenColor } from '../utils/color';
 
 interface OverviewModeProps {
   pages: Page[];
@@ -36,6 +37,10 @@ export function OverviewMode({
   const [editingPageId, setEditingPageId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [navigatingPageId, setNavigatingPageId] = useState<string | null>(null);
+
+  useEffect(() => { requestAnimationFrame(() => setIsVisible(true)); }, []);
 
   const sortedPages = [...pages].sort((a, b) => a.position - b.position);
 
@@ -59,12 +64,9 @@ export function OverviewMode({
   };
 
   const handlePageClick = (e: React.MouseEvent, pageId: string) => {
-    // Only handle click if it wasn't a drag operation
-    if (draggedPageId) {
-      return;
-    }
-    onPageSelect(pageId);
-    onClose();
+    if (draggedPageId || navigatingPageId) return;
+    setNavigatingPageId(pageId);
+    setTimeout(() => { onPageSelect(pageId); onClose(); }, 300);
   };
 
   const handleDragStart = (e: React.DragEvent, pageId: string) => {
@@ -165,10 +167,15 @@ export function OverviewMode({
 
       {/* Page Grid */}
       <div
-        className={`grid ${isMobile ? 'grid-cols-2 gap-3 p-4 overflow-y-auto max-h-[80vh] w-full' : 'gap-6 w-[85vw] max-w-screen-xl'}`}
-        style={!isMobile ? { gridTemplateColumns: `repeat(${desktopCols}, 1fr)` } : undefined}
+        className={`grid ${isMobile ? 'grid-cols-2 gap-3 p-4 overflow-y-auto max-h-[80vh] w-full' : 'gap-6 w-[85vw] max-w-screen-xl'} transition-all duration-200 ease-out ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.97]'}`}
+        style={!isMobile ? {
+          gridTemplateColumns: `repeat(${desktopCols}, 1fr)`,
+          perspective: '1000px',
+          perspectiveOrigin: '50% 50%',
+          transformStyle: 'preserve-3d' as const,
+        } : undefined}
       >
-        {sortedPages.map((page) => {
+        {sortedPages.map((page, index) => {
           const palette = getPalette(page.palette_id);
           const isCurrentPage = page.id === currentPageId;
           const isDragging = draggedPageId === page.id;
@@ -186,13 +193,17 @@ export function OverviewMode({
               onDrop={(e) => handleDrop(e, page.id)}
               onContextMenu={(e) => handleContextMenu(e, page.id)}
               className={`
-                relative aspect-square rounded-2xl p-4 transition-all duration-150
-                ${isCurrentPage ? 'ring-4 ring-white' : ''}
-                ${isDragging ? 'opacity-50 scale-95 cursor-grabbing' : 'hover:scale-105 cursor-grab'}
-                ${isDragOver ? 'scale-110 shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-4 ring-amber-400' : 'shadow-lg hover:shadow-xl'}
+                overview-card
+                relative aspect-square rounded-2xl p-4 overflow-hidden
+                ${isCurrentPage ? 'ring-4 ring-white shadow-[0_0_15px_rgba(255,255,255,0.5)]' : ''}
+                ${isDragging ? 'opacity-50 scale-95 cursor-grabbing' : 'hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:brightness-110 cursor-grab'}
+                ${isDragOver ? 'scale-110 shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-4 ring-amber-400' : 'shadow-[0_8px_30px_rgba(0,0,0,0.3)]'}
+                ${navigatingPageId === page.id ? 'scale-[1.15] shadow-[0_0_40px_rgba(255,255,255,0.3)] z-10' : ''}
+                ${navigatingPageId && navigatingPageId !== page.id ? 'opacity-50 scale-95' : ''}
               `}
-              style={{ backgroundColor: palette.background }}
+              style={{ backgroundColor: darkenColor(palette.background, 15) }}
             >
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none" />
               {/* Page Title */}
               {editingPageId === page.id ? (
                 <input

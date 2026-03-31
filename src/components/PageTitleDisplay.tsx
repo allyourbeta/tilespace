@@ -78,6 +78,7 @@ export function PageTitleDisplay({ currentPage, currentPageId }: PageTitleDispla
           bg-black/20 backdrop-blur 
           text-white text-2xl font-semibold 
           px-8 py-6 rounded-2xl
+          shadow-xl border border-white/15
           transition-opacity duration-300 ease-in-out
           pointer-events-none
           min-w-[200px]

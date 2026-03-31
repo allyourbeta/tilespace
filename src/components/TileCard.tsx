@@ -17,6 +17,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
   const linkCount = tile.links?.length || 0;
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
   const [isTileDragOver, setIsTileDragOver] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     const linkData = e.dataTransfer.types.includes('application/link-id');
@@ -56,21 +57,28 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
       className={`
         group relative cursor-pointer
         h-full w-full
         flex flex-col items-center
-        bg-white
-        rounded-xl
+        bg-gradient-to-b from-white via-white to-gray-100
+        rounded-2xl
         border-[6px]
-        transition-all duration-150 ease-out
-        hover:shadow-xl hover:-translate-y-1
+        shadow-[0_8px_30px_rgba(0,0,0,0.12)]
+        hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
         ${isDragging ? 'opacity-50 scale-95' : 'opacity-100'}
         ${isLinkDragOver ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
         ${isTileDragOver ? 'scale-105 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-4 ring-amber-400 ring-offset-2 ring-offset-white' : ''}
       `}
-      style={{ borderColor }}
+      style={{
+        borderColor,
+        transform: isHovered ? 'translateZ(20px) translateY(-4px)' : 'translateZ(0px)',
+        transformStyle: 'preserve-3d' as const,
+        transition: 'transform 200ms ease-out, box-shadow 200ms ease-out',
+      }}
     >
       <div className="absolute top-3 left-4 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing">
         <GripVertical className="w-5 h-5 text-gray-400" />
@@ -78,7 +86,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
 
       <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4 px-4">
         <div
-          className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center mb-3"
+          className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center mb-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
           style={{ backgroundColor: `${tile.accent_color}20` }}
         >
           <span

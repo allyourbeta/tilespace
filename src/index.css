@@ -77,3 +77,24 @@
 .prose blockquote {
   @apply border-l-4 border-gray-300 pl-4 italic text-gray-600 my-4;
 }
+
+/* Smooth page transition */
+.page-transition-enter {
+  opacity: 0;
+  transform: scale(0.98);
+}
+.page-transition-active {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+/* Overview card 3D hover */
+.overview-card {
+  transform: translateZ(0);
+  transform-style: preserve-3d;
+  transition: transform 200ms ease-out, box-shadow 200ms ease-out;
+}
+.overview-card:hover {
+  transform: translateZ(20px) scale(1.05);
+}

@@ -150,7 +150,7 @@ export function FloatingActions({
             ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
           `}
         >
-          <div data-testid="floating-actions-menu" className="bg-white rounded-xl shadow-xl border border-gray-100 overflow-visible min-w-[180px]">
+          <div data-testid="floating-actions-menu" className="bg-white rounded-xl shadow-2xl border border-gray-100 border-white/10 overflow-visible min-w-[180px]">
             {canAddTile && (
               <button
                 type="button"
@@ -210,7 +210,7 @@ export function FloatingActions({
           onClick={() => { if (isMobile) setIsOpen(!isOpen); }}
           className={`
             p-3.5 rounded-full shadow-lg hover:shadow-xl
-            transition-all duration-200 ease-out hover:scale-105
+            transition-all duration-200 ease-out hover:scale-105 hover:-translate-y-0.5
             ${isOpen
               ? 'bg-gray-900 text-white'
               : 'bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white'
