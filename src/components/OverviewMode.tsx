@@ -194,7 +194,7 @@ export function OverviewMode({
               onContextMenu={(e) => handleContextMenu(e, page.id)}
               className={`
                 overview-card
-                relative aspect-square rounded-2xl p-4 overflow-hidden
+                relative aspect-square rounded-2xl overflow-hidden
                 ${isCurrentPage ? 'ring-4 ring-white shadow-[0_0_15px_rgba(255,255,255,0.5)]' : ''}
                 ${isDragging ? 'opacity-50 scale-95 cursor-grabbing' : 'hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:brightness-110 cursor-grab'}
                 ${isDragOver ? 'scale-110 shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-4 ring-amber-400' : 'shadow-[0_8px_30px_rgba(0,0,0,0.3)]'}
@@ -216,13 +216,13 @@ export function OverviewMode({
                   }}
                   onBlur={handleSubmitRename}
                   autoFocus
-                  className="absolute top-2 left-2 right-8 bg-white/90 text-gray-900 text-lg font-semibold px-3 py-2 rounded border-none outline-none"
+                  className="absolute top-3 left-3 right-8 bg-white/90 text-gray-900 text-xl font-semibold px-3 py-2 rounded border-none outline-none"
                   maxLength={75}
                 />
               ) : (
-                <div className="absolute top-2 left-2 right-8">
+                <div className="absolute top-3 left-3 right-8">
                   <h3 
-                    className="text-white text-lg font-semibold truncate cursor-pointer"
+                    className="text-white text-xl font-semibold leading-tight break-words cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingPageId(page.id);
