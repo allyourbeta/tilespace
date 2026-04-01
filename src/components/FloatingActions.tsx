@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Plus, X, Link as LinkIcon, FileText, Grid3x3 } from 'lucide-react';
-import { Tile, Link } from '../types';
+import { Tile, Link } from '@/types';
 import { PaletteSelector } from './PaletteSelector';
 import { TileSubmenu } from './TileSubmenu';
-import { useIsMobile } from '../hooks';
+import { useIsMobile } from '@/hooks';
 
 interface FloatingActionsProps {
   onAddTile: () => void;

@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { Page } from '../types/page';
+import { Page } from '@/types';
 
 interface UsePageNavigationProps {
   pages: Page[];

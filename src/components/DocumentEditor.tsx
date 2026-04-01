@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { X, Edit3, Eye, Trash2 } from 'lucide-react';
-import { Link } from '../types';
+import { Link } from '@/types';
 
 interface DocumentEditorProps {
   document: Link | null;

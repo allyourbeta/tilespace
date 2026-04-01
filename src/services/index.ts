@@ -21,3 +21,12 @@ export {
   isDocumentEmpty,
   findLinkById,
 } from './LinkService';
+
+export {
+  sortPagesByPosition,
+  getNextPagePosition,
+  getDefaultPageTitle,
+  findPageById,
+  getPagePaletteId,
+  calculateOverviewColumns,
+} from './PageService';

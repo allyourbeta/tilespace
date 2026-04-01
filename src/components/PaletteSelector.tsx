@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Palette, Check } from 'lucide-react';
-import { PALETTES, Palette as PaletteType } from '../types';
+import { PALETTES, Palette as PaletteType } from '@/types';
 
 interface PaletteSelectorProps {
   currentPaletteId: string;

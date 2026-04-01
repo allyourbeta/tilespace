@@ -1,6 +1,6 @@
-import { Page } from '../types/page';
+import { Page } from '@/types';
 import { Grid3x3 } from 'lucide-react';
-import { useIsMobile } from '../hooks';
+import { useIsMobile } from '@/hooks';
 
 interface PageDotsProps {
   pages: Page[];

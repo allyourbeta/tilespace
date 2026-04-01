@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ExternalLink, Trash2, FileText } from 'lucide-react';
-import { Link } from '../../types';
+import { Link } from '@/types';
 
 interface LinkItemProps {
   link: Link;

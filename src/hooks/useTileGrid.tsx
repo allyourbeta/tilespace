@@ -1,0 +1,114 @@
+import React, { useMemo } from 'react';
+import { getGridConfig, getGridCapacity } from '@/types';
+import { APP_CONFIG } from '@/lib/constants';
+import { TileCard } from '@/components/TileCard';
+import { useTileStore } from '@/state/tileStore';
+import { useUIStore } from '@/state/uiStore';
+import { usePageStore } from '@/state/pageStore';
+import { getPalette } from '@/types';
+
+export function useTileGrid() {
+  const tiles = useTileStore(s => s.tiles);
+  const loadTiles = useTileStore(s => s.loadTiles);
+  const swapTilePositions = useTileStore(s => s.swapTilePositions);
+  const moveTileToPosition = useTileStore(s => s.moveTileToPosition);
+  const moveLink = useTileStore(s => s.moveLink);
+  const setSelectedTileId = useUIStore(s => s.setSelectedTileId);
+  const draggedTileId = useUIStore(s => s.draggedTileId);
+  const setDraggedTileId = useUIStore(s => s.setDraggedTileId);
+
+  const pages = usePageStore(s => s.pages);
+  const currentPageId = usePageStore(s => s.currentPageId);
+  const currentPage = currentPageId ? pages.find(p => p.id === currentPageId) : null;
+  const currentPaletteId = currentPage?.palette_id ?? 'ocean';
+  const currentPalette = getPalette(currentPaletteId);
+  const borderColor = currentPalette.border;
+
+  const gridCapacity = getGridCapacity(tiles.length);
+  const canAddMore = tiles.length < APP_CONFIG.MAX_TILES;
+  const { cols, rows } = getGridConfig(gridCapacity);
+
+  const gridStyle = useMemo(() => ({
+    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    gridTemplateRows: `repeat(${rows}, 1fr)`,
+  }), [cols, rows]);
+
+  const mobileGridStyle = useMemo(() => ({
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gridTemplateRows: 'auto',
+  }), []);
+
+  const handleDragStart = (e: React.DragEvent, tile: { id: string }) => {
+    setDraggedTileId(tile.id);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDropOnTile = async (e: React.DragEvent, targetTile: { id: string }) => {
+    e.preventDefault();
+    if (!draggedTileId || draggedTileId === targetTile.id) {
+      setDraggedTileId(null);
+      return;
+    }
+    setDraggedTileId(null);
+    await swapTilePositions(draggedTileId, targetTile.id);
+  };
+
+  const handleDropOnEmpty = async (e: React.DragEvent, targetPosition: number) => {
+    e.preventDefault();
+    if (!draggedTileId) return;
+    const id = draggedTileId;
+    setDraggedTileId(null);
+    await moveTileToPosition(id, targetPosition);
+  };
+
+  const handleLinkDrop = async (linkId: string, targetTileId: string) => {
+    await moveLink(linkId, targetTileId);
+  };
+
+  const tilesByPosition = useMemo(
+    () => new Map(tiles.map(t => [t.position, t])),
+    [tiles]
+  );
+
+  const gridCells = useMemo(() => {
+    const cells = [];
+    for (let position = 0; position < gridCapacity; position++) {
+      const tile = tilesByPosition.get(position);
+      if (tile) {
+        cells.push(
+          <TileCard
+            key={tile.id}
+            tile={tile}
+            borderColor={borderColor}
+            onClick={() => setSelectedTileId(tile.id)}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDropOnTile}
+            onLinkDrop={handleLinkDrop}
+            isDragging={draggedTileId === tile.id}
+          />
+        );
+      } else {
+        cells.push(
+          <div
+            key={`empty-${position}`}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDropOnEmpty(e, position)}
+            className="rounded-2xl bg-black/5 shadow-inner border border-white/10 flex items-center justify-center hover:bg-white/15 hover:shadow-none hover:border-white/25 transition-all"
+            style={{ transform: 'translateZ(-10px)' }}
+          >
+            <span className="text-white/50 text-2xl font-light">-</span>
+          </div>
+        );
+      }
+    }
+    return cells;
+  }, [tilesByPosition, gridCapacity, borderColor, draggedTileId, setSelectedTileId]);
+
+  return { gridCells, gridStyle, mobileGridStyle, canAddMore };
+}

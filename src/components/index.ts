@@ -4,6 +4,7 @@ export { DocumentEditor } from './DocumentEditor';
 export { FloatingActions } from './FloatingActions';
 export { TileSubmenu } from './TileSubmenu';
 export { OverviewMode } from './OverviewMode';
+export { OverviewPageCard } from './OverviewPageCard';
 export { PageDots } from './PageDots';
 export { PageTitleDisplay } from './PageTitleDisplay';
 export { PaletteSelector } from './PaletteSelector';

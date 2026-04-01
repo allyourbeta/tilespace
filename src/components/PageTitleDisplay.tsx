@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Page } from '../types/page';
-import { PAGE_TITLE_OVERLAY } from '../lib/constants';
-import { useIsMobile } from '../hooks';
+import { Page } from '@/types';
+import { PAGE_TITLE_OVERLAY } from '@/lib/constants';
+import { useIsMobile } from '@/hooks';
 
 interface PageTitleDisplayProps {
   currentPage: Page | null;

@@ -1,5 +1,5 @@
-import { Tile, Link } from '../types';
-import { isValidUrl } from '../utils/url';
+import { Tile, Link } from '@/types';
+import { isValidUrl } from '@/utils/url';
 
 interface TileSubmenuProps {
   tiles: Tile[];

@@ -5,24 +5,29 @@
 ### Directory Structure
 ```
 src/
-├── api/          # Supabase API calls (unused - consider removing)
+├── api/          # Supabase API calls (pages, tiles, links, preferences)
 ├── auth/         # Authentication context and guards
-├── components/   # React components
+├── components/   # React components (UI only)
 ├── hooks/        # Custom React hooks
-├── lib/          # Core utilities (db.ts, constants.ts, supabase.ts)
+├── lib/          # Constants and configuration
 ├── pages/        # Page-level components
+├── services/     # Pure business logic (no React, no DB)
+├── state/        # Zustand stores (pageStore, tileStore, uiStore)
 ├── types/        # TypeScript type definitions
 └── utils/        # Pure utility functions
 ```
 
 ### State Management
-- Uses React useState in App.tsx (not Zustand)
-- Tiles and pages loaded from Supabase
+- **Zustand** stores in `src/state/`
+  - `pageStore.ts` - Pages, currentPageId, page CRUD
+  - `tileStore.ts` - Tiles for current page, tile/link CRUD
+  - `uiStore.ts` - UI state (selectedTileId, modals, transitions)
 - Optimistic updates with error rollback
 
 ### Key Files
-- `App.tsx` - Main app component, all state lives here
-- `lib/db.ts` - All Supabase database operations
+- `App.tsx` - Thin root component, wires stores to UI (~260 lines)
+- `api/` - All Supabase database operations (pages.ts, tiles.ts, links.ts)
+- `state/` - Zustand stores with all business logic
 - `lib/constants.ts` - Magic numbers and configuration
 - `types/` - All TypeScript interfaces
 
@@ -34,6 +39,7 @@ src/
 ### Testing
 ```bash
 npm run build  # Type check + build
+npm run test   # Run vitest
 npm run dev    # Local development
 ```
 
@@ -43,46 +49,92 @@ git push       # Triggers Vercel deploy
 vercel --prod  # Manual production deploy
 ```
 
+## Layered Architecture
+
+```
+Components (UI only, no logic)
+    ↓
+Hooks (useWelcomeBack, useTileGrid, useTileHandlers, etc.)
+    ↓
+State (Zustand stores - pageStore, tileStore, uiStore)
+    ↓
+Services (pure functions, no React, no DB)
+    ↓
+API Layer (all Supabase calls - api/pages.ts, api/tiles.ts, api/links.ts)
+    ↓
+Database (Supabase PostgreSQL)
+```
+
+### Rules
+- **Components**: Render only. No business logic. No direct DB calls.
+- **Hooks**: Bridge between stores and components. Extract complex logic.
+- **State**: Zustand stores. Call API layer. Manage optimistic updates.
+- **Services**: Pure functions. No React imports. No database imports. Testable.
+- **API Layer**: ONLY place that imports Supabase client.
+
 ## Component Architecture
 
 ### Main Components
 
-#### App.tsx (640 lines)
-The root component that manages all application state:
-- Page and tile state management
-- Authentication handling
-- Navigation and routing logic
-- Uses custom hooks for page navigation and keyboard handling
+#### App.tsx (~260 lines)
+Thin root component that wires Zustand stores to UI:
+- Reads state from pageStore, tileStore, uiStore
+- Delegates to custom hooks for complex logic
+- No direct API calls or business logic
 
-#### TilePanel/ (403 lines total)
-Modular tile editing panel split into separate files:
-- `TilePanel/TilePanel.tsx` - Main panel component
-- `TilePanel/PanelLinkItem.tsx` - Link editing component
-- `TilePanel/PanelTempLinkItem.tsx` - Temporary link creation
-- `TilePanel/index.tsx` - Barrel export
+#### TilePanel/ (~400 lines total)
+Modular tile editing panel:
+- `TilePanel.tsx` - Main panel (~188 lines)
+- `PanelLinkItem.tsx` - Link editing
+- `PanelTempLinkItem.tsx` - Temporary link creation
+- `PanelEmojiPicker.tsx` - Emoji selection
+- `PanelColorPicker.tsx` - Color selection
+- `index.tsx` - Barrel export
 
 #### Other Key Components
-- `PageTitleDisplay.tsx` - Page title overlay with hover/transition logic
-- `PageDots.tsx` - Navigation dots with overview mode disc
-- `OverviewMode.tsx` - Grid view of all pages
-- `TileCard.tsx` - Individual tile display component
+- `OverviewMode.tsx` - Grid view of all pages (~133 lines)
+- `OverviewPageCard.tsx` - Individual page card in overview
+- `FloatingActions.tsx` - Floating action buttons
+- `PageTitleDisplay.tsx` - Page title overlay
+- `PageDots.tsx` - Navigation dots
+- `TileCard.tsx` - Individual tile display
+- `PasteLinkModal.tsx` - Link paste modal
+- `DocumentEditor.tsx` - Markdown document editor
 
 ### Custom Hooks
 
 #### src/hooks/
 - `usePageNavigation.ts` - Page navigation logic (next/prev/go to page)
-- `useKeyboardNavigation.ts` - Arrow key navigation handling
-- `index.ts` - Barrel exports for hooks
+- `useKeyboardNavigation.ts` - Arrow key navigation
+- `useIsMobile.ts` - Mobile breakpoint detection
+- `useWelcomeBack.ts` - Welcome-back idle detection and overview trigger
+- `useTileGrid.tsx` - Grid rendering, drag-and-drop logic
+- `useTileHandlers.ts` - Paste link, add note, save document handlers
 
-### Database Layer
+### State Layer
 
-#### src/lib/db.ts
-All database operations are centralized here:
-- Page CRUD operations
-- Tile CRUD operations  
-- Link CRUD operations
-- Position swapping and reordering
-- Uses constants from `constants.ts`
+#### src/state/
+- `pageStore.ts` - Page CRUD, navigation, palette management (~116 lines)
+- `tileStore.ts` - Tile/link CRUD, palette changes, optimistic updates (~275 lines)
+- `uiStore.ts` - Selected tile, modals, transitions (~50 lines)
+
+### API Layer
+
+#### src/api/
+All Supabase operations:
+- `client.ts` - Supabase client and getCurrentUserId
+- `pages.ts` - Page CRUD, swap positions, reset
+- `tiles.ts` - Tile CRUD, recolor, swap/move positions
+- `links.ts` - Link CRUD, move between tiles
+- `preferences.ts` - User preferences
+
+### Services Layer
+
+#### src/services/
+Pure business logic (no React, no DB):
+- `TileService.ts` - Tile position, emoji, inbox utilities
+- `LinkService.ts` - URL validation, duplicate checking, link utilities
+- `PageService.ts` - Page sorting, position, column calculations
 
 ### Utilities
 
@@ -90,100 +142,58 @@ All database operations are centralized here:
 Configuration and magic numbers:
 - `GRID_CONFIG` - Grid breakpoints, max tiles, colors per palette
 - `PAGE_TITLE_OVERLAY` - Hover zone dimensions and fade timing
-- `OVERVIEW_MODE` - Grid layout configuration
-- Color utility functions for contrast
+- `APP_CONFIG`, `INBOX_TILE`, `TIMING`, `WELCOME_BACK`
 
-#### src/utils/url.ts
-URL handling utilities:
-- `normalizeUrl()` - Adds https:// and validates URLs
-- `isValidUrl()` - Validates HTTP/HTTPS URLs
-- `extractDomain()` - Gets clean domain from URL
+#### src/utils/
+- `url.ts` - normalizeUrl, isValidUrl, extractDomain
+- `color.ts` - darkenColor
+- `grid.ts` - Grid capacity calculations
 
 ### TypeScript Types
 
 #### src/types/
-- Core interfaces for Tile, Link, Page
-- Palette and color definitions
-- Grid configuration types
+- `tile.ts` - Tile, TileInsert, TileUpdate, TileRow
+- `link.ts` - Link, LinkInsert, LinkUpdate, LinkRow, LinkType
+- `page.ts` - Page
+- `palette.ts` - Palette, PALETTES, getPalette, getColorFromPalette
+- `emoji.ts` - EMOJI_CATEGORIES, DEFAULT_EMOJIS
+- `user.ts` - User, UserPreferences
 
 ## Code Organization Principles
 
 ### File Size Limits
-- No file over 300 lines (current status: ✅)
-- TilePanel split from 657 → 403 lines
-- App.tsx reduced from 674 → 640 lines
+- No file over 300 lines
+- Target 150-200 lines per file
+- Largest files: tileStore.ts (275), App.tsx (261)
 
-### Separation of Concerns
-- **Components**: UI rendering only
-- **Hooks**: Reusable logic extraction
-- **Database**: Centralized in `lib/db.ts`
-- **Utils**: Pure functions in `utils/`
-- **Constants**: Centralized configuration
+### Path Aliases
+- `@/` maps to `src/` (configured in vite.config.ts and tsconfig.app.json)
+- All imports use `@/` prefix for consistency
 
 ### Import Organization
-- Barrel exports in `components/index.ts` and `hooks/index.ts`
-- Consistent relative path imports
-- Clear separation between internal and external dependencies
-
-## Recent Refactoring (Completed)
-
-### Phase 1: Dead Code Removal
-- ✅ Removed unused Zustand store (`src/state/`)
-- ✅ Removed unused StyleMockups component
-- ✅ Removed old PageTitle component (replaced by PageTitleDisplay)
-- ✅ Removed duplicate LinkItem and TempLinkItem components
-- ✅ Removed unused AppPage.tsx
-
-### Phase 2: Constants Extraction
-- ✅ Moved magic numbers to `src/lib/constants.ts`
-- ✅ Updated PageTitleDisplay to use constants
-- ✅ Updated db.ts to use grid configuration constants
-
-### Phase 3: Component Splitting
-- ✅ Split TilePanel.tsx into modular structure
-- ✅ Created dedicated TilePanel/ directory
-- ✅ Extracted PanelLinkItem and PanelTempLinkItem
-
-### Phase 4: Hook Extraction  
-- ✅ Extracted usePageNavigation hook from App.tsx
-- ✅ Extracted useKeyboardNavigation hook
-- ✅ Reduced App.tsx complexity
-
-### Phase 5: Utility Consolidation
-- ✅ Consolidated URL utilities to `src/utils/url.ts`
-- ✅ Removed duplicate functions from db.ts
-
-### Phase 6: Barrel Exports
-- ✅ Updated `src/components/index.ts` with all components
-- ✅ Added proper exports for new hooks
+- Barrel exports in `components/index.ts`, `hooks/index.ts`, `state/index.ts`, `services/index.ts`
+- `@/` path aliases throughout
 
 ## Development Workflow
 
 ### Making Changes
 1. Always run `npm run build` after changes
-2. Test core functionality: login, navigation, tile/link CRUD
-3. Commit with descriptive messages following established patterns
+2. Run `npm run test` to verify tests pass
+3. Check no file exceeds 300 lines
 
 ### Adding New Features
-1. **Database access** → Add to `src/lib/db.ts`
-2. **Reusable logic** → Create custom hook in `src/hooks/`
-3. **UI components** → Add to `src/components/` with barrel export
-4. **Configuration** → Add to `src/lib/constants.ts`
+1. **Database access** → Add to `src/api/`
+2. **Business logic** → Add to `src/services/`
+3. **State management** → Add to `src/state/`
+4. **Reusable logic** → Create custom hook in `src/hooks/`
+5. **UI components** → Add to `src/components/` with barrel export
+6. **Configuration** → Add to `src/lib/constants.ts`
 
-### Code Quality Standards
-- TypeScript strict mode enabled
-- All magic numbers moved to constants
-- Functions under 50 lines preferred
-- Clear, descriptive naming
-- Proper error handling with user-friendly messages
-
-## Performance Considerations
-
-- React hooks for state management (fast, simple)
-- Optimistic updates for better UX
-- Debounced search and input handling
-- Lazy loading of components where appropriate
-- Efficient re-renders through proper dependency arrays
+### Warning Signs (Fix Immediately)
+- File over 250 lines → Split now
+- Component importing database directly → Move to API layer
+- Logic in component → Extract to service or hook
+- Direct Supabase imports outside `api/` → Move to API layer
 
 ## Security
 
@@ -191,5 +201,8 @@ URL handling utilities:
 - User isolation at database level
 - No secrets in frontend code
 - Proper authentication guards on routes
-
-This architecture provides a clean, maintainable foundation for TileSpace development. The modular structure makes it easy to extend functionality while keeping code organized and testable.
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.

@@ -8,4 +8,4 @@ export {
   canAddTile,
   type GridCapacity,
 } from './grid';
-export { isLightColor, getButtonStyles, type ButtonStyles } from './color';
+export { darkenColor, isLightColor, getButtonStyles, type ButtonStyles } from './color';

@@ -1,36 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Tile } from '../types';
-import { fetchTiles, createLink } from '../lib/db';
-import { Check, X, Loader2, Link as LinkIcon, ClipboardPaste, AlertCircle } from 'lucide-react';
+import { useState } from 'react';
+import { Tile, Link } from '@/types';
+import { Check, X, Loader2, Link as LinkIcon, ClipboardPaste } from 'lucide-react';
 
 interface PasteLinkModalProps {
+  tiles: Tile[];
   onClose: () => void;
-  onLinkAdded: () => void;
+  onCreateLink: (tileId: string, data: { title: string; url: string; summary: string }) => Promise<Link>;
 }
 
-export function PasteLinkModal({ onClose, onLinkAdded }: PasteLinkModalProps) {
-  const [tiles, setTiles] = useState<Tile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalProps) {
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [step, setStep] = useState<'input' | 'select'>('input');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [savedTile, setSavedTile] = useState('');
-
-  useEffect(() => {
-    fetchTiles()
-      .then(data => {
-        setTiles(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to load tiles:', err);
-        setLoadError('Failed to load tiles. Please try again.');
-        setLoading(false);
-      });
-  }, []);
 
   const handlePaste = async () => {
     try {
@@ -52,12 +36,10 @@ export function PasteLinkModal({ onClose, onLinkAdded }: PasteLinkModalProps) {
   const handleSelectTile = async (tile: Tile) => {
     setSaving(true);
     try {
-      const position = tile.links?.length || 0;
-      await createLink(tile.id, position, title || url, url, '');
+      await onCreateLink(tile.id, { title: title || url, url, summary: '' });
       setSaved(true);
       setSavedTile(tile.title);
       setTimeout(() => {
-        onLinkAdded();
         onClose();
       }, 1000);
     } catch (err) {
@@ -159,35 +141,7 @@ export function PasteLinkModal({ onClose, onLinkAdded }: PasteLinkModalProps) {
               </div>
             </div>
 
-            {loading ? (
-              <div className="py-8 flex justify-center">
-                <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
-              </div>
-            ) : loadError ? (
-              <div className="py-8 flex flex-col items-center gap-3">
-                <AlertCircle className="w-8 h-8 text-red-400" />
-                <p className="text-sm text-gray-600 text-center">{loadError}</p>
-                <button
-                  onClick={() => {
-                    setLoadError(null);
-                    setLoading(true);
-                    fetchTiles()
-                      .then(data => {
-                        setTiles(data);
-                        setLoading(false);
-                      })
-                      .catch(err => {
-                        console.error('Failed to load tiles:', err);
-                        setLoadError('Failed to load tiles. Please try again.');
-                        setLoading(false);
-                      });
-                  }}
-                  className="px-4 py-2 bg-gray-900 text-white text-sm rounded-lg hover:bg-gray-800"
-                >
-                  Retry
-                </button>
-              </div>
-            ) : tiles.length === 0 ? (
+            {tiles.length === 0 ? (
               <div className="py-8 flex flex-col items-center gap-2">
                 <p className="text-sm text-gray-500">No tiles yet.</p>
                 <p className="text-xs text-gray-400">Create a tile first to save links.</p>

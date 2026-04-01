@@ -1,9 +1,19 @@
 export { supabase, getCurrentUserId } from './client';
 
 export {
+  fetchPages,
+  createPage,
+  updatePage,
+  updatePagePalette,
+  swapPagePositions,
+  resetPage,
+} from './pages';
+
+export {
   fetchTiles,
   createTile,
   updateTile,
+  updateTileColor,
   deleteTile,
   swapTilePositions,
   moveTileToPosition,
@@ -12,10 +22,10 @@ export {
 
 export {
   createLink,
+  createDocument,
   updateLink,
   deleteLink,
   moveLink,
-  getLinkCount,
 } from './links';
 
 export {

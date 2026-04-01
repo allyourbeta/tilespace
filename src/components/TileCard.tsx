@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Tile } from '../types';
+import { Tile } from '@/types';
 import { GripVertical } from 'lucide-react';
 
 interface TileCardProps {

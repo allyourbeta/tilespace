@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { execSync } from 'child_process';
+import path from 'path';
 
 const buildHash = (() => {
   // Vercel auto-prefixes env vars per framework; check both
@@ -32,6 +33,11 @@ export default defineConfig({
   define: {
     __BUILD_HASH__: JSON.stringify(buildHash),
     __BUILD_TIME__: JSON.stringify(buildTime),
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
