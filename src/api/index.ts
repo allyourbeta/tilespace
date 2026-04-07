@@ -17,6 +17,7 @@ export {
   deleteTile,
   swapTilePositions,
   moveTileToPosition,
+  insertTileAtPosition,
   recolorAllTiles,
 } from './tiles';
 

@@ -164,3 +164,16 @@ export async function moveTileToPosition(tileId: string, targetPosition: number)
 
   if (error) throw error;
 }
+
+export async function insertTileAtPosition(tileId: string, targetPosition: number, pageId: string): Promise<Tile[]> {
+  const { error } = await supabase
+    .rpc('insert_tile_at_position', {
+      p_tile_id: tileId,
+      p_target_position: targetPosition
+    });
+
+  if (error) throw error;
+
+  // Re-fetch to get consistent state after the shift
+  return fetchTiles(pageId);
+}

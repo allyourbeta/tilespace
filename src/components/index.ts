@@ -1,4 +1,5 @@
 export { TileCard } from './TileCard';
+export { EmptyCell } from './EmptyCell';
 export { TilePanel } from './TilePanel';
 export { DocumentEditor } from './DocumentEditor';
 export { FloatingActions } from './FloatingActions';

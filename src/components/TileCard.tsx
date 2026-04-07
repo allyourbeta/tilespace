@@ -17,6 +17,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
   const linkCount = tile.links?.length || 0;
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
   const [isTileDragOver, setIsTileDragOver] = useState(false);
+  const [isShiftHeld, setIsShiftHeld] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -29,6 +30,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
       onDragOver(e);
       if (!isDragging) {
         setIsTileDragOver(true);
+        setIsShiftHeld(e.shiftKey);
       }
     }
   };
@@ -36,6 +38,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
   const handleDragLeave = () => {
     setIsLinkDragOver(false);
     setIsTileDragOver(false);
+    setIsShiftHeld(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -46,9 +49,17 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
       onLinkDrop(linkId, tile.id);
     } else {
       setIsTileDragOver(false);
+      setIsShiftHeld(false);
       onDrop(e, tile);
     }
   };
+
+  // Insert mode: green tint. Swap mode (shift): amber tint.
+  const tileDragOverClass = isTileDragOver
+    ? isShiftHeld
+      ? 'scale-105 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-4 ring-amber-400 ring-offset-2 ring-offset-white'
+      : 'scale-105 shadow-[0_0_20px_rgba(74,222,128,0.5)] ring-4 ring-green-400 ring-offset-2 ring-offset-white'
+    : '';
 
   return (
     <div
@@ -71,7 +82,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
         hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
         ${isDragging ? 'opacity-50 scale-95' : 'opacity-100'}
         ${isLinkDragOver ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
-        ${isTileDragOver ? 'scale-105 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-4 ring-amber-400 ring-offset-2 ring-offset-white' : ''}
+        ${tileDragOverClass}
       `}
       style={{
         borderColor,
@@ -83,6 +94,15 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
       <div className="absolute top-3 left-4 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing">
         <GripVertical className="w-5 h-5 text-gray-400" />
       </div>
+
+      {/* Drag mode label */}
+      {isTileDragOver && (
+        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white shadow-lg z-10 ${
+          isShiftHeld ? 'bg-amber-500' : 'bg-green-500'
+        }`}>
+          {isShiftHeld ? 'SWAP' : 'INSERT'}
+        </div>
+      )}
 
       <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4 px-4">
         <div

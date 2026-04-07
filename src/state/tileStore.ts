@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { Tile, Link } from '@/types';
 import { getColorFromPalette } from '@/types';
 import * as api from '@/api';
+import * as TileService from '@/services/TileService';
 import { TIMING } from '@/lib/constants';
 import { usePageStore } from './pageStore';
 import { useUIStore } from './uiStore';
@@ -17,6 +18,7 @@ interface TileState {
   deleteTile: (id: string) => Promise<void>;
   swapTilePositions: (draggedId: string, targetId: string) => Promise<void>;
   moveTileToPosition: (tileId: string, position: number) => Promise<void>;
+  insertTileAtPosition: (tileId: string, targetPosition: number) => Promise<void>;
   createLink: (tileId: string, data: { title: string; url: string; summary: string }) => Promise<Link>;
   createDocument: (tileId: string, position: number, title: string, content: string, summary: string) => Promise<Link>;
   updateLink: (id: string, updates: Partial<Link>) => Promise<void>;
@@ -29,13 +31,9 @@ interface TileState {
 let paletteDebounceTimer: number | null = null;
 
 function getPageContext() {
-  const pageState = usePageStore.getState();
-  const currentPageId = pageState.currentPageId;
-  const currentPage = currentPageId
-    ? pageState.pages.find(p => p.id === currentPageId)
-    : null;
-  const paletteId = currentPage?.palette_id ?? 'ocean';
-  return { currentPageId, paletteId };
+  const { currentPageId, pages } = usePageStore.getState();
+  const currentPage = currentPageId ? pages.find(p => p.id === currentPageId) : null;
+  return { currentPageId, paletteId: currentPage?.palette_id ?? 'ocean' };
 }
 
 export const useTileStore = create<TileState>((set, get) => ({
@@ -45,7 +43,6 @@ export const useTileStore = create<TileState>((set, get) => ({
   loadTiles: async () => {
     const { currentPageId } = getPageContext();
     if (!currentPageId) return;
-
     try {
       const tilesData = await api.fetchTiles(currentPageId);
       set({ tiles: tilesData, loading: false });
@@ -58,7 +55,6 @@ export const useTileStore = create<TileState>((set, get) => ({
   createTile: async () => {
     const { currentPageId, paletteId } = getPageContext();
     if (!currentPageId) return;
-
     try {
       const newTile = await api.createTile(currentPageId, paletteId);
       set(state => ({ tiles: [...state.tiles, newTile] }));
@@ -97,7 +93,6 @@ export const useTileStore = create<TileState>((set, get) => ({
   deleteTile: async (id) => {
     const { currentPageId } = getPageContext();
     if (!currentPageId) return;
-
     try {
       const updatedTiles = await api.deleteTile(id, currentPageId);
       set({ tiles: updatedTiles });
@@ -144,10 +139,34 @@ export const useTileStore = create<TileState>((set, get) => ({
     }
   },
 
+  insertTileAtPosition: async (tileId, targetPosition) => {
+    const { currentPageId } = getPageContext();
+    if (!currentPageId) return;
+
+    const { tiles } = get();
+    const positionUpdates = TileService.computeInsertPositions(tiles, tileId, targetPosition);
+    if (positionUpdates.size === 0) return;
+
+    // Optimistic update
+    set(state => ({
+      tiles: state.tiles.map(t => {
+        const newPos = positionUpdates.get(t.id);
+        return newPos !== undefined ? { ...t, position: newPos } : t;
+      }).sort((a, b) => a.position - b.position),
+    }));
+
+    try {
+      const freshTiles = await api.insertTileAtPosition(tileId, targetPosition, currentPageId);
+      set({ tiles: freshTiles });
+    } catch (err) {
+      console.error('Failed to insert tile:', err);
+      await get().loadTiles();
+    }
+  },
+
   createLink: async (tileId, data) => {
     const { tiles } = get();
     const tile = tiles.find(t => t.id === tileId);
-
     const normalizedUrl = data.url.trim().toLowerCase();
     const existingLink = tile?.links?.find(l =>
       l.url && l.url.toLowerCase() === normalizedUrl
@@ -159,7 +178,6 @@ export const useTileStore = create<TileState>((set, get) => ({
     try {
       const position = tile?.links?.length || 0;
       const newLink = await api.createLink(tileId, position, data.title, data.url, data.summary);
-
       set(state => ({
         tiles: state.tiles.map(t =>
           t.id === tileId
@@ -178,7 +196,6 @@ export const useTileStore = create<TileState>((set, get) => ({
   createDocument: async (tileId, position, title, content, summary) => {
     try {
       const newDoc = await api.createDocument(tileId, position, title, content, summary);
-
       set(state => ({
         tiles: state.tiles.map(t =>
           t.id === tileId
@@ -203,7 +220,6 @@ export const useTileStore = create<TileState>((set, get) => ({
           links: t.links?.map(l => l.id === id ? { ...l, ...updates } : l),
         })),
       }));
-
       const editingDoc = useUIStore.getState().editingDocument;
       if (editingDoc?.id === id) {
         useUIStore.getState().setEditingDocument({ ...editingDoc, ...updates } as Link);
@@ -222,7 +238,6 @@ export const useTileStore = create<TileState>((set, get) => ({
           links: t.links?.filter(l => l.id !== id),
         })),
       }));
-
       const editingDoc = useUIStore.getState().editingDocument;
       if (editingDoc?.id === id) {
         useUIStore.getState().setEditingDocument(null);
