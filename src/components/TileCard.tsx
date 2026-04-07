@@ -49,17 +49,9 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
       onLinkDrop(linkId, tile.id);
     } else {
       setIsTileDragOver(false);
-      setIsShiftHeld(false);
       onDrop(e, tile);
     }
   };
-
-  // Insert mode: green tint. Swap mode (shift): amber tint.
-  const tileDragOverClass = isTileDragOver
-    ? isShiftHeld
-      ? 'scale-105 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-4 ring-amber-400 ring-offset-2 ring-offset-white'
-      : 'scale-105 shadow-[0_0_20px_rgba(74,222,128,0.5)] ring-4 ring-green-400 ring-offset-2 ring-offset-white'
-    : '';
 
   return (
     <div
@@ -82,7 +74,11 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
         hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
         ${isDragging ? 'opacity-50 scale-95' : 'opacity-100'}
         ${isLinkDragOver ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
-        ${tileDragOverClass}
+        ${isTileDragOver
+          ? isShiftHeld
+            ? 'scale-105 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-4 ring-amber-400 ring-offset-2 ring-offset-white'
+            : 'scale-105 shadow-[0_0_20px_rgba(74,222,128,0.5)] ring-4 ring-green-400 ring-offset-2 ring-offset-white'
+          : ''}
       `}
       style={{
         borderColor,
@@ -95,7 +91,6 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
         <GripVertical className="w-5 h-5 text-gray-400" />
       </div>
 
-      {/* Drag mode label */}
       {isTileDragOver && (
         <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white shadow-lg z-10 ${
           isShiftHeld ? 'bg-amber-500' : 'bg-green-500'

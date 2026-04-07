@@ -8,9 +8,9 @@
     - Tile at 4 goes to position 1
     - Tiles at 1,2,3 shift to 2,3,4
 
-  Example: tiles at positions [0,1,2,3,4], move tile at 1 to position 3:
-    - Tile at 1 goes to position 3
-    - Tiles at 2,3 shift to 1,2
+  Uses a temporary position (-999) to avoid unique constraint violations.
+  The constraint on (user_id, page_id, position) may not be deferred,
+  so we must avoid any moment where two tiles share a position.
 */
 
 CREATE OR REPLACE FUNCTION insert_tile_at_position(
@@ -24,9 +24,12 @@ AS $$
 DECLARE
   old_position integer;
   tile_page_id uuid;
+  tile_user_id uuid;
+  r RECORD;
 BEGIN
-  -- Get the tile's current position and page
-  SELECT position, page_id INTO old_position, tile_page_id
+  -- Get the tile's current position, page, and user
+  SELECT position, page_id, user_id
+  INTO old_position, tile_page_id, tile_user_id
   FROM tiles WHERE id = p_tile_id;
 
   IF old_position IS NULL THEN
@@ -34,31 +37,48 @@ BEGIN
   END IF;
 
   IF old_position = p_target_position THEN
-    RETURN; -- nothing to do
+    RETURN;
   END IF;
 
-  -- Temporarily move dragged tile out of the way
-  UPDATE tiles SET position = -999 WHERE id = p_tile_id;
+  -- Step 1: Move dragged tile out of the way
+  UPDATE tiles SET position = -999, updated_at = now()
+  WHERE id = p_tile_id;
 
+  -- Step 2: Shift tiles one at a time in the right order to avoid collisions
   IF old_position < p_target_position THEN
     -- Moving forward: shift tiles in (old, target] back by 1
-    UPDATE tiles
-    SET position = position - 1, updated_at = now()
-    WHERE page_id = tile_page_id
-      AND position > old_position
-      AND position <= p_target_position;
+    -- Process from lowest position up so each -1 shift moves into the
+    -- now-vacant slot
+    FOR r IN
+      SELECT id FROM tiles
+      WHERE page_id = tile_page_id
+        AND user_id = tile_user_id
+        AND position > old_position
+        AND position <= p_target_position
+      ORDER BY position ASC
+    LOOP
+      UPDATE tiles SET position = position - 1, updated_at = now()
+      WHERE id = r.id;
+    END LOOP;
   ELSE
     -- Moving backward: shift tiles in [target, old) forward by 1
-    UPDATE tiles
-    SET position = position + 1, updated_at = now()
-    WHERE page_id = tile_page_id
-      AND position >= p_target_position
-      AND position < old_position;
+    -- Process from highest position down so each +1 shift moves into the
+    -- now-vacant slot
+    FOR r IN
+      SELECT id FROM tiles
+      WHERE page_id = tile_page_id
+        AND user_id = tile_user_id
+        AND position >= p_target_position
+        AND position < old_position
+      ORDER BY position DESC
+    LOOP
+      UPDATE tiles SET position = position + 1, updated_at = now()
+      WHERE id = r.id;
+    END LOOP;
   END IF;
 
-  -- Place the tile at its target position
-  UPDATE tiles
-  SET position = p_target_position, updated_at = now()
+  -- Step 3: Place the tile at its target position
+  UPDATE tiles SET position = p_target_position, updated_at = now()
   WHERE id = p_tile_id;
 END;
 $$;

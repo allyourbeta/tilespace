@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { getGridConfig, getGridCapacity } from '@/types';
 import { APP_CONFIG } from '@/lib/constants';
 import { TileCard } from '@/components/TileCard';
@@ -29,11 +29,6 @@ export function useTileGrid() {
   const canAddMore = tiles.length < APP_CONFIG.MAX_TILES;
   const { cols, rows } = getGridConfig(gridCapacity);
 
-  // Use a ref so drag handlers always read the latest draggedTileId
-  // without needing to be in any dependency array
-  const draggedTileIdRef = useRef(draggedTileId);
-  useEffect(() => { draggedTileIdRef.current = draggedTileId; }, [draggedTileId]);
-
   const gridStyle = useMemo(() => ({
     gridTemplateColumns: `repeat(${cols}, 1fr)`,
     gridTemplateRows: `repeat(${rows}, 1fr)`,
@@ -44,85 +39,87 @@ export function useTileGrid() {
     gridTemplateRows: 'auto',
   }), []);
 
-  const handleDragStart = useCallback((e: React.DragEvent, tile: { id: string }) => {
+  const handleDragStart = (e: React.DragEvent, tile: { id: string }) => {
     setDraggedTileId(tile.id);
     e.dataTransfer.effectAllowed = 'move';
-  }, [setDraggedTileId]);
+  };
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-  }, []);
+  };
 
-  // Drop on an occupied tile: shift+drop = swap, normal drop = insert
-  const handleDropOnTile = useCallback(async (e: React.DragEvent, targetTile: { id: string }) => {
+  const handleDropOnTile = async (e: React.DragEvent, targetTile: { id: string }) => {
     e.preventDefault();
-    const currentDraggedId = draggedTileIdRef.current;
-    if (!currentDraggedId || currentDraggedId === targetTile.id) {
+    if (!draggedTileId || draggedTileId === targetTile.id) {
       setDraggedTileId(null);
       return;
     }
+    const srcId = draggedTileId;
     setDraggedTileId(null);
 
     if (e.shiftKey) {
-      await swapTilePositions(currentDraggedId, targetTile.id);
+      // Shift+drop = swap (original behavior)
+      await swapTilePositions(srcId, targetTile.id);
     } else {
-      // Insert: find target tile's position and insert there
+      // Default drop = insert (shift others over)
       const target = tiles.find(t => t.id === targetTile.id);
       if (target) {
-        await insertTileAtPosition(currentDraggedId, target.position);
+        await insertTileAtPosition(srcId, target.position);
       }
     }
-  }, [setDraggedTileId, swapTilePositions, insertTileAtPosition, tiles]);
+  };
 
-  // Drop on an empty cell: always move directly (no shift needed)
-  const handleDropOnEmpty = useCallback(async (e: React.DragEvent, targetPosition: number) => {
+  const handleDropOnEmpty = async (e: React.DragEvent, targetPosition: number) => {
     e.preventDefault();
-    const currentDraggedId = draggedTileIdRef.current;
-    if (!currentDraggedId) return;
+    if (!draggedTileId) return;
+    const id = draggedTileId;
     setDraggedTileId(null);
-    await moveTileToPosition(currentDraggedId, targetPosition);
-  }, [setDraggedTileId, moveTileToPosition]);
+    await moveTileToPosition(id, targetPosition);
+  };
 
-  const handleLinkDrop = useCallback(async (linkId: string, targetTileId: string) => {
+  const handleLinkDrop = async (linkId: string, targetTileId: string) => {
     await moveLink(linkId, targetTileId);
-  }, [moveLink]);
+  };
 
   const tilesByPosition = useMemo(
     () => new Map(tiles.map(t => [t.position, t])),
     [tiles]
   );
 
-  // Build grid cells directly (no useMemo around JSX with embedded handlers)
-  const gridCells = [];
-  for (let position = 0; position < gridCapacity; position++) {
-    const tile = tilesByPosition.get(position);
-    if (tile) {
-      gridCells.push(
-        <TileCard
-          key={tile.id}
-          tile={tile}
-          borderColor={borderColor}
-          onClick={() => setSelectedTileId(tile.id)}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleDropOnTile}
-          onLinkDrop={handleLinkDrop}
-          isDragging={draggedTileId === tile.id}
-        />
-      );
-    } else {
-      gridCells.push(
-        <EmptyCell
-          key={`empty-${position}`}
-          position={position}
-          onDragOver={handleDragOver}
-          onDrop={handleDropOnEmpty}
-          isDragActive={draggedTileId !== null}
-        />
-      );
+  const gridCells = useMemo(() => {
+    const cells = [];
+    for (let position = 0; position < gridCapacity; position++) {
+      const tile = tilesByPosition.get(position);
+      if (tile) {
+        cells.push(
+          <TileCard
+            key={tile.id}
+            tile={tile}
+            borderColor={borderColor}
+            onClick={() => setSelectedTileId(tile.id)}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onDrop={handleDropOnTile}
+            onLinkDrop={handleLinkDrop}
+            isDragging={draggedTileId === tile.id}
+          />
+        );
+      } else {
+        cells.push(
+          <EmptyCell
+            key={`empty-${position}`}
+            position={position}
+            onDragOver={handleDragOver}
+            onDrop={handleDropOnEmpty}
+            isDragActive={draggedTileId !== null}
+          />
+        );
+      }
     }
-  }
+    return cells;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tilesByPosition, gridCapacity, borderColor, draggedTileId, tiles]);
 
   return { gridCells, gridStyle, mobileGridStyle, canAddMore };
 }

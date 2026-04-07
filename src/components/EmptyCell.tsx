@@ -20,6 +20,8 @@ export function EmptyCell({ position, onDragOver, onDrop, isDragActive }: EmptyC
   };
 
   const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     setIsDraggedOver(false);
     onDrop(e, position);
   };
