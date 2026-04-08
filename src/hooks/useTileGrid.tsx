@@ -51,31 +51,29 @@ export function useTileGrid() {
 
   const handleDropOnTile = async (e: React.DragEvent, targetTile: { id: string }) => {
     e.preventDefault();
-    if (!draggedTileId || draggedTileId === targetTile.id) {
+    const currentDraggedId = useUIStore.getState().draggedTileId;
+    if (!currentDraggedId || currentDraggedId === targetTile.id) {
       setDraggedTileId(null);
       return;
     }
-    const srcId = draggedTileId;
     setDraggedTileId(null);
 
     if (e.shiftKey) {
-      // Shift+drop = swap (original behavior)
-      await swapTilePositions(srcId, targetTile.id);
+      await swapTilePositions(currentDraggedId, targetTile.id);
     } else {
-      // Default drop = insert (shift others over)
       const target = tiles.find(t => t.id === targetTile.id);
       if (target) {
-        await insertTileAtPosition(srcId, target.position);
+        await insertTileAtPosition(currentDraggedId, target.position);
       }
     }
   };
 
   const handleDropOnEmpty = async (e: React.DragEvent, targetPosition: number) => {
     e.preventDefault();
-    if (!draggedTileId) return;
-    const id = draggedTileId;
+    const currentDraggedId = useUIStore.getState().draggedTileId;
+    if (!currentDraggedId) return;
     setDraggedTileId(null);
-    await moveTileToPosition(id, targetPosition);
+    await moveTileToPosition(currentDraggedId, targetPosition);
   };
 
   const handleLinkDrop = async (linkId: string, targetTileId: string) => {
