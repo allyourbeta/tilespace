@@ -41,7 +41,6 @@ export function EmptyCell({ position, onDragOver, onDrop, isDragActive }: EmptyC
             : 'bg-black/5 border-white/10'
         }
       `}
-      style={{ transform: 'translateZ(-10px)' }}
     >
       <span className={`text-2xl font-light transition-all ${
         isDraggedOver ? 'text-white/80 scale-125' : 'text-white/50'

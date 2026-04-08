@@ -42,6 +42,7 @@ export function useTileGrid() {
   const handleDragStart = (e: React.DragEvent, tile: { id: string }) => {
     setDraggedTileId(tile.id);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', tile.id);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
