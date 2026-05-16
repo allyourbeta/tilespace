@@ -1,55 +1,38 @@
-import { useState, useEffect, useRef } from 'react';
-import { Page } from '@/types';
-import { PAGE_TITLE_OVERLAY } from '@/lib/constants';
+import { useState, useMemo } from 'react';
+import { Page, getPalette } from '@/types';
+import { darkenColor } from '@/utils/color';
 import { useIsMobile } from '@/hooks';
 
 interface PageTitleDisplayProps {
   currentPage: Page | null;
   currentPageId: string | null;
+  pages: Page[];
+  onShowOverview: () => void;
 }
 
-export function PageTitleDisplay({ currentPage, currentPageId }: PageTitleDisplayProps) {
+export function PageTitleDisplay({ currentPage, currentPageId, pages, onShowOverview }: PageTitleDisplayProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [showFromPageChange, setShowFromPageChange] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
-  const prevPageIdRef = useRef<string | null>(null);
   const isMobile = useIsMobile();
 
-  // Handle page change detection
-  useEffect(() => {
-    if (!currentPageId) return;
+  const sortedPages = useMemo(
+    () => [...pages].sort((a, b) => a.position - b.position),
+    [pages]
+  );
 
-    // If page ID changed from previous value, show title
-    if (prevPageIdRef.current !== currentPageId) {
-      prevPageIdRef.current = currentPageId;
-      setShowFromPageChange(true);
-
-      // Clear any existing timeout
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      // Hide after 2 seconds
-      timeoutRef.current = window.setTimeout(() => {
-        setShowFromPageChange(false);
-      }, PAGE_TITLE_OVERLAY.FADE_TIMEOUT_MS);
-    }
-  }, [currentPageId]);
-
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, []);
+  const gridCols = useMemo(() => {
+    const count = sortedPages.length;
+    if (count <= 2) return 2;
+    if (count <= 4) return 2;
+    if (count <= 6) return 3;
+    if (count <= 9) return 3;
+    if (count <= 12) return 4;
+    if (count <= 16) return 4;
+    return 5;
+  }, [sortedPages.length]);
 
   if (!currentPage) {
     return null;
   }
-
-  const isVisible = isHovered || showFromPageChange;
 
   // Mobile: always-visible compact title bar
   if (isMobile) {
@@ -60,33 +43,57 @@ export function PageTitleDisplay({ currentPage, currentPageId }: PageTitleDispla
     );
   }
 
-  // Desktop: hover/fade behavior
+  // Desktop: hover zone reveals clickable overview thumbnail
   return (
-    <>
-      {/* Hover detection area */}
-      <div
-        className="fixed top-0 left-0 z-20"
-        style={{ width: `${PAGE_TITLE_OVERLAY.HOVER_ZONE_WIDTH_PX}px`, height: `${PAGE_TITLE_OVERLAY.HOVER_ZONE_HEIGHT_PX}px` }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      />
-      
-      {/* Title display */}
-      <div
+    <div
+      className="fixed top-0 left-0 z-30"
+      style={{ width: '300px', height: '160px' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <button
+        onClick={onShowOverview}
+        aria-label="Open page overview"
         className={`
-          fixed top-6 left-6 z-30 
-          bg-black/20 backdrop-blur 
-          text-white text-2xl font-semibold 
-          px-8 py-6 rounded-2xl
+          absolute top-5 left-5
+          bg-black/25 backdrop-blur-md
+          rounded-xl
           shadow-xl border border-white/15
-          transition-opacity duration-300 ease-in-out
-          pointer-events-none
-          min-w-[200px]
-          ${isVisible ? 'opacity-100' : 'opacity-0'}
+          transition-all duration-300 ease-in-out
+          cursor-pointer
+          hover:bg-black/35 hover:scale-105 hover:shadow-2xl
+          active:scale-95
+          ${isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}
         `}
+        style={{ padding: '10px' }}
       >
-        {currentPage.title}
-      </div>
-    </>
+        <div
+          className="grid gap-[3px]"
+          style={{ gridTemplateColumns: `repeat(${gridCols}, 1fr)` }}
+        >
+          {sortedPages.map((page) => {
+            const palette = getPalette(page.palette_id);
+            const isCurrent = page.id === currentPageId;
+            return (
+              <div
+                key={page.id}
+                className={`
+                  rounded-[3px]
+                  ${isCurrent ? 'ring-1 ring-white shadow-[0_0_4px_rgba(255,255,255,0.6)]' : ''}
+                `}
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  backgroundColor: darkenColor(palette.background, 10),
+                }}
+              />
+            );
+          })}
+        </div>
+        <div className="text-white/70 text-[10px] font-medium text-center mt-1.5 tracking-wide uppercase">
+          Overview
+        </div>
+      </button>
+    </div>
   );
 }

@@ -158,25 +158,21 @@ function AppContent() {
 
   return (
     <div
-      className="h-screen w-screen overflow-hidden relative"
+      className="h-screen w-screen overflow-hidden"
       style={{ background: `radial-gradient(ellipse at center, ${bgColor} 0%, ${darkenColor(bgColor, 25)} 100%)` }}
       {...swipeHandlers}
     >
-      {/* Grain texture overlay */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ opacity: 0.15 }}>
-        <filter id="tilespace-grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#tilespace-grain)" />
-      </svg>
-
       <PageTitleDisplay currentPage={currentPage} currentPageId={currentPageId} pages={pages} onShowOverview={() => setShowOverview(true)} />
 
       <div
         className={`h-full w-full grid ${isMobile ? 'gap-2 p-2 pt-10 pb-16 overflow-y-auto' : 'gap-4 p-4'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
         style={{
           ...(isMobile ? mobileGridStyle : gridStyle),
-          ...(!isMobile ? {} : {}),
+          ...(!isMobile ? {
+            perspective: '1200px',
+            perspectiveOrigin: '50% 50%',
+            transformStyle: 'preserve-3d' as const,
+          } : {}),
         }}
       >
         {gridCells}

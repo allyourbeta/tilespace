@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Tile } from '@/types';
 import { GripVertical } from 'lucide-react';
+import { TILE_VISUALS } from '@/lib/constants';
 
 interface TileCardProps {
   tile: Tile;
@@ -13,12 +14,16 @@ interface TileCardProps {
   isDragging: boolean;
 }
 
-export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
+export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
   const linkCount = tile.links?.length || 0;
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
   const [isTileDragOver, setIsTileDragOver] = useState(false);
   const [isShiftHeld, setIsShiftHeld] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Each tile has its own perspective so rotation is independent of grid position
+  const restingTransform = `perspective(800px) rotate3d(-1, 1, 0, ${TILE_VISUALS.TILT_DEGREES}deg)`;
+  const hoverTransform = 'perspective(800px) rotate3d(-1, 1, 0, 0deg) translateY(-4px) translateZ(20px)';
 
   const handleDragOver = (e: React.DragEvent) => {
     const linkData = e.dataTransfer.types.includes('application/link-id');
@@ -67,11 +72,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
         group relative cursor-pointer
         h-full w-full
         flex flex-col items-center
-        bg-gradient-to-b from-white via-white to-gray-100
         rounded-2xl
-        border-[6px]
-        shadow-[0_8px_30px_rgba(0,0,0,0.12)]
-        hover:shadow-[0_12px_40px_rgba(0,0,0,0.18)]
         ${isDragging ? 'opacity-50 scale-95' : 'opacity-100'}
         ${isLinkDragOver ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
         ${isTileDragOver
@@ -81,12 +82,20 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
           : ''}
       `}
       style={{
-        borderColor,
-        transform: isHovered ? 'translateZ(20px) translateY(-4px)' : 'translateZ(0px)',
+        backgroundColor: `${tile.accent_color}30`,
+        border: '1px solid rgba(255,255,255,0.15)',
+        backdropFilter: 'blur(8px)',
+        transform: isHovered ? hoverTransform : restingTransform,
         transformStyle: 'preserve-3d' as const,
-        transition: 'transform 200ms ease-out, box-shadow 200ms ease-out',
+        transition: 'transform 400ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 400ms cubic-bezier(0.23, 1, 0.32, 1)',
+        boxShadow: isHovered
+          ? `${TILE_VISUALS.LIFTED_SHADOW}, inset 2px 2px 6px rgba(255,255,255,0.7), inset -1px -1px 3px rgba(0,0,0,0.08)`
+          : `${TILE_VISUALS.RESTING_SHADOW}, inset 2px 2px 6px rgba(255,255,255,0.6), inset -1px -1px 3px rgba(0,0,0,0.06)`,
       }}
     >
+      {/* Glass highlight overlay */}
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/40 via-white/20 to-transparent pointer-events-none" />
+
       <div className="absolute top-3 left-4 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing">
         <GripVertical className="w-5 h-5 text-gray-400" />
       </div>
@@ -99,7 +108,7 @@ export function TileCard({ tile, borderColor, onClick, onDragStart, onDragOver, 
         </div>
       )}
 
-      <div className="flex-1 flex flex-col items-center justify-center pt-4 pb-4 px-4">
+      <div className="relative flex-1 flex flex-col items-center justify-center pt-4 pb-4 px-4">
         <div
           className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center mb-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
           style={{ backgroundColor: `${tile.accent_color}20` }}

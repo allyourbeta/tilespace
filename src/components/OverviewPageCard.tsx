@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MoreVertical } from 'lucide-react';
 import { Page, getPalette } from '@/types';
 import { darkenColor } from '@/utils/color';
+import { TILE_VISUALS } from '@/lib/constants';
 
 interface OverviewPageCardProps {
   page: Page;
@@ -32,6 +33,17 @@ export function OverviewPageCard({
   onContextMenu, onEditStart, onEditChange, onEditSubmit, onEditCancel,
 }: OverviewPageCardProps) {
   const palette = getPalette(page.palette_id);
+  const [isHovered, setIsHovered] = useState(false);
+  // Axis (-1, 1, 0): top-left toward viewer, bottom-right away
+  const restingTransform = `perspective(800px) rotate3d(-1, 1, 0, ${TILE_VISUALS.TILT_DEGREES}deg)`;
+  const hoverTransform = 'perspective(800px) rotate3d(-1, 1, 0, 0deg) scale(1.05) translateZ(20px)';
+
+  // Determine transform based on state priority
+  let currentTransform = isHovered ? hoverTransform : restingTransform;
+  if (isDragging) currentTransform = 'scale(0.95)';
+  if (isDragOver) currentTransform = 'scale(1.10)';
+  if (isNavigating) currentTransform = 'scale(1.15)';
+  if (isOtherNavigating) currentTransform = 'scale(0.95)';
 
   return (
     <div
@@ -43,15 +55,23 @@ export function OverviewPageCard({
       onDragLeave={onDragLeave}
       onDrop={(e) => onDrop(e, page.id)}
       onContextMenu={(e) => onContextMenu(e, page.id)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`
         overview-card relative aspect-square rounded-2xl overflow-hidden
         ${isCurrentPage ? 'ring-4 ring-white shadow-[0_0_15px_rgba(255,255,255,0.5)]' : ''}
-        ${isDragging ? 'opacity-50 scale-95 cursor-grabbing' : 'hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:brightness-110 cursor-grab'}
-        ${isDragOver ? 'scale-110 shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-4 ring-amber-400' : 'shadow-[0_8px_30px_rgba(0,0,0,0.3)]'}
-        ${isNavigating ? 'scale-[1.15] shadow-[0_0_40px_rgba(255,255,255,0.3)] z-10' : ''}
-        ${isOtherNavigating ? 'opacity-50 scale-95' : ''}
+        ${isDragging ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}
+        ${isDragOver ? 'shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-4 ring-amber-400' : ''}
+        ${isNavigating ? 'shadow-[0_0_40px_rgba(255,255,255,0.3)] z-10' : ''}
+        ${isOtherNavigating ? 'opacity-50' : ''}
       `}
-      style={{ backgroundColor: darkenColor(palette.background, 15) }}
+      style={{
+        backgroundColor: `${palette.background}88`,
+        backdropFilter: 'blur(8px)',
+        border: '1px solid rgba(255,255,255,0.25)',
+        transform: currentTransform,
+        boxShadow: isHovered ? TILE_VISUALS.HOVER_SHADOW : TILE_VISUALS.RESTING_SHADOW,
+      }}
     >
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none" />
       {editingPageId === page.id ? (
@@ -71,7 +91,7 @@ export function OverviewPageCard({
       ) : (
         <div className="absolute top-3 left-3 right-8">
           <h3
-            className="text-white text-xl font-semibold leading-tight break-words cursor-pointer"
+            className="text-white text-xl font-semibold leading-tight break-words cursor-pointer drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
             onClick={(e) => { e.stopPropagation(); onEditStart(page.id, page.title); }}
           >
             {page.title}
