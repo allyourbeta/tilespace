@@ -36,7 +36,7 @@ export async function fetchTiles(pageId: string): Promise<Tile[]> {
   }));
 }
 
-export async function createTile(pageId: string, paletteId: string): Promise<Tile> {
+export async function createTile(pageId: string, paletteId: string, targetPosition?: number): Promise<Tile> {
   const userId = await getCurrentUserId();
 
   const { data: tiles, error: fetchError } = await supabase
@@ -50,12 +50,17 @@ export async function createTile(pageId: string, paletteId: string): Promise<Til
   const count = tiles?.length || 0;
   if (count >= GRID_CONFIG.MAX_TILES) throw new Error(`Maximum tile limit (${GRID_CONFIG.MAX_TILES}) reached`);
 
-  const capacity = count < GRID_CONFIG.BREAKPOINTS[0] ? GRID_CONFIG.BREAKPOINTS[0] : count < GRID_CONFIG.BREAKPOINTS[1] ? GRID_CONFIG.BREAKPOINTS[1] : GRID_CONFIG.BREAKPOINTS[2];
-
   const occupied = new Set(tiles?.map(t => t.position) || []);
-  let position = 0;
-  while (position < capacity && occupied.has(position)) {
-    position++;
+
+  let position: number;
+  if (targetPosition !== undefined && !occupied.has(targetPosition)) {
+    position = targetPosition;
+  } else {
+    const capacity = count < GRID_CONFIG.BREAKPOINTS[0] ? GRID_CONFIG.BREAKPOINTS[0] : count < GRID_CONFIG.BREAKPOINTS[1] ? GRID_CONFIG.BREAKPOINTS[1] : GRID_CONFIG.BREAKPOINTS[2];
+    position = 0;
+    while (position < capacity && occupied.has(position)) {
+      position++;
+    }
   }
 
   const colorIndex = position % GRID_CONFIG.COLORS_PER_PALETTE;

@@ -12,7 +12,7 @@ interface TileState {
   loading: boolean;
 
   loadTiles: () => Promise<void>;
-  createTile: () => Promise<void>;
+  createTile: (targetPosition?: number) => Promise<void>;
   updateTile: (id: string, updates: Partial<Tile>) => Promise<void>;
   updateTileColor: (id: string, colorIndex: number) => Promise<void>;
   deleteTile: (id: string) => Promise<void>;
@@ -52,11 +52,11 @@ export const useTileStore = create<TileState>((set, get) => ({
     }
   },
 
-  createTile: async () => {
+  createTile: async (targetPosition?: number) => {
     const { currentPageId, paletteId } = getPageContext();
     if (!currentPageId) return;
     try {
-      const newTile = await api.createTile(currentPageId, paletteId);
+      const newTile = await api.createTile(currentPageId, paletteId, targetPosition);
       set(state => ({ tiles: [...state.tiles, newTile] }));
       useUIStore.getState().selectTile(newTile.id, true);
     } catch (err) {

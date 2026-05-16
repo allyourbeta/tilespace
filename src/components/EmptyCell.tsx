@@ -4,10 +4,11 @@ interface EmptyCellProps {
   position: number;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent, position: number) => void;
+  onClick: (position: number) => void;
   isDragActive: boolean;
 }
 
-export function EmptyCell({ position, onDragOver, onDrop, isDragActive }: EmptyCellProps) {
+export function EmptyCell({ position, onDragOver, onDrop, onClick, isDragActive }: EmptyCellProps) {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -28,6 +29,7 @@ export function EmptyCell({ position, onDragOver, onDrop, isDragActive }: EmptyC
 
   return (
     <div
+      onClick={() => onClick(position)}
       onDragOver={onDragOver}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}

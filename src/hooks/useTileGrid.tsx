@@ -10,6 +10,7 @@ import { getPalette } from '@/types';
 
 export function useTileGrid() {
   const tiles = useTileStore(s => s.tiles);
+  const createTile = useTileStore(s => s.createTile);
   const swapTilePositions = useTileStore(s => s.swapTilePositions);
   const moveTileToPosition = useTileStore(s => s.moveTileToPosition);
   const insertTileAtPosition = useTileStore(s => s.insertTileAtPosition);
@@ -111,6 +112,7 @@ export function useTileGrid() {
             position={position}
             onDragOver={handleDragOver}
             onDrop={handleDropOnEmpty}
+            onClick={(pos: number) => createTile(pos)}
             isDragActive={draggedTileId !== null}
           />
         );
