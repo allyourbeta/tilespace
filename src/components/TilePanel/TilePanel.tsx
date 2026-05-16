@@ -6,8 +6,8 @@ import { useIsMobile } from '@/hooks';
 import { isValidUrl } from '@/utils/url';
 import { PanelLinkItem } from './PanelLinkItem';
 import { PanelTempLinkItem, type TempLink } from './PanelTempLinkItem';
-import { PanelEmojiPicker } from './PanelEmojiPicker';
 import { PanelColorPicker } from './PanelColorPicker';
+import { getInitials } from '@/utils';
 
 interface TilePanelProps {
   tile: Tile;
@@ -129,7 +129,7 @@ export function TilePanel({
         <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2" style={{ backgroundColor: tile.accent_color + '15' }}>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <PanelEmojiPicker currentEmoji={tile.emoji} onSelect={(emoji) => onUpdateTile(tile.id, { emoji })} />
+              <span className="text-2xl font-medium tracking-wide" style={{ color: tile.accent_color }}>{getInitials(tile.title)}</span>
               <PanelColorPicker accentColor={tile.accent_color} colorIndex={tile.color_index} palette={palette} onSelect={(idx) => onUpdateTileColor(tile.id, idx)} />
             </div>
           </div>

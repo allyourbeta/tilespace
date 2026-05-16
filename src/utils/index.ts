@@ -1,4 +1,5 @@
 export { isValidUrl, normalizeUrl, extractDomain } from './url';
+export { getInitials } from './initials';
 export {
   GRID_CAPACITIES,
   MAX_TILES,

@@ -1,5 +1,6 @@
 import { Tile, Link } from '@/types';
 import { isValidUrl } from '@/utils/url';
+import { getInitials } from '@/utils';
 
 interface TileSubmenuProps {
   tiles: Tile[];
@@ -47,7 +48,7 @@ export function TileSubmenu({ tiles, onCreateLink, onSelectTile, onClose }: Tile
             className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all hover:scale-[1.03] hover:brightness-110"
             style={{ backgroundColor: tile.accent_color + '20' }}
           >
-            <span className="text-base shrink-0">{tile.emoji || '📦'}</span>
+            <span className="text-xs font-medium shrink-0 tracking-wide" style={{ color: tile.accent_color }}>{getInitials(tile.title)}</span>
             <span className="text-xs font-medium text-gray-700 truncate">{tile.title}</span>
           </button>
         ))}

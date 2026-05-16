@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tile } from '@/types';
+import { getInitials } from '@/utils';
 import { GripVertical } from 'lucide-react';
 import { TILE_VISUALS } from '@/lib/constants';
 
@@ -111,13 +112,12 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
       <div className="relative flex-1 flex flex-col items-center justify-center pt-4 pb-4 px-4">
         <div
           className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center mb-3 shadow-[0_2px_8px_rgba(0,0,0,0.1)]"
-          style={{ backgroundColor: `${tile.accent_color}20` }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.35)' }}
         >
           <span
-            className="text-2xl sm:text-3xl lg:text-4xl select-none"
-            style={{ filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.1))' }}
+            className="text-lg sm:text-xl lg:text-2xl font-medium select-none tracking-wide text-gray-700"
           >
-            {tile.emoji || '📁'}
+            {getInitials(tile.title)}
           </span>
         </div>
 

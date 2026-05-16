@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Tile, Link } from '@/types';
+import { getInitials } from '@/utils';
 import { Check, X, Loader2, Link as LinkIcon, ClipboardPaste } from 'lucide-react';
 
 interface PasteLinkModalProps {
@@ -156,7 +157,7 @@ export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalP
                     className="p-3 rounded-xl text-left transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                     style={{ backgroundColor: tile.accent_color }}
                   >
-                    <span className="text-2xl mb-1 block">{tile.emoji}</span>
+                    <span className="text-xl mb-1 block font-medium tracking-wide text-white/90">{getInitials(tile.title)}</span>
                     <span className="text-white font-semibold text-sm block truncate">
                       {tile.title}
                     </span>
