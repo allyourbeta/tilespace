@@ -38,4 +38,17 @@ describe('getInitials', () => {
     expect(getInitials('A B')).toBe('B');
     expect(getInitials('X Y')).toBe('XY');
   });
+
+  it('strips brackets and punctuation', () => {
+    expect(getInitials('[curl]')).toBe('CU');
+    expect(getInitials('[agents]')).toBe('AG');
+    expect(getInitials('[Data Pipeline]')).toBe('DP');
+    expect(getInitials('[MCP]')).toBe('MC');
+    expect(getInitials('Cafés in SF?!')).toBe('CS');
+  });
+
+  it('returns ? for all-punctuation titles', () => {
+    expect(getInitials('[]')).toBe('?');
+    expect(getInitials('---')).toBe('?');
+  });
 });

@@ -15,14 +15,17 @@ const SKIP_WORDS = new Set(['the', 'a', 'an', 'and', 'or', 'of', 'in', 'on', 'to
 export function getInitials(title: string): string {
   if (!title || !title.trim()) return '?';
 
+  // Strip non-alphabetic characters (brackets, punctuation, digits) from each word
   const words = title
     .split(/[\s\-–—/]+/)
+    .map(w => w.replace(/[^a-zA-Z]/g, ''))
     .filter(w => w.length > 0)
     .filter(w => !SKIP_WORDS.has(w.toLowerCase()));
 
   if (words.length === 0) {
-    // All words were skipped — fall back to first two chars of original
-    return title.trim().slice(0, 2).toUpperCase();
+    // All words were skipped or empty — fall back to first two alpha chars
+    const alphaOnly = title.replace(/[^a-zA-Z]/g, '');
+    return alphaOnly.length > 0 ? alphaOnly.slice(0, 2).toUpperCase() : '?';
   }
 
   if (words.length === 1) {
