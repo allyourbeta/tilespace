@@ -1,13 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
-import { X, Plus, FileText } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { X, Plus, FileText, Check } from 'lucide-react';
 import { Tile, Link, getPalette } from '@/types';
 import { getButtonStyles } from '@/utils';
 import { useIsMobile } from '@/hooks';
 import { isValidUrl } from '@/utils/url';
 import { PanelLinkItem } from './PanelLinkItem';
 import { PanelTempLinkItem, type TempLink } from './PanelTempLinkItem';
+import { PanelEmojiPicker } from './PanelEmojiPicker';
 import { PanelColorPicker } from './PanelColorPicker';
-import { getInitials } from '@/utils';
 
 interface TilePanelProps {
   tile: Tile;
@@ -36,10 +36,17 @@ export function TilePanel({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDraggingLink, setIsDraggingLink] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const palette = getPalette(currentPaletteId);
+
+  const saveAndClose = useCallback(() => {
+    if (title !== tile.title) onUpdateTile(tile.id, { title });
+    setShowSaved(true);
+    setTimeout(() => onClose(), 600);
+  }, [title, tile.title, tile.id, onUpdateTile, onClose]);
 
   useEffect(() => { setTitle(tile.title); }, [tile.title]);
   useEffect(() => { if (isNewTile && titleRef.current) { titleRef.current.focus(); titleRef.current.select(); } }, [isNewTile]);
@@ -68,13 +75,16 @@ export function TilePanel({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (title !== tile.title) onUpdateTile(tile.id, { title });
-        onClose();
+        saveAndClose();
+      }
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        saveAndClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, title, tile.title, tile.id, onUpdateTile]);
+  }, [saveAndClose]);
 
   useEffect(() => {
     if (!isDragging) return;
@@ -129,11 +139,11 @@ export function TilePanel({
         <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2" style={{ backgroundColor: tile.accent_color + '15' }}>
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <span className="text-2xl font-medium tracking-wide" style={{ color: tile.accent_color }}>{getInitials(tile.title)}</span>
+              <PanelEmojiPicker currentEmoji={tile.emoji} onSelect={(emoji) => onUpdateTile(tile.id, { emoji })} />
               <PanelColorPicker accentColor={tile.accent_color} colorIndex={tile.color_index} palette={palette} onSelect={(idx) => onUpdateTileColor(tile.id, idx)} />
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
+          <button onClick={saveAndClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -182,6 +192,18 @@ export function TilePanel({
             Delete Tile
           </button>
         </div>
+
+        {/* Saved indicator */}
+        {showSaved && (
+          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 animate-in fade-in duration-200">
+            <div className="flex items-center gap-3 bg-green-50 border border-green-200 px-6 py-4 rounded-2xl shadow-lg">
+              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                <Check className="w-6 h-6 text-white" strokeWidth={3} />
+              </div>
+              <span className="text-green-800 text-lg font-semibold">Saved</span>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
