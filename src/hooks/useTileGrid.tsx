@@ -25,6 +25,7 @@ export function useTileGrid() {
   const currentPaletteId = currentPage?.palette_id ?? 'ocean';
   const currentPalette = getPalette(currentPaletteId);
   const borderColor = currentPalette.border;
+  const pageBackground = currentPalette.background;
 
   const gridCapacity = getGridCapacity(tiles.length);
   const canAddMore = tiles.length < APP_CONFIG.MAX_TILES;
@@ -97,6 +98,7 @@ export function useTileGrid() {
             key={tile.id}
             tile={tile}
             borderColor={borderColor}
+            pageBackground={pageBackground}
             onClick={() => setSelectedTileId(tile.id)}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
@@ -120,7 +122,7 @@ export function useTileGrid() {
     }
     return cells;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tilesByPosition, gridCapacity, borderColor, draggedTileId, tiles]);
+  }, [tilesByPosition, gridCapacity, borderColor, pageBackground, draggedTileId, tiles]);
 
   return { gridCells, gridStyle, mobileGridStyle, canAddMore };
 }

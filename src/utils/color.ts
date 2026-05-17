@@ -7,6 +7,44 @@ export function darkenColor(hex: string, percent: number): string {
 }
 
 /**
+ * Convert hex to HSL components
+ */
+function hexToHSL(hex: string): { h: number; s: number; l: number } {
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.substring(0, 2), 16) / 255;
+  const g = parseInt(clean.substring(2, 4), 16) / 255;
+  const b = parseInt(clean.substring(4, 6), 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  let h = 0;
+  let s = 0;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+    else if (max === g) h = ((b - r) / d + 2) / 6;
+    else h = ((r - g) / d + 4) / 6;
+  }
+
+  return { h: h * 360, s: s * 100, l: l * 100 };
+}
+
+/**
+ * Returns a dark, saturated complementary color for use as text on a light badge.
+ * Takes the page background hex, shifts hue by 180°, and clamps to ensure
+ * readability against a white/frosted background.
+ */
+export function getComplementaryColor(hexBg: string): string {
+  const { h } = hexToHSL(hexBg);
+  const compHue = (h + 180) % 360;
+  // High saturation, low lightness → vivid but dark enough to read on white
+  return `hsl(${Math.round(compHue)}, 70%, 35%)`;
+}
+
+/**
  * Calculate relative luminance of a hex color
  * Based on WCAG 2.0 formula
  */
