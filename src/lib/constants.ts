@@ -35,7 +35,7 @@ export const OVERVIEW_MODE = {
 
 // Welcome-back overview
 export const WELCOME_BACK = {
-  IDLE_THRESHOLD_MS: 30000, // 30 seconds
+  IDLE_THRESHOLD_MS: 300000, // 300 seconds
   LAST_ACTIVE_KEY: 'tilespace_last_active',
 } as const;
 
