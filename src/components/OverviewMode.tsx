@@ -72,10 +72,19 @@ export function OverviewMode({
 
   return (
     <div
-      className={`fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center ${isMobile ? 'p-3' : 'p-8'}`}
+      className={`fixed inset-0 z-50 flex items-center justify-center ${isMobile ? 'p-3' : 'p-8'}`}
+      style={{
+        backgroundColor: '#BD7A24',
+        backgroundImage: [
+          'repeating-linear-gradient(90deg, rgba(0,0,0,0.17) 0px, rgba(0,0,0,0.05) 1px, rgba(255,255,255,0.16) 3px, rgba(0,0,0,0.05) 5px, rgba(0,0,0,0.17) 6px)',
+          'repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.04) 1px, rgba(255,255,255,0.13) 3px, rgba(0,0,0,0.04) 5px, rgba(0,0,0,0.15) 6px)',
+          'radial-gradient(ellipse at 50% 36%, rgba(255,231,184,0.26) 0%, rgba(0,0,0,0) 52%, rgba(0,0,0,0.16) 100%)',
+        ].join(', '),
+        backgroundSize: '6px 6px, 6px 6px, 100% 100%',
+      }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <button onClick={onClose} className="absolute top-6 right-6 text-white hover:bg-white/10 p-2 rounded-lg transition-colors">
+      <button onClick={onClose} className="absolute top-6 right-6 text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors">
         <X className="w-6 h-6" />
       </button>
 

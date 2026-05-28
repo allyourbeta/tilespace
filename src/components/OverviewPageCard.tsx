@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MoreVertical } from 'lucide-react';
 import { Page, getPalette } from '@/types';
-import { darkenColor } from '@/utils/color';
+import { darkenColor, isLightColor } from '@/utils/color';
 import { TILE_VISUALS } from '@/lib/constants';
 
 interface OverviewPageCardProps {
@@ -34,6 +34,17 @@ export function OverviewPageCard({
 }: OverviewPageCardProps) {
   const palette = getPalette(page.palette_id);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Cards now render at full opacity, so a light palette needs dark foreground
+  // text/controls (white-on-near-white would be invisible). Reuse the existing
+  // luminance helper to pick readable colors per card.
+  const isLight = isLightColor(palette.background);
+  const titleColor = isLight ? '#1F2937' : '#FFFFFF';
+  const titleShadow = isLight ? 'none' : '0 1px 3px rgba(0,0,0,0.3)';
+  const kebabClass = isLight
+    ? 'text-gray-700/80 hover:text-gray-900 hover:bg-black/10'
+    : 'text-white/70 hover:text-white hover:bg-white/10';
+  const badgeClass = isLight ? 'bg-black/10 text-gray-800' : 'bg-white/20 text-white';
   // Axis (-1, 1, 0): top-left toward viewer, bottom-right away
   const restingTransform = `perspective(800px) rotate3d(-1, 1, 0, ${TILE_VISUALS.TILT_DEGREES}deg)`;
   const hoverTransform = 'perspective(800px) rotate3d(-1, 1, 0, 0deg) scale(1.05) translateZ(20px)';
@@ -66,7 +77,7 @@ export function OverviewPageCard({
         ${isOtherNavigating ? 'opacity-50' : ''}
       `}
       style={{
-        backgroundColor: `${palette.background}88`,
+        backgroundColor: palette.background,
         backdropFilter: 'blur(8px)',
         border: '1px solid rgba(255,255,255,0.25)',
         transform: currentTransform,
@@ -91,7 +102,8 @@ export function OverviewPageCard({
       ) : (
         <div className="absolute top-3 left-3 right-8">
           <h3
-            className="text-white text-xl font-semibold leading-tight break-words cursor-pointer drop-shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+            className="text-xl font-semibold leading-tight break-words cursor-pointer"
+            style={{ color: titleColor, textShadow: titleShadow }}
             onClick={(e) => { e.stopPropagation(); onEditStart(page.id, page.title); }}
           >
             {page.title}
@@ -101,12 +113,12 @@ export function OverviewPageCard({
 
       <button
         onClick={(e) => { e.stopPropagation(); onContextMenu(e, page.id); }}
-        className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/10 p-1 rounded transition-colors"
+        className={`absolute top-2 right-2 p-1 rounded transition-colors ${kebabClass}`}
       >
         <MoreVertical className="w-4 h-4" />
       </button>
 
-      <div className="absolute bottom-2 right-2 bg-white/20 text-white text-xs font-mono px-2 py-1 rounded">
+      <div className={`absolute bottom-2 right-2 text-xs font-mono px-2 py-1 rounded ${badgeClass}`}>
         {page.position + 1}
       </div>
 

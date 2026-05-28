@@ -43,14 +43,19 @@ export function PageTitleDisplay({ currentPage, currentPageId, pages, onShowOver
     );
   }
 
-  // Desktop: hover zone reveals clickable overview thumbnail
+  // Desktop: always-visible title (top-right) + hover-zone overview thumbnail (top-left)
   return (
-    <div
-      className="fixed top-0 left-0 z-30"
-      style={{ width: '300px', height: '160px' }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <>
+      <div className="fixed top-5 right-5 z-30 max-w-[40vw] truncate bg-black/20 backdrop-blur text-white text-base font-semibold px-4 py-2 rounded-xl shadow-lg border border-white/10 pointer-events-none">
+        {currentPage.title}
+      </div>
+
+      <div
+        className="fixed top-0 left-0 z-30"
+        style={{ width: '300px', height: '160px' }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
       <button
         onClick={onShowOverview}
         aria-label="Open page overview"
@@ -94,6 +99,7 @@ export function PageTitleDisplay({ currentPage, currentPageId, pages, onShowOver
           Overview
         </div>
       </button>
-    </div>
+      </div>
+    </>
   );
 }

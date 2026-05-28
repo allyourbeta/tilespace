@@ -137,7 +137,7 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
 
         <div className="h-6 mt-2 flex items-center">
           {linkCount > 0 && (
-            <span className="text-xs sm:text-sm text-gray-400 font-medium">
+            <span className="text-sm sm:text-base text-gray-600 font-semibold">
               {linkCount} {linkCount === 1 ? 'item' : 'items'}
             </span>
           )}
