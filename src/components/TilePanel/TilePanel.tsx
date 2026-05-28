@@ -13,6 +13,7 @@ interface TilePanelProps {
   tile: Tile;
   currentPaletteId: string;
   isNewTile?: boolean;
+  isDocumentOpen?: boolean;
   onClose: () => void;
   onUpdateTile: (id: string, updates: Partial<Tile>) => void;
   onUpdateTileColor: (id: string, colorIndex: number) => void;
@@ -25,7 +26,7 @@ interface TilePanelProps {
 }
 
 export function TilePanel({
-  tile, currentPaletteId, isNewTile = false,
+  tile, currentPaletteId, isNewTile = false, isDocumentOpen = false,
   onClose, onUpdateTile, onUpdateTileColor, onResetTile,
   onCreateLink, onUpdateLink, onDeleteLink, onOpenDocument, onAddNote,
 }: TilePanelProps) {
@@ -74,6 +75,9 @@ export function TilePanel({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // When a note/document is open on top, let it own the keyboard (Escape
+      // should close the note first, not the whole panel).
+      if (isDocumentOpen) return;
       if (e.key === 'Escape') {
         saveAndClose();
       }
@@ -84,7 +88,7 @@ export function TilePanel({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [saveAndClose]);
+  }, [saveAndClose, isDocumentOpen]);
 
   useEffect(() => {
     if (!isDragging) return;

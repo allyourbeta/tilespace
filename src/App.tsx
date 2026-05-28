@@ -195,6 +195,7 @@ function AppContent() {
           tile={selectedTile}
           currentPaletteId={currentPaletteId}
           isNewTile={isNewTile}
+          isDocumentOpen={!!editingDocument}
           onClose={closeTilePanel}
           onUpdateTile={tileUpdateTile}
           onUpdateTileColor={tileUpdateColor}

@@ -74,7 +74,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
     setHasChanges(true);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (document) {
       const isEmpty = !title.trim() && !content.trim() && !summary.trim();
       if (isEmpty) {
@@ -85,7 +85,19 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
       }
     }
     onClose();
-  };
+  }, [document, title, content, summary, hasChanges, onSave, onDelete, onClose]);
+
+  // Escape closes the note and returns to the tile panel (the level above).
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleClose]);
 
   const handleDelete = () => {
     if (!document) return;
