@@ -9,7 +9,7 @@ interface OverviewModeProps {
   currentPageId: string;
   onClose: () => void;
   onPageSelect: (pageId: string) => void;
-  onSwapPages: (pageAId: string, pageBId: string) => void;
+  onInsertPage: (draggedPageId: string, targetPosition: number) => void;
   onUpdatePageTitle: (pageId: string, title: string) => void;
   onResetPage: (pageId: string) => void;
 }
@@ -21,7 +21,7 @@ interface ContextMenuState {
 }
 
 export function OverviewMode({
-  pages, currentPageId, onClose, onPageSelect, onSwapPages, onUpdatePageTitle, onResetPage,
+  pages, currentPageId, onClose, onPageSelect, onInsertPage, onUpdatePageTitle, onResetPage,
 }: OverviewModeProps) {
   const [draggedPageId, setDraggedPageId] = useState<string | null>(null);
   const [dragOverPageId, setDragOverPageId] = useState<string | null>(null);
@@ -50,15 +50,29 @@ export function OverviewMode({
     return () => { document.removeEventListener('keydown', handleKeyDown); document.removeEventListener('click', handleClick); };
   }, [onClose]);
 
-  const handlePageClick = (e: React.MouseEvent, pageId: string) => {
+  const handlePageClick = (_e: React.MouseEvent, pageId: string) => {
     if (draggedPageId || navigatingPageId) return;
     setNavigatingPageId(pageId);
     setTimeout(() => { onPageSelect(pageId); onClose(); }, 300);
   };
 
-  const handleDragStart = (e: React.DragEvent, pageId: string) => { setDraggedPageId(pageId); e.dataTransfer.effectAllowed = 'move'; };
-  const handleDragOver = (e: React.DragEvent, pageId: string) => { e.preventDefault(); if (pageId !== draggedPageId) setDragOverPageId(pageId); };
-  const handleDrop = (e: React.DragEvent, targetPageId: string) => { e.preventDefault(); if (draggedPageId && draggedPageId !== targetPageId) onSwapPages(draggedPageId, targetPageId); setDraggedPageId(null); setDragOverPageId(null); };
+  const handleDragStart = (e: React.DragEvent, pageId: string) => {
+    setDraggedPageId(pageId);
+    e.dataTransfer.effectAllowed = 'move';
+    // Some browsers (notably Safari) won't treat this as a real drag unless a
+    // payload is set in dragstart — without it, dragover/drop fire erratically.
+    e.dataTransfer.setData('text/plain', pageId);
+  };
+  const handleDragOver = (e: React.DragEvent, pageId: string) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; if (pageId !== draggedPageId) setDragOverPageId(pageId); };
+  const handleDrop = (e: React.DragEvent, targetPageId: string) => {
+    e.preventDefault();
+    const draggedId = draggedPageId;
+    setDraggedPageId(null);
+    setDragOverPageId(null);
+    if (!draggedId || draggedId === targetPageId) return;
+    const target = sortedPages.find(p => p.id === targetPageId);
+    if (target) onInsertPage(draggedId, target.position);
+  };
   const handleDragEnd = () => { setDraggedPageId(null); setDragOverPageId(null); };
 
   const handleContextMenu = (e: React.MouseEvent, pageId: string) => { e.preventDefault(); e.stopPropagation(); setContextMenu({ pageId, x: e.clientX, y: e.clientY }); };
@@ -90,13 +104,22 @@ export function OverviewMode({
 
       <div
         className={`grid ${isMobile ? 'grid-cols-2 gap-3 p-4 overflow-y-auto max-h-[80vh] w-full' : 'gap-6 w-[85vw] max-w-screen-xl'} transition-all duration-200 ease-out ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.97]'}`}
-        style={!isMobile ? { gridTemplateColumns: `repeat(${desktopCols}, 1fr)`, perspective: '1000px', perspectiveOrigin: '50% 50%', transformStyle: 'preserve-3d' as const } : undefined}
+        style={!isMobile ? {
+          gridTemplateColumns: `repeat(${desktopCols}, 1fr)`,
+          // The 3D perspective makes resting cards look great, but native
+          // drop hit-testing is unreliable against transformed geometry. Drop
+          // the 3D context while dragging so drops land on the right card.
+          ...(draggedPageId
+            ? {}
+            : { perspective: '1000px', perspectiveOrigin: '50% 50%', transformStyle: 'preserve-3d' as const }),
+        } : undefined}
       >
         {sortedPages.map((page) => (
           <OverviewPageCard
             key={page.id}
             page={page}
             isCurrentPage={page.id === currentPageId}
+            isDragActive={draggedPageId !== null}
             isDragging={draggedPageId === page.id}
             isDragOver={dragOverPageId === page.id && draggedPageId !== page.id}
             isNavigating={navigatingPageId === page.id}

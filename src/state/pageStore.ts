@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Page } from '@/types';
 import * as api from '@/api';
+import * as PageService from '@/services/PageService';
 import { WELCOME_BACK } from '@/lib/constants';
 import { useUIStore } from './uiStore';
 import { useTileStore } from './tileStore';
@@ -14,7 +15,7 @@ interface PageState {
   loadPages: () => Promise<void>;
   createPage: (paletteId: string) => Promise<void>;
   updatePageTitle: (pageId: string, title: string) => Promise<void>;
-  swapPages: (pageAId: string, pageBId: string) => Promise<void>;
+  insertPage: (pageId: string, targetPosition: number) => Promise<void>;
   resetPage: (pageId: string) => Promise<void>;
   updatePagePalette: (pageId: string, paletteId: string) => void;
   setCurrentPageId: (id: string | null) => void;
@@ -82,12 +83,25 @@ export const usePageStore = create<PageState>((set, get) => ({
     }
   },
 
-  swapPages: async (pageAId: string, pageBId: string) => {
+  insertPage: async (pageId: string, targetPosition: number) => {
+    const { pages } = get();
+    const positionUpdates = PageService.computeInsertPositions(pages, pageId, targetPosition);
+    if (positionUpdates.size === 0) return;
+
+    // Optimistic update: apply the shifted positions immediately
+    set(state => ({
+      pages: state.pages.map(p => {
+        const newPos = positionUpdates.get(p.id);
+        return newPos !== undefined ? { ...p, position: newPos } : p;
+      }).sort((a, b) => a.position - b.position),
+    }));
+
     try {
-      await api.swapPagePositions(pageAId, pageBId);
-      await get().loadPages();
+      const freshPages = await api.insertPageAtPosition(pageId, targetPosition);
+      set({ pages: freshPages });
     } catch (err) {
-      console.error('Failed to swap pages:', err);
+      console.error('Failed to insert page:', err);
+      await get().loadPages(); // rollback to server truth
     }
   },
 

@@ -1,6 +1,5 @@
 import { supabase, getCurrentUserId } from './client';
 import type { Page } from '@/types/page';
-import { GRID_CONFIG } from '@/lib/constants';
 
 export async function fetchPages(): Promise<Page[]> {
   const { data, error } = await supabase
@@ -48,25 +47,17 @@ export async function updatePagePalette(pageId: string, paletteId: string): Prom
   if (error) throw error;
 }
 
-export async function swapPagePositions(pageAId: string, pageBId: string): Promise<void> {
-  const { data: pages, error: fetchError } = await supabase
-    .from('pages')
-    .select('id, position')
-    .in('id', [pageAId, pageBId]);
+export async function insertPageAtPosition(pageId: string, targetPosition: number): Promise<Page[]> {
+  const { error } = await supabase
+    .rpc('insert_page_at_position', {
+      p_page_id: pageId,
+      p_target_position: targetPosition,
+    });
 
-  if (fetchError) throw fetchError;
-  if (!pages || pages.length !== 2) throw new Error('Pages not found');
+  if (error) throw error;
 
-  const pageA = pages.find(p => p.id === pageAId);
-  const pageB = pages.find(p => p.id === pageBId);
-
-  if (!pageA || !pageB) throw new Error('Pages not found');
-
-  const tempPosition = GRID_CONFIG.TEMP_POSITION;
-
-  await supabase.from('pages').update({ position: tempPosition }).eq('id', pageAId);
-  await supabase.from('pages').update({ position: pageA.position }).eq('id', pageBId);
-  await supabase.from('pages').update({ position: pageB.position }).eq('id', pageAId);
+  // Re-fetch to get consistent state after the shift
+  return fetchPages();
 }
 
 export async function resetPage(pageId: string): Promise<void> {

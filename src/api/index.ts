@@ -5,7 +5,7 @@ export {
   createPage,
   updatePage,
   updatePagePalette,
-  swapPagePositions,
+  insertPageAtPosition,
   resetPage,
 } from './pages';
 

@@ -29,4 +29,5 @@ export {
   findPageById,
   getPagePaletteId,
   calculateOverviewColumns,
+  computeInsertPositions,
 } from './PageService';

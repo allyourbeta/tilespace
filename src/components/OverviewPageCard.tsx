@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { MoreVertical } from 'lucide-react';
 import { Page, getPalette } from '@/types';
-import { darkenColor, isLightColor } from '@/utils/color';
+import { isLightColor } from '@/utils/color';
 import { TILE_VISUALS } from '@/lib/constants';
 
 interface OverviewPageCardProps {
   page: Page;
   isCurrentPage: boolean;
+  isDragActive: boolean;
   isDragging: boolean;
   isDragOver: boolean;
   isNavigating: boolean;
@@ -27,7 +28,7 @@ interface OverviewPageCardProps {
 }
 
 export function OverviewPageCard({
-  page, isCurrentPage, isDragging, isDragOver, isNavigating, isOtherNavigating,
+  page, isCurrentPage, isDragActive, isDragging, isDragOver, isNavigating, isOtherNavigating,
   editingPageId, editValue,
   onPageClick, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop,
   onContextMenu, onEditStart, onEditChange, onEditSubmit, onEditCancel,
@@ -51,6 +52,9 @@ export function OverviewPageCard({
 
   // Determine transform based on state priority
   let currentTransform = isHovered ? hoverTransform : restingTransform;
+  // While a drag is in progress, drop the 3D tilt to keep drop hit-testing
+  // accurate; scale-based states below stay flat (no rotate3d).
+  if (isDragActive) currentTransform = 'scale(1)';
   if (isDragging) currentTransform = 'scale(0.95)';
   if (isDragOver) currentTransform = 'scale(1.10)';
   if (isNavigating) currentTransform = 'scale(1.15)';
@@ -72,7 +76,7 @@ export function OverviewPageCard({
         overview-card relative aspect-square rounded-2xl overflow-hidden
         ${isCurrentPage ? 'ring-4 ring-white shadow-[0_0_15px_rgba(255,255,255,0.5)]' : ''}
         ${isDragging ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}
-        ${isDragOver ? 'shadow-[0_0_25px_rgba(251,191,36,0.7)] ring-4 ring-amber-400' : ''}
+        ${isDragOver ? 'shadow-[0_0_25px_rgba(74,222,128,0.7)] ring-4 ring-green-400' : ''}
         ${isNavigating ? 'shadow-[0_0_40px_rgba(255,255,255,0.3)] z-10' : ''}
         ${isOtherNavigating ? 'opacity-50' : ''}
       `}
@@ -85,6 +89,11 @@ export function OverviewPageCard({
       }}
     >
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 via-transparent to-black/10 pointer-events-none" />
+      {isDragOver && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white bg-green-500 shadow-lg z-20 pointer-events-none">
+          INSERT
+        </div>
+      )}
       {editingPageId === page.id ? (
         <input
           type="text"

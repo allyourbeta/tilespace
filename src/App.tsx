@@ -30,7 +30,7 @@ function AppContent() {
   const loadPages = usePageStore(s => s.loadPages);
   const setCurrentPageId = usePageStore(s => s.setCurrentPageId);
   const pageCreatePage = usePageStore(s => s.createPage);
-  const swapPages = usePageStore(s => s.swapPages);
+  const insertPage = usePageStore(s => s.insertPage);
   const updatePageTitle = usePageStore(s => s.updatePageTitle);
   const pageResetPage = usePageStore(s => s.resetPage);
 
@@ -246,7 +246,7 @@ function AppContent() {
           currentPageId={currentPageId!}
           onClose={() => setShowOverview(false)}
           onPageSelect={goToPage}
-          onSwapPages={swapPages}
+          onInsertPage={insertPage}
           onUpdatePageTitle={updatePageTitle}
           onResetPage={pageResetPage}
         />
