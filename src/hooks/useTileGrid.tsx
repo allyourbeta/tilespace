@@ -32,8 +32,11 @@ export function useTileGrid() {
   const { cols, rows } = getGridConfig(gridCapacity);
 
   const gridStyle = useMemo(() => ({
-    gridTemplateColumns: `repeat(${cols}, 1fr)`,
-    gridTemplateRows: `repeat(${rows}, 1fr)`,
+    // minmax(0, 1fr) lets tracks shrink below their content size.
+    // Plain 1fr means minmax(auto, 1fr): rows refuse to shrink below
+    // tile content, grow past the viewport, and get clipped.
+    gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+    gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))`,
   }), [cols, rows]);
 
   const mobileGridStyle = useMemo(() => ({

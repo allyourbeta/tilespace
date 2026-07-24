@@ -110,9 +110,9 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center justify-center pt-4 pb-4 px-4">
+      <div className="relative flex-1 flex flex-col items-center justify-center py-2 px-3 min-h-0 w-full">
         <div
-          className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center mb-3"
+          className="w-[clamp(3.5rem,7.4vh,5rem)] h-[clamp(3.5rem,7.4vh,5rem)] rounded-2xl flex items-center justify-center mb-2 shrink-0 [@media(max-height:560px)]:hidden"
           style={{
             backgroundColor: 'rgba(255,255,255,0.4)',
             boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)',
@@ -120,7 +120,7 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
           }}
         >
           <span
-            className="text-lg sm:text-xl lg:text-2xl select-none tracking-wide"
+            className="text-[clamp(1rem,2.2vh,1.5rem)] select-none tracking-wide"
             style={{
               fontFamily: 'Nunito, sans-serif',
               fontWeight: 700,
@@ -131,17 +131,18 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
           </span>
         </div>
 
-        <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 text-center tracking-tight leading-tight">
+        <h3
+          className="text-[clamp(1.125rem,2.2vh,1.5rem)] font-bold text-gray-800 text-center tracking-tight leading-tight line-clamp-2"
+          title={tile.title}
+        >
           {tile.title || '---'}
         </h3>
 
-        <div className="h-6 mt-2 flex items-center">
-          {linkCount > 0 && (
-            <span className="text-sm sm:text-base text-gray-600 font-semibold">
-              {linkCount} {linkCount === 1 ? 'item' : 'items'}
-            </span>
-          )}
-        </div>
+        {linkCount > 0 && (
+          <span className="mt-1 text-[clamp(0.875rem,1.5vh,1rem)] text-gray-600 font-semibold [@media(max-height:560px)]:hidden">
+            {linkCount} {linkCount === 1 ? 'item' : 'items'}
+          </span>
+        )}
       </div>
     </div>
   );
