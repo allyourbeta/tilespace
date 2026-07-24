@@ -39,6 +39,11 @@ export const WELCOME_BACK = {
   LAST_ACTIVE_KEY: 'tilespace_last_active',
 } as const;
 
+// Last-viewed page persistence (survives refresh)
+export const PAGE_PERSISTENCE = {
+  LAST_PAGE_KEY: 'tilespace_last_page',
+} as const;
+
 // Timing
 export const TIMING = {
   AUTOSAVE_DELAY_MS: 1000,

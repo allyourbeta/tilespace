@@ -2,9 +2,19 @@ import { create } from 'zustand';
 import type { Page } from '@/types';
 import * as api from '@/api';
 import * as PageService from '@/services/PageService';
-import { WELCOME_BACK } from '@/lib/constants';
+import { WELCOME_BACK, PAGE_PERSISTENCE } from '@/lib/constants';
 import { useUIStore } from './uiStore';
 import { useTileStore } from './tileStore';
+
+/** Remember the last-viewed page across refreshes (per browser). */
+function persistLastPage(id: string | null) {
+  try {
+    if (id) localStorage.setItem(PAGE_PERSISTENCE.LAST_PAGE_KEY, id);
+    else localStorage.removeItem(PAGE_PERSISTENCE.LAST_PAGE_KEY);
+  } catch {
+    // localStorage unavailable (private mode etc.) — persistence is best-effort
+  }
+}
 
 interface PageState {
   pages: Page[];
@@ -36,8 +46,16 @@ export const usePageStore = create<PageState>((set, get) => ({
       const updates: Partial<PageState> = { pages: pagesData };
 
       if (pagesData.length > 0 && !currentPageId) {
-        const sorted = [...pagesData].sort((a, b) => a.position - b.position);
-        updates.currentPageId = sorted[0].id;
+        // Restore last-viewed page if it still exists; else first by position
+        const savedId = localStorage.getItem(PAGE_PERSISTENCE.LAST_PAGE_KEY);
+        const saved = savedId ? pagesData.find(p => p.id === savedId) : undefined;
+        if (saved) {
+          updates.currentPageId = saved.id;
+        } else {
+          const sorted = [...pagesData].sort((a, b) => a.position - b.position);
+          updates.currentPageId = sorted[0].id;
+        }
+        persistLastPage(updates.currentPageId ?? null);
       }
 
       set(updates);
@@ -63,6 +81,7 @@ export const usePageStore = create<PageState>((set, get) => ({
         : 0;
       const title = `Page ${nextPosition + 1}`;
       const newPage = await api.createPage(title, nextPosition, paletteId);
+      persistLastPage(newPage.id);
       set(state => ({
         pages: [...state.pages, newPage],
         currentPageId: newPage.id,
@@ -125,6 +144,9 @@ export const usePageStore = create<PageState>((set, get) => ({
     }));
   },
 
-  setCurrentPageId: (id) => set({ currentPageId: id }),
+  setCurrentPageId: (id) => {
+    persistLastPage(id);
+    set({ currentPageId: id });
+  },
   setPages: (pages) => set({ pages }),
 }));
