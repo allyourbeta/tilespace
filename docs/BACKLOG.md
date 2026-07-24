@@ -1,0 +1,1 @@
+- Deep link to pages via URL hash — spec: docs/specs/deep-link-pages.md
