@@ -1,0 +1,218 @@
+version: 1
+project: tilespace
+prefix: ts
+items:
+  - id: ts-zzit2l
+    title: Deep link to pages via URL hash
+    status: open
+    section: Features
+    body: |-
+      Spec: `docs/specs/deep-link-pages.md`
+  - id: ts-zciqfo
+    title: Create Vercel project and link to repo
+    status: open
+    section: Vercel Setup
+  - id: ts-7ls4de
+    title: Set environment variables in Vercel dashboard
+    status: open
+    section: Vercel Setup
+    body: |-
+      - `VITE_SUPABASE_URL`
+      - `VITE_SUPABASE_ANON_KEY`
+  - id: ts-vcf72k
+    title: Deploy and verify build succeeds
+    status: open
+    section: Vercel Setup
+  - id: ts-llucxl
+    title: Purchase domain (e.g., tilespace.app, mytilespace.com)
+    status: open
+    section: Domain
+  - id: ts-wtfzbn
+    title: Configure DNS in Vercel
+    status: open
+    section: Domain
+  - id: ts-c6fg5b
+    title: Update Supabase Auth settings
+    status: open
+    section: Domain
+    body: |-
+      - Site URL → production domain
+      - Redirect URLs → add production domain
+  - id: ts-7itscq
+    title: Update Google OAuth
+    status: open
+    section: Domain
+    body: |-
+      - Add production callback URL to authorized redirect URIs
+  - id: ts-vtynpp
+    title: Add rate limiting to Supabase Edge Functions (if using quick-capture)
+    status: open
+    section: Rate Limiting
+  - id: ts-tdd43a
+    title: Consider Vercel Edge Middleware for API rate limiting
+    status: open
+    section: Rate Limiting
+  - id: ts-jtlu2a
+    title: Limits to consider
+    status: open
+    section: Rate Limiting
+    body: |-
+      - API calls: 100/minute per user
+      - Tile creation: 10/minute per user
+      - Link creation: 30/minute per user
+  - id: ts-ete4z7
+    title: Max tile title length (100 chars?)
+    status: open
+    section: Input Validation
+  - id: ts-bu3guu
+    title: Max link title length (200 chars?)
+    status: open
+    section: Input Validation
+  - id: ts-y6yrp7
+    title: Max link URL length (2000 chars?)
+    status: open
+    section: Input Validation
+  - id: ts-joqdtq
+    title: Max note content size (50KB?)
+    status: open
+    section: Input Validation
+  - id: ts-hbdxpd
+    title: Sanitize all user input (XSS prevention)
+    status: open
+    section: Input Validation
+  - id: ts-5om5pk
+    title: 'Max tiles per user: 100'
+    status: open
+    section: Resource Limits Per User
+  - id: ts-2twxqc
+    title: 'Max links per tile: 50'
+    status: open
+    section: Resource Limits Per User
+  - id: ts-hzldbz
+    title: 'Max total links per user: 500'
+    status: open
+    section: Resource Limits Per User
+  - id: ts-upkaga
+    title: 'Max notes per user: 100'
+    status: open
+    section: Resource Limits Per User
+  - id: ts-kqlpaw
+    title: 'Max note size: 50KB each'
+    status: open
+    section: Resource Limits Per User
+  - id: ts-2jvxr3
+    title: Enforce limits in frontend, API layer, and database
+    status: open
+    section: Resource Limits Per User
+    body: |-
+      - Frontend (UX feedback)
+      - API layer (validation)
+      - Database (constraints or triggers)
+  - id: ts-3t3t4p
+    title: Monitor for unusual activity patterns
+    status: open
+    section: Abuse Prevention
+  - id: ts-civpn4
+    title: Add ability to disable/ban accounts if needed
+    status: open
+    section: Abuse Prevention
+  - id: ts-ugtzlw
+    title: Consider email verification for new accounts
+    status: open
+    section: Abuse Prevention
+  - id: ts-ibjxyy
+    title: CAPTCHA on signup? (maybe overkill for now)
+    status: open
+    section: Abuse Prevention
+  - id: ts-anbrw5
+    title: Hero section with tagline and screenshot
+    status: open
+    section: Design
+  - id: ts-ikl4jp
+    title: Feature highlights (3-4 key benefits)
+    status: open
+    section: Design
+  - id: ts-zsyktm
+    title: How it works (simple steps)
+    status: open
+    section: Design
+  - id: ts-ixv5wh
+    title: Call to action (Sign up with Google)
+    status: open
+    section: Design
+  - id: ts-nzetau
+    title: Footer with links (Privacy, Terms, Contact)
+    status: open
+    section: Design
+  - id: ts-yg5dyk
+    title: Create `/landing` or show on `/` for logged-out users
+    status: open
+    section: Implementation
+  - id: ts-zuwrbl
+    title: Redirect authenticated users to `/app`
+    status: open
+    section: Implementation
+  - id: ts-uorpq4
+    title: Mobile responsive design
+    status: open
+    section: Implementation
+  - id: ts-63lmpl
+    title: Drag tiles to reorder/swap positions
+    status: open
+    section: Features to Test
+  - id: ts-nvyemw
+    title: Drag links between tiles
+    status: open
+    section: Features to Test
+  - id: ts-xvtpuy
+    title: Edit tile emoji and color
+    status: open
+    section: Features to Test
+  - id: ts-i777vb
+    title: Delete tiles (with confirmation)
+    status: open
+    section: Features to Test
+  - id: ts-txfrmq
+    title: Add/edit/delete notes (documents)
+    status: open
+    section: Features to Test
+  - id: ts-gbezv2
+    title: Markdown rendering in notes
+    status: open
+    section: Features to Test
+  - id: ts-hxu2sp
+    title: Generate proper icons (currently placeholder)
+    status: open
+    section: Chrome Extension
+  - id: ts-b2ro6p
+    title: 'Deploy edge function: `supabase functions deploy quick-capture`'
+    status: open
+    section: Chrome Extension
+  - id: ts-ii5lc2
+    title: Test quick capture flow end-to-end
+    status: open
+    section: Chrome Extension
+  - id: ts-7ktfie
+    title: Keyboard navigation between tiles (arrow keys)
+    status: open
+    section: UX Improvements
+  - id: ts-4ts5pk
+    title: Search/filter tiles
+    status: open
+    section: UX Improvements
+  - id: ts-to6v7z
+    title: Tile reordering via drag on main grid
+    status: open
+    section: UX Improvements
+  - id: ts-kyyjov
+    title: Dark mode support
+    status: open
+    section: UX Improvements
+  - id: ts-mqzizt
+    title: Export/import tiles as JSON
+    status: open
+    section: Data
+  - id: ts-dwqhuh
+    title: Backup reminders
+    status: open
+    section: Data
