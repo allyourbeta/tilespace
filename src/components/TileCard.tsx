@@ -1,13 +1,11 @@
 import { useState } from 'react';
 import { Tile } from '@/types';
-import { getInitials, getComplementaryColor } from '@/utils';
+import { getInitials } from '@/utils';
+import { chipColor, chipTint } from '@/lib/chipColors';
 import { GripVertical } from 'lucide-react';
-import { TILE_VISUALS } from '@/lib/constants';
 
 interface TileCardProps {
   tile: Tile;
-  borderColor: string;
-  pageBackground: string;
   onClick: () => void;
   onDragStart: (e: React.DragEvent, tile: Tile) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -16,16 +14,11 @@ interface TileCardProps {
   isDragging: boolean;
 }
 
-export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging, pageBackground }: TileCardProps) {
+export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
   const linkCount = tile.links?.length || 0;
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
   const [isTileDragOver, setIsTileDragOver] = useState(false);
   const [isShiftHeld, setIsShiftHeld] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Each tile has its own perspective so rotation is independent of grid position
-  const restingTransform = `perspective(800px) rotate3d(-1, 1, 0, ${TILE_VISUALS.TILT_DEGREES}deg)`;
-  const hoverTransform = 'perspective(800px) rotate3d(-1, 1, 0, 0deg) translateY(-4px) translateZ(20px)';
 
   const handleDragOver = (e: React.DragEvent) => {
     const linkData = e.dataTransfer.types.includes('application/link-id');
@@ -67,39 +60,27 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
+      title={tile.title}
       className={`
         group relative cursor-pointer
-        h-full w-full
-        flex flex-col items-center
-        rounded-2xl
-        ${isDragging ? 'opacity-50 scale-95' : 'opacity-100'}
+        h-full w-full min-h-0 min-w-0 overflow-hidden
+        flex flex-col
+        bg-surface-card border border-edge rounded-tile shadow-card
+        hover:shadow-cardHi hover:-translate-y-px hover:border-[#DEDCD6]
+        transition-[box-shadow,transform,border-color] duration-[140ms]
+        ${isDragging ? 'opacity-50' : ''}
         ${isLinkDragOver ? 'ring-4 ring-blue-400 ring-offset-2' : ''}
         ${isTileDragOver
           ? isShiftHeld
-            ? 'scale-105 shadow-[0_0_20px_rgba(251,191,36,0.6)] ring-4 ring-amber-400 ring-offset-2 ring-offset-white'
-            : 'scale-105 shadow-[0_0_20px_rgba(74,222,128,0.5)] ring-4 ring-green-400 ring-offset-2 ring-offset-white'
+            ? 'ring-4 ring-amber-400 ring-offset-2'
+            : 'ring-4 ring-green-400 ring-offset-2'
           : ''}
       `}
-      style={{
-        backgroundColor: `${tile.accent_color}30`,
-        border: '1px solid rgba(255,255,255,0.15)',
-        backdropFilter: 'blur(8px)',
-        transform: isHovered ? hoverTransform : restingTransform,
-        transformStyle: 'preserve-3d' as const,
-        transition: 'transform 400ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 400ms cubic-bezier(0.23, 1, 0.32, 1)',
-        boxShadow: isHovered
-          ? `${TILE_VISUALS.LIFTED_SHADOW}, inset 2px 2px 6px rgba(255,255,255,0.7), inset -1px -1px 3px rgba(0,0,0,0.08)`
-          : `${TILE_VISUALS.RESTING_SHADOW}, inset 2px 2px 6px rgba(255,255,255,0.6), inset -1px -1px 3px rgba(0,0,0,0.06)`,
-      }}
+      style={{ padding: 'clamp(10px,1.5vh,15px) clamp(11px,1.5vh,16px)' }}
     >
-      {/* Glass highlight overlay */}
-      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/40 via-white/20 to-transparent pointer-events-none" />
-
-      <div className="absolute top-3 left-4 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing">
-        <GripVertical className="w-5 h-5 text-gray-400" />
+      <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing">
+        <GripVertical className="w-4 h-4 text-ink-faint" />
       </div>
 
       {isTileDragOver && (
@@ -110,40 +91,41 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
         </div>
       )}
 
-      <div className="relative flex-1 flex flex-col items-center justify-center py-2 px-3 min-h-0 w-full">
-        <div
-          className="w-[clamp(3.5rem,7.4vh,5rem)] h-[clamp(3.5rem,7.4vh,5rem)] rounded-2xl flex items-center justify-center mb-2 shrink-0 [@media(max-height:560px)]:hidden"
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.4)',
-            boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.6), inset 0 -2px 4px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.15), 0 1px 3px rgba(0,0,0,0.1)',
-            border: '1px solid rgba(255,255,255,0.5)',
-          }}
-        >
-          <span
-            className="text-[clamp(1rem,2.2vh,1.5rem)] select-none tracking-wide"
-            style={{
-              fontFamily: 'Nunito, sans-serif',
-              fontWeight: 700,
-              color: getComplementaryColor(pageBackground),
-            }}
-          >
-            {getInitials(tile.title)}
-          </span>
-        </div>
+      <span
+        className="flex-none flex items-center justify-center font-bold [@media(max-height:600px)]:hidden"
+        style={{
+          width: 'clamp(26px,3.4vh,34px)',
+          height: 'clamp(26px,3.4vh,34px)',
+          borderRadius: 'clamp(7px,1vh,9px)',
+          marginBottom: 'clamp(6px,1vh,10px)',
+          fontSize: 'clamp(.6875rem,1.35vh,.8125rem)',
+          letterSpacing: '.015em',
+          background: chipTint(tile.color_index),
+          color: chipColor(tile.color_index),
+        }}
+      >
+        {getInitials(tile.title)}
+      </span>
 
-        <h3
-          className="text-[clamp(1.125rem,2.2vh,1.5rem)] font-bold text-gray-800 text-center tracking-tight leading-tight line-clamp-2"
-          title={tile.title}
-        >
-          {tile.title || '---'}
-        </h3>
+      <h3
+        className="line-clamp-2 text-ink font-semibold min-h-0 overflow-hidden"
+        style={{
+          fontSize: 'clamp(.8125rem,1.62vh,.9375rem)',
+          lineHeight: 1.32,
+          letterSpacing: '-.008em',
+        }}
+      >
+        {tile.title || '---'}
+      </h3>
 
-        {linkCount > 0 && (
-          <span className="mt-1 text-[clamp(0.875rem,1.5vh,1rem)] text-gray-600 font-semibold [@media(max-height:560px)]:hidden">
-            {linkCount} {linkCount === 1 ? 'item' : 'items'}
-          </span>
-        )}
-      </div>
+      {linkCount > 0 && (
+        <span
+          className="mt-auto flex-none text-ink-muted pt-[5px] [@media(max-height:600px)]:hidden"
+          style={{ fontSize: 'clamp(.6875rem,1.2vh,.75rem)' }}
+        >
+          {linkCount} {linkCount === 1 ? 'item' : 'items'}
+        </span>
+      )}
     </div>
   );
 }

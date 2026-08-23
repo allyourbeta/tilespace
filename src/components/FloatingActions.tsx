@@ -149,7 +149,7 @@ export function FloatingActions({
             ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}
           `}
         >
-          <div data-testid="floating-actions-menu" className="bg-white rounded-xl shadow-2xl border border-gray-100 border-white/10 overflow-visible min-w-[180px]">
+          <div data-testid="floating-actions-menu" className="bg-surface-card rounded-lg shadow-cardHi border border-edge overflow-visible min-w-[180px]">
             {canAddTile && (
               <button
                 type="button"
@@ -208,19 +208,17 @@ export function FloatingActions({
         <button
           onClick={() => { if (isMobile) setIsOpen(!isOpen); }}
           className={`
-            p-3.5 rounded-full shadow-lg hover:shadow-xl
-            transition-all duration-200 ease-out hover:scale-105 hover:-translate-y-0.5
-            ${isOpen
-              ? 'bg-gray-900 text-white'
-              : 'bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white'
-            }
+            h-[34px] min-w-[34px] px-2.5 rounded-lg bg-surface-card border border-edge shadow-card
+            hover:border-[#DAD8D2] transition-colors duration-150
+            flex items-center justify-center
+            ${isOpen ? 'text-ink' : 'text-ink-2'}
           `}
           title="Actions"
         >
           {isOpen ? (
-            <X className="w-5 h-5" />
+            <X className="w-[18px] h-[18px]" />
           ) : (
-            <Plus className="w-5 h-5" />
+            <Plus className="w-[18px] h-[18px]" />
           )}
         </button>
       </div>

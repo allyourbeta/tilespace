@@ -8,7 +8,7 @@ interface EmptyCellProps {
   isDragActive: boolean;
 }
 
-export function EmptyCell({ position, onDragOver, onDrop, onClick, isDragActive }: EmptyCellProps) {
+export function EmptyCell({ position, onDragOver, onDrop, onClick }: EmptyCellProps) {
   const [isDraggedOver, setIsDraggedOver] = useState(false);
 
   const handleDragEnter = (e: React.DragEvent) => {
@@ -34,21 +34,13 @@ export function EmptyCell({ position, onDragOver, onDrop, onClick, isDragActive 
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`
-        rounded-2xl shadow-inner border flex items-center justify-center transition-all
-        ${isDraggedOver
-          ? 'bg-white/20 border-white/50 shadow-[0_0_15px_rgba(255,255,255,0.2)] scale-[1.02]'
-          : isDragActive
-            ? 'bg-black/5 border-white/20 border-dashed'
-            : 'bg-black/5 border-white/10'
-        }
-      `}
+      className={`rounded-tile flex items-center justify-center transition-colors ${
+        isDraggedOver
+          ? 'border border-ink-faint bg-white'
+          : 'border border-dashed border-edge-soft bg-white/35'
+      }`}
     >
-      <span className={`text-2xl font-light transition-all ${
-        isDraggedOver ? 'text-white/80 scale-125' : 'text-white/50'
-      }`}>
-        {isDraggedOver ? '+' : '-'}
-      </span>
+      {isDraggedOver && <span className="text-2xl font-light text-ink-muted">+</span>}
     </div>
   );
 }

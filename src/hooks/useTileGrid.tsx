@@ -5,8 +5,6 @@ import { TileCard } from '@/components/TileCard';
 import { EmptyCell } from '@/components/EmptyCell';
 import { useTileStore } from '@/state/tileStore';
 import { useUIStore } from '@/state/uiStore';
-import { usePageStore } from '@/state/pageStore';
-import { getPalette } from '@/types';
 
 export function useTileGrid() {
   const tiles = useTileStore(s => s.tiles);
@@ -18,14 +16,6 @@ export function useTileGrid() {
   const setSelectedTileId = useUIStore(s => s.setSelectedTileId);
   const draggedTileId = useUIStore(s => s.draggedTileId);
   const setDraggedTileId = useUIStore(s => s.setDraggedTileId);
-
-  const pages = usePageStore(s => s.pages);
-  const currentPageId = usePageStore(s => s.currentPageId);
-  const currentPage = currentPageId ? pages.find(p => p.id === currentPageId) : null;
-  const currentPaletteId = currentPage?.palette_id ?? 'ocean';
-  const currentPalette = getPalette(currentPaletteId);
-  const borderColor = currentPalette.border;
-  const pageBackground = currentPalette.background;
 
   const gridCapacity = getGridCapacity(tiles.length);
   const canAddMore = tiles.length < APP_CONFIG.MAX_TILES;
@@ -100,8 +90,6 @@ export function useTileGrid() {
           <TileCard
             key={tile.id}
             tile={tile}
-            borderColor={borderColor}
-            pageBackground={pageBackground}
             onClick={() => setSelectedTileId(tile.id)}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
@@ -125,7 +113,7 @@ export function useTileGrid() {
     }
     return cells;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tilesByPosition, gridCapacity, borderColor, pageBackground, draggedTileId, tiles]);
+  }, [tilesByPosition, gridCapacity, draggedTileId, tiles]);
 
   return { gridCells, gridStyle, mobileGridStyle, canAddMore };
 }
