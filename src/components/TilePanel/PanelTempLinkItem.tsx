@@ -14,6 +14,8 @@ interface TempLinkItemProps {
   onRemove: (tempId: string) => void;
 }
 
+const INPUT_CLASS = 'w-full px-3 py-2 bg-surface-card border border-edge rounded-[9px] text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint';
+
 export function PanelTempLinkItem({ tempLink, onChange, onBlur, onRemove }: TempLinkItemProps) {
   const titleRef = useRef<HTMLInputElement>(null);
 
@@ -33,21 +35,21 @@ export function PanelTempLinkItem({ tempLink, onChange, onBlur, onRemove }: Temp
   };
 
   return (
-    <div className="p-4 bg-amber-50 rounded-lg space-y-3 border border-amber-200">
+    <div className="p-3 bg-surface-hover border border-edge rounded-[9px] space-y-2">
       <input
         ref={titleRef}
         type="text"
         value={tempLink.title}
         onChange={(e) => onChange(tempLink.tempId, 'title', e.target.value)}
         placeholder="Link title"
-        className="w-full px-3 py-2 bg-surface-card border border-edge rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-amber-300"
+        className={INPUT_CLASS}
       />
       <input
         type="text"
         value={tempLink.summary}
         onChange={(e) => onChange(tempLink.tempId, 'summary', e.target.value)}
         placeholder="Brief note (optional)"
-        className="w-full px-3 py-2 bg-surface-card border border-edge rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-amber-300"
+        className={INPUT_CLASS}
       />
       <input
         type="url"
@@ -56,13 +58,13 @@ export function PanelTempLinkItem({ tempLink, onChange, onBlur, onRemove }: Temp
         onBlur={handleUrlBlur}
         onKeyDown={handleUrlKeyDown}
         placeholder="https://..."
-        className="w-full px-3 py-2 bg-surface-card border border-edge rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-amber-300"
+        className={INPUT_CLASS}
       />
-      <p className="text-xs text-amber-600">Enter URL and press Tab or Enter to save</p>
+      <p className="text-xs text-ink-muted">Enter URL and press Tab or Enter to save</p>
       <div className="flex justify-end">
         <button
           onClick={() => onRemove(tempLink.tempId)}
-          className="py-2 px-4 text-ink-muted hover:bg-black/[0.06] rounded-lg transition-colors text-sm"
+          className="py-2 px-4 text-ink-muted hover:bg-ink/[0.06] rounded-[9px] transition-colors text-sm"
         >
           Cancel
         </button>

@@ -38,14 +38,14 @@ export function PanelEmojiPicker({ currentEmoji, onSelect }: PanelEmojiPickerPro
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="text-4xl hover:scale-110 transition-transform cursor-pointer"
+        className="w-[34px] h-[34px] rounded-[9px] border border-edge bg-surface-subtle hover:border-edge-hover transition-colors flex items-center justify-center text-[1.0625rem]"
         title="Change emoji"
       >
         {currentEmoji || '🌿'}
       </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-surface-card rounded-lg shadow-cardHi border border-edge z-10 w-72 overflow-hidden">
+        <div className="absolute top-full left-0 mt-2 bg-surface-card rounded-[9px] shadow-cardHi border border-edge z-10 w-72 overflow-hidden">
           <div className="flex border-b border-edge">
             {Object.keys(EMOJI_CATEGORIES).map((cat) => (
               <button

@@ -29,20 +29,21 @@ export function PanelColorPicker({ colorIndex, onSelect }: PanelColorPickerProps
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-8 h-8 rounded-lg shadow-card border border-edge hover:scale-110 transition-transform"
-        style={{ backgroundColor: chipColor(colorIndex) }}
+        className="w-[34px] h-[34px] rounded-[9px] border border-edge bg-surface-subtle hover:border-edge-hover transition-colors flex items-center justify-center"
         title="Change color"
-      />
+      >
+        <span className="block w-[15px] h-[15px] rounded-[5px]" style={{ backgroundColor: chipColor(colorIndex) }} />
+      </button>
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-surface-card rounded-lg shadow-cardHi border border-edge z-10 p-3 w-52">
+        <div className="absolute top-full left-0 mt-2 bg-surface-card rounded-[9px] shadow-cardHi border border-edge z-10 p-3 w-52">
           <p className="text-xs font-medium text-ink-muted mb-2">Chip colour</p>
           <div className="grid grid-cols-4 gap-2">
             {CHIP_COLORS.map((color, index) => (
               <button
                 key={index}
                 onClick={() => handleSelect(index)}
-                className={`w-10 h-10 rounded-lg shadow-card transition-transform hover:scale-110 ${
+                className={`w-8 h-8 rounded-[9px] transition-transform hover:scale-110 ${
                   colorIndex === index ? 'ring-2 ring-offset-2 ring-ink-faint' : ''
                 }`}
                 style={{ backgroundColor: color }}

@@ -7,6 +7,8 @@ export default {
         surface: {
           page: '#FAFAF8',
           card: '#FFFFFF',
+          subtle: '#FCFCFB',
+          hover: '#F6F5F2',
         },
         edge: {
           DEFAULT: '#E8E6E1',
@@ -14,6 +16,7 @@ export default {
           hover: '#DAD8D2',
           tilehover: '#DEDCD6',
           placeholder: '#D8D6D0',
+          grip: '#E0DED8',
         },
         ink: {
           DEFAULT: '#1C1B19',
@@ -21,6 +24,10 @@ export default {
           muted: '#8C8A83',
           faint: '#B4B2AB',
           grip: '#B9B7B0',
+        },
+        danger: {
+          DEFAULT: '#B91C1C',
+          tint: '#FEF2F2',
         },
       },
       boxShadow: {

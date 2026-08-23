@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Plus, FileText, Check } from 'lucide-react';
+import { X, Plus, FileText } from 'lucide-react';
 import { Tile, Link } from '@/types';
-import { chipColor, chipTint } from '@/lib/chipColors';
+import { chipColor } from '@/lib/chipColors';
 import { useIsMobile } from '@/hooks';
 import { isValidUrl } from '@/utils/url';
 import { PanelLinkItem } from './PanelLinkItem';
@@ -24,6 +24,10 @@ interface TilePanelProps {
   onAddNote: () => void;
 }
 
+const BTN_BASE = 'inline-flex items-center justify-center gap-[7px] h-9 px-3.5 rounded-[9px] border text-sm font-medium shadow-card transition-[border-color,color,filter] duration-150';
+const BTN_SECONDARY = `${BTN_BASE} border-edge bg-surface-card text-ink-2 hover:border-edge-hover hover:text-ink`;
+const BTN_PRIMARY = `${BTN_BASE} text-white hover:brightness-[.94] hover:text-white`;
+
 export function TilePanel({
   tile, isNewTile = false, isDocumentOpen = false,
   onClose, onUpdateTile, onUpdateTileColor, onResetTile,
@@ -36,14 +40,12 @@ export function TilePanel({
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [isDraggingLink, setIsDraggingLink] = useState(false);
-  const [showSaved, setShowSaved] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
   const saveAndClose = useCallback(() => {
     if (title !== tile.title) onUpdateTile(tile.id, { title });
-    setShowSaved(true);
     setTimeout(() => onClose(), 600);
   }, [title, tile.title, tile.id, onUpdateTile, onClose]);
 
@@ -122,55 +124,64 @@ export function TilePanel({
   const realLinks = tile.links || [];
   const hasAnyLinks = realLinks.length > 0 || tempLinks.length > 0;
   const accent = chipColor(tile.color_index);
-  const headerTint = chipTint(tile.color_index);
-  const primaryBtn = { backgroundColor: accent, color: 'white' };
-  const secondaryBtn = { borderColor: accent, color: accent, backgroundColor: headerTint };
+  const primaryBtnStyle = { backgroundColor: accent, borderColor: accent };
 
   return (
     <>
-      <div className={`fixed inset-0 bg-black/30 z-40 ${isDraggingLink ? 'pointer-events-none' : ''}`} onClick={onClose} />
+      <div className={`fixed inset-0 bg-ink/20 z-40 ${isDraggingLink ? 'pointer-events-none' : ''}`} onClick={onClose} />
       <div
         data-testid="tile-panel"
         ref={panelRef}
-        className={`fixed bg-surface-card shadow-cardHi z-50 flex flex-col overflow-hidden ${isMobile ? 'inset-0 rounded-none' : 'w-full max-w-md rounded-l-tile'}`}
-        style={isMobile ? {} : { right: -panelPosition.x, top: Math.max(8, panelPosition.y), bottom: Math.max(8, -panelPosition.y), cursor: isDragging ? 'grabbing' : 'default' }}
+        className={`fixed bg-surface-card shadow-[-16px_0_48px_rgba(28,27,25,.13)] z-50 flex flex-col overflow-hidden ${isMobile ? 'inset-0 rounded-none' : 'w-full max-w-md rounded-l-[14px] border border-edge border-r-0'}`}
+        style={isMobile ? {} : { right: -panelPosition.x, top: Math.max(10, panelPosition.y), bottom: Math.max(10, -panelPosition.y), cursor: isDragging ? 'grabbing' : 'default' }}
       >
         {!isMobile && (
-          <div onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); setDragStart({ x: e.clientX, y: e.clientY }); }} className="h-6 bg-edge-soft cursor-grab active:cursor-grabbing flex items-center justify-center hover:bg-edge transition-colors" title="Drag to move panel">
-            <div className="w-12 h-1 bg-ink-faint/50 rounded-full" />
+          <div onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); setDragStart({ x: e.clientX, y: e.clientY }); }} className="h-[22px] flex-none flex items-center justify-center cursor-grab active:cursor-grabbing">
+            <div className="w-[34px] h-[3px] rounded-[2px] bg-edge-grip" />
           </div>
         )}
 
-        <div className="px-4 py-3 border-b border-edge flex items-center gap-2" style={{ backgroundColor: headerTint }}>
-          <div className="flex-1">
-            <div className="flex items-center gap-3">
-              <PanelEmojiPicker currentEmoji={tile.emoji} onSelect={(emoji) => onUpdateTile(tile.id, { emoji })} />
-              <PanelColorPicker colorIndex={tile.color_index} onSelect={(idx) => onUpdateTileColor(tile.id, idx)} />
-            </div>
+        <div className="px-[18px] pt-0.5 pb-4 flex-none">
+          <div className="flex items-center gap-[9px] mb-3">
+            <PanelEmojiPicker currentEmoji={tile.emoji} onSelect={(emoji) => onUpdateTile(tile.id, { emoji })} />
+            <PanelColorPicker colorIndex={tile.color_index} onSelect={(idx) => onUpdateTileColor(tile.id, idx)} />
+            <span className="flex-1" />
+            <button
+              onClick={saveAndClose}
+              title="Close"
+              className="w-[30px] h-[30px] rounded-lg border-none bg-transparent text-ink-muted hover:bg-ink/5 hover:text-ink-2 flex items-center justify-center transition-colors"
+            >
+              <X className="w-[18px] h-[18px]" />
+            </button>
           </div>
-          <button onClick={saveAndClose} className="p-2 hover:bg-black/[0.05] rounded-lg transition-colors">
-            <X className="w-5 h-5 text-ink-2" />
-          </button>
+          <input
+            ref={titleRef}
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onBlur={handleTitleBlur}
+            onKeyDown={(e) => e.key === 'Enter' && titleRef.current?.blur()}
+            placeholder="Tile name..."
+            className="w-full border-none outline-none bg-transparent p-0 text-[1.375rem] font-bold tracking-[-.022em] text-ink placeholder-ink-faint"
+          />
         </div>
 
-        <div className="px-4 pb-3 border-b border-edge" style={{ backgroundColor: headerTint }}>
-          <input ref={titleRef} type="text" value={title} onChange={(e) => setTitle(e.target.value)} onBlur={handleTitleBlur} onKeyDown={(e) => e.key === 'Enter' && titleRef.current?.blur()} placeholder="Tile name..." className="w-full text-xl font-semibold bg-transparent border-none outline-none text-ink placeholder-ink-faint" />
-        </div>
+        <div className="h-px bg-edge-soft flex-none" />
 
-        <div className="flex-1 overflow-y-auto p-4">
-          {pasteFlash && <div className="mb-2 px-3 py-2 bg-green-50 text-green-700 text-sm font-medium rounded-lg text-center">Link added from clipboard</div>}
+        <div className="flex-1 min-h-0 overflow-y-auto p-3.5">
+          {pasteFlash && <div className="mb-2 px-3 py-2 bg-surface-hover text-ink-2 text-sm font-medium rounded-lg text-center">Link added from clipboard</div>}
           {!hasAnyLinks ? (
-            <div className="text-center py-8">
-              <p className="text-ink-muted text-base font-medium mb-4">No links yet</p>
+            <div className="text-center py-11 px-5">
+              <p className="text-[.9375rem] text-ink-muted mb-[18px]">No links yet</p>
               <div className="flex gap-2 justify-center">
-                <button onClick={handleAddTempLink} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm hover:opacity-90" style={primaryBtn}><Plus className="w-4 h-4" />Add Link</button>
-                <button onClick={onAddNote} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border hover:opacity-80" style={secondaryBtn}><FileText className="w-4 h-4" />Add Note</button>
+                <button onClick={handleAddTempLink} className={BTN_PRIMARY} style={primaryBtnStyle}><Plus className="w-4 h-4" />Add Link</button>
+                <button onClick={onAddNote} className={BTN_SECONDARY}><FileText className="w-4 h-4" />Add Note</button>
               </div>
             </div>
           ) : (
             <div className="space-y-1">
               {realLinks.map((link) => (
-                <PanelLinkItem key={link.id} link={link} onUpdate={onUpdateLink} onDelete={onDeleteLink} onDragStart={(e, id) => { e.dataTransfer.setData('application/link-id', id); e.dataTransfer.effectAllowed = 'move'; setIsDraggingLink(true); }} onDragEnd={() => setIsDraggingLink(false)} onOpenDocument={onOpenDocument} />
+                <PanelLinkItem key={link.id} link={link} tileAccent={accent} onUpdate={onUpdateLink} onDelete={onDeleteLink} onDragStart={(e, id) => { e.dataTransfer.setData('application/link-id', id); e.dataTransfer.effectAllowed = 'move'; setIsDraggingLink(true); }} onDragEnd={() => setIsDraggingLink(false)} onOpenDocument={onOpenDocument} />
               ))}
               {tempLinks.map((tl) => (
                 <PanelTempLinkItem key={tl.tempId} tempLink={tl} onChange={handleTempLinkChange} onBlur={handleTempLinkBlur} onRemove={(id) => setTempLinks(prev => prev.filter(t => t.tempId !== id))} />
@@ -179,36 +190,26 @@ export function TilePanel({
           )}
         </div>
 
-        <div className="p-4 border-t border-edge space-y-2">
+        <div className="flex-none px-3.5 py-3 border-t border-edge-soft">
           {hasAnyLinks && (
             <div className="flex gap-2">
-              <button onClick={handleAddTempLink} className="flex-1 py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm hover:opacity-90" style={primaryBtn}><Plus className="w-4 h-4" />Add Link</button>
-              <button onClick={onAddNote} className="flex-1 py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm border hover:opacity-80" style={secondaryBtn}><FileText className="w-4 h-4" />Add Note</button>
+              <button onClick={handleAddTempLink} className={`flex-1 ${BTN_PRIMARY}`} style={primaryBtnStyle}><Plus className="w-4 h-4" />Add Link</button>
+              <button onClick={onAddNote} className={`flex-1 ${BTN_SECONDARY}`}><FileText className="w-4 h-4" />Add Note</button>
             </div>
           )}
-          <button
-            onClick={() => {
-              const hasLinks = (tile.links?.length || 0) > 0;
-              if (hasLinks) { if (confirm('This tile has links that will be permanently deleted.')) { if (confirm('Are you sure you want to delete this tile?')) onResetTile(tile.id); } }
-              else { if (confirm('Delete this tile?')) onResetTile(tile.id); }
-            }}
-            className="w-full py-2.5 px-4 text-white font-semibold bg-red-500 hover:bg-red-600 rounded-lg transition-colors"
-          >
-            Delete Tile
-          </button>
-        </div>
-
-        {/* Saved indicator */}
-        {showSaved && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 animate-in fade-in duration-200">
-            <div className="flex items-center gap-3 bg-green-50 border border-green-200 px-6 py-4 rounded-lg shadow-cardHi">
-              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
-                <Check className="w-6 h-6 text-white" strokeWidth={3} />
-              </div>
-              <span className="text-green-800 text-lg font-semibold">Saved</span>
-            </div>
+          <div className="mt-2.5 text-center">
+            <button
+              onClick={() => {
+                const hasLinks = (tile.links?.length || 0) > 0;
+                if (hasLinks) { if (confirm('This tile has links that will be permanently deleted.')) { if (confirm('Are you sure you want to delete this tile?')) onResetTile(tile.id); } }
+                else { if (confirm('Delete this tile?')) onResetTile(tile.id); }
+              }}
+              className="border-none bg-transparent text-[.8125rem] text-ink-muted px-[9px] py-[5px] rounded-[7px] hover:text-danger hover:bg-danger-tint transition-colors"
+            >
+              Delete tile
+            </button>
           </div>
-        )}
+        </div>
       </div>
     </>
   );
