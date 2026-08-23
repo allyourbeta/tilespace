@@ -170,20 +170,34 @@ function AppContent() {
       isMobileSidebarOpen={isMobileSidebarOpen}
       onMobileSidebarOpen={() => setIsMobileSidebarOpen(true)}
       onMobileSidebarClose={() => setIsMobileSidebarOpen(false)}
+      footerActions={
+        <FloatingActions
+          onAddTile={tileCreateTile}
+          onPasteLink={handlePasteLink}
+          onAddNote={() => handleAddNote()}
+          canAddTile={canAddMore}
+          currentPaletteId={currentPaletteId}
+          onSelectPalette={changePalette}
+          tiles={tiles}
+          onCreateLink={tileCreateLink}
+          onSelectTile={(id) => { setSelectedTileId(id); setIsNewTile(false); }}
+        />
+      }
+      footerCenter={
+        <PageDots
+          pages={pages}
+          currentPageId={currentPageId!}
+          onPageSelect={goToPage}
+        />
+      }
     >
       <div
-        className={`h-full w-full grid ${isMobile ? 'gap-2 pb-16 overflow-y-auto' : 'gap-3'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
+        className={`h-full w-full grid ${isMobile ? 'gap-2 overflow-y-auto' : 'gap-3'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
         style={isMobile ? mobileGridStyle : gridStyle}
         {...swipeHandlers}
       >
         {gridCells}
       </div>
-
-      <PageDots
-        pages={pages}
-        currentPageId={currentPageId!}
-        onPageSelect={goToPage}
-      />
 
       {selectedTile && (
         <TilePanel
@@ -201,18 +215,6 @@ function AppContent() {
           onAddNote={() => handleAddNote(selectedTile)}
         />
       )}
-
-      <FloatingActions
-        onAddTile={tileCreateTile}
-        onPasteLink={handlePasteLink}
-        onAddNote={() => handleAddNote()}
-        canAddTile={canAddMore}
-        currentPaletteId={currentPaletteId}
-        onSelectPalette={changePalette}
-        tiles={tiles}
-        onCreateLink={tileCreateLink}
-        onSelectTile={(id) => { setSelectedTileId(id); setIsNewTile(false); }}
-      />
 
       {showPasteLink && (
         <PasteLinkModal

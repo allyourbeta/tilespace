@@ -135,10 +135,10 @@ export function FloatingActions({
   };
 
   return (
-    <div className="fixed bottom-4 left-4 z-40 flex items-end gap-2">
+    <div className="flex items-end gap-2">
       <div
         ref={menuRef}
-        className="relative"
+        className="relative z-10"
         onMouseEnter={handleMouseEnterContainer}
         onMouseLeave={handleMouseLeaveContainer}
       >

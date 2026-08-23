@@ -18,6 +18,8 @@ interface AppShellProps {
   isMobileSidebarOpen: boolean;
   onMobileSidebarOpen: () => void;
   onMobileSidebarClose: () => void;
+  footerActions: ReactNode;
+  footerCenter?: ReactNode;
   children: ReactNode;
 }
 
@@ -25,6 +27,7 @@ export function AppShell({
   pages, tileCounts, currentPage, currentPageId,
   onPageSelect, onInsertPage, onUpdatePageTitle, onResetPage, onCreatePage,
   isMobile, isMobileSidebarOpen, onMobileSidebarOpen, onMobileSidebarClose,
+  footerActions, footerCenter,
   children,
 }: AppShellProps) {
   const paletteBg = currentPage ? getPalette(currentPage.palette_id).background : null;
@@ -73,7 +76,14 @@ export function AppShell({
           {children}
         </div>
 
-        <footer className="flex-none" style={{ height: LAYOUT.FOOTER_HEIGHT_PX }} />
+        <footer
+          className="flex-none flex items-center"
+          style={{ height: LAYOUT.FOOTER_HEIGHT_PX, padding: `0 ${gutter}px` }}
+        >
+          <div className="flex-none">{footerActions}</div>
+          <div className="flex-1 flex justify-center">{footerCenter}</div>
+          <div className="flex-none" />
+        </footer>
       </div>
     </div>
   );
