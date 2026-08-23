@@ -50,13 +50,13 @@ export function PaletteSelector({ currentPaletteId, onSelectPalette }: PaletteSe
       {isOpen && (
         <div className="absolute bottom-full mb-2 left-0 bg-surface-card rounded-lg shadow-cardHi border border-edge overflow-hidden w-80 z-50">
           <div className="p-3 border-b border-edge">
-            <h3 className="text-sm font-semibold text-ink">Color Theme</h3>
-            <p className="text-xs text-ink-muted mt-0.5">Background & accent colors</p>
+            <h3 className="text-ts-body font-semibold text-ink">Color Theme</h3>
+            <p className="text-ts-meta text-ink-muted mt-0.5">Background & accent colors</p>
           </div>
           <div className="max-h-96 overflow-y-auto">
             <div className="p-2">
               <div className="px-2 py-1.5 mb-1">
-                <span className="text-xs font-semibold text-ink-muted uppercase tracking-wide">Vibrant</span>
+                <span className="text-ts-meta font-semibold text-ink-muted uppercase tracking-wide">Vibrant</span>
               </div>
               {vibrantPalettes.map((palette) => (
                 <PaletteOption
@@ -72,7 +72,7 @@ export function PaletteSelector({ currentPaletteId, onSelectPalette }: PaletteSe
             </div>
             <div className="p-2 border-t border-edge">
               <div className="px-2 py-1.5 mb-1">
-                <span className="text-xs font-semibold text-ink-muted uppercase tracking-wide">Muted / Pastel</span>
+                <span className="text-ts-meta font-semibold text-ink-muted uppercase tracking-wide">Muted / Pastel</span>
               </div>
               {mutedPalettes.map((palette) => (
                 <PaletteOption
@@ -120,16 +120,16 @@ function PaletteOption({ palette, isSelected, onSelect }: PaletteOptionProps) {
       </div>
       <div className="flex-1 text-left">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-ink">{palette.name}</span>
+          <span className="text-ts-body font-medium text-ink">{palette.name}</span>
           {isSelected && <Check className="w-4 h-4 text-ink-2" />}
         </div>
         <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-xs text-ink-faint">Background</span>
+          <span className="text-ts-meta text-ink-faint">Background</span>
           <div
             className="w-3 h-3 rounded-sm"
             style={{ backgroundColor: palette.background }}
           />
-          <span className="text-xs text-ink-faint ml-1">Border</span>
+          <span className="text-ts-meta text-ink-faint ml-1">Border</span>
           <div
             className="w-3 h-3 rounded-sm"
             style={{ backgroundColor: palette.border }}

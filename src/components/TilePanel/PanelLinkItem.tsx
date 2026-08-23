@@ -102,9 +102,9 @@ export function PanelLinkItem({ link, tileAccent, onUpdate, onDelete, onDragStar
             className="flex-1 min-w-0 text-left flex items-center gap-2.5"
           >
             <FileText className="w-[15px] h-[15px] flex-shrink-0" style={{ color: tileAccent }} />
-            <span className="text-[.9375rem] font-medium text-ink truncate">{link.title || 'Untitled'}</span>
+            <span className="text-ts-body font-medium text-ink truncate">{link.title || 'Untitled'}</span>
             {link.summary && (
-              <span className="text-[.8125rem] text-ink-muted flex-none hidden sm:inline">{link.summary}</span>
+              <span className="text-ts-meta text-ink-muted flex-none hidden sm:inline">{link.summary}</span>
             )}
           </button>
         ) : (
@@ -116,9 +116,9 @@ export function PanelLinkItem({ link, tileAccent, onUpdate, onDelete, onDragStar
             onClick={(e) => e.stopPropagation()}
           >
             <ExternalLink className="w-[15px] h-[15px] text-ink-faint flex-shrink-0" />
-            <span className="text-[.9375rem] font-medium text-ink truncate">{link.title || link.url}</span>
+            <span className="text-ts-body font-medium text-ink truncate">{link.title || link.url}</span>
             {link.summary && (
-              <span className="text-[.8125rem] text-ink-muted flex-none hidden sm:inline">{link.summary}</span>
+              <span className="text-ts-meta text-ink-muted flex-none hidden sm:inline">{link.summary}</span>
             )}
           </a>
         )}
@@ -185,7 +185,7 @@ export function PanelLinkItem({ link, tileAccent, onUpdate, onDelete, onDragStar
             setSummary(link.summary);
             setIsEditing(false);
           }}
-          className="py-2 px-4 text-ink-2 hover:bg-ink/[0.06] rounded-[9px] transition-colors text-sm"
+          className="py-2 px-4 text-ink-2 hover:bg-ink/[0.06] rounded-[9px] transition-colors text-ts-body"
         >
           Cancel
         </button>

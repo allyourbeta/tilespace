@@ -57,7 +57,7 @@ export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalP
           <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-xl font-semibold text-ink mb-1">Saved!</h2>
+          <h2 className="text-ts-head font-semibold text-ink mb-1">Saved!</h2>
           <p className="text-ink-2">Added to {savedTile}</p>
         </div>
       </div>
@@ -68,7 +68,7 @@ export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalP
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-surface-card rounded-lg max-w-md w-full shadow-cardHi border border-edge overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-edge">
-          <h2 className="text-lg font-semibold text-ink">
+          <h2 className="text-ts-head font-semibold text-ink">
             {step === 'input' ? 'Add Link' : 'Choose Tile'}
           </h2>
           <button
@@ -83,7 +83,7 @@ export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalP
           <div className="p-4">
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-ink-2 mb-1.5">
+                <label className="block text-ts-body font-medium text-ink-2 mb-1.5">
                   URL
                 </label>
                 <div className="flex gap-2">
@@ -106,7 +106,7 @@ export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalP
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-ink-2 mb-1.5">
+                <label className="block text-ts-body font-medium text-ink-2 mb-1.5">
                   Title (optional)
                 </label>
                 <input
@@ -135,18 +135,18 @@ export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalP
                   <LinkIcon className="w-4 h-4 text-ink-2" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-ink truncate text-sm">
+                  <p className="font-medium text-ink truncate text-ts-body">
                     {title || 'Untitled'}
                   </p>
-                  <p className="text-xs text-ink-muted truncate">{url}</p>
+                  <p className="text-ts-meta text-ink-muted truncate">{url}</p>
                 </div>
               </div>
             </div>
 
             {tiles.length === 0 ? (
               <div className="py-8 flex flex-col items-center gap-2">
-                <p className="text-sm text-ink-2">No tiles yet.</p>
-                <p className="text-xs text-ink-faint">Create a tile first to save links.</p>
+                <p className="text-ts-body text-ink-2">No tiles yet.</p>
+                <p className="text-ts-meta text-ink-faint">Create a tile first to save links.</p>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto">
@@ -158,11 +158,11 @@ export function PasteLinkModal({ tiles, onClose, onCreateLink }: PasteLinkModalP
                     className="p-3 rounded-lg text-left transition-all border border-edge hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
                     style={{ backgroundColor: chipTint(tile.color_index) }}
                   >
-                    <span className="text-xl mb-1 block font-medium tracking-wide" style={{ color: chipColor(tile.color_index) }}>{getInitials(tile.title)}</span>
-                    <span className="text-ink font-semibold text-sm block truncate">
+                    <span className="text-ts-tile mb-1 block font-medium tracking-wide" style={{ color: chipColor(tile.color_index) }}>{getInitials(tile.title)}</span>
+                    <span className="text-ink font-semibold text-ts-body block truncate">
                       {tile.title}
                     </span>
-                    <span className="text-ink-muted text-xs">
+                    <span className="text-ink-muted text-ts-meta">
                       {tile.links?.length || 0} links
                     </span>
                   </button>

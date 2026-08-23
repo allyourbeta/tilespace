@@ -62,12 +62,12 @@ export function PageRow({
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       onContextMenu={onContextMenu}
-      className={`group relative flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg cursor-pointer text-sm transition-colors ${
+      className={`group relative flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg cursor-pointer text-ts-body transition-colors ${
         isActive ? 'text-ink font-semibold' : 'text-ink-2 hover:bg-black/[0.04]'
       } ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'ring-1 ring-ink-faint' : ''}`}
       style={isActive ? { background: `${bg}14` } : undefined}
     >
-      <span className="absolute -left-px w-2.5 text-[.75rem] leading-none text-ink-grip opacity-0 group-hover:opacity-100 cursor-grab">⠿</span>
+      <span className="absolute -left-px w-2.5 text-ts-meta leading-none text-ink-grip opacity-0 group-hover:opacity-100 cursor-grab">⠿</span>
       <span className="w-[11px] h-[11px] rounded-[3.5px] flex-none" style={{ background: bg }} />
       {isEditing ? (
         <input
@@ -81,7 +81,7 @@ export function PageRow({
             if (e.key === 'Enter') onEditSubmit();
             if (e.key === 'Escape') onEditCancel();
           }}
-          className="flex-1 min-w-0 bg-white text-ink text-sm rounded border border-edge px-1 -mx-1 outline-none"
+          className="flex-1 min-w-0 bg-white text-ink text-ts-body rounded border border-edge px-1 -mx-1 outline-none"
         />
       ) : (
         <span
@@ -92,7 +92,7 @@ export function PageRow({
         </span>
       )}
       {!isEditing && (
-        <span className="text-xs text-ink-faint tabular-nums">{tileCount}</span>
+        <span className="text-ts-meta text-ink-faint tabular-nums">{tileCount}</span>
       )}
     </div>
   );

@@ -78,14 +78,14 @@ export function TileCard({ tile, titleLines, onClick, onDragStart, onDragOver, o
             : 'ring-4 ring-green-400 ring-offset-2'
           : ''}
       `}
-      style={{ padding: 'clamp(10px,1.5vh,15px) clamp(11px,1.5vh,16px)' }}
+      style={{ padding: '14px 16px' }}
     >
       <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-60 transition-opacity cursor-grab active:cursor-grabbing">
         <GripVertical className="w-4 h-4 text-ink-faint" />
       </div>
 
       {isTileDragOver && (
-        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white shadow-lg z-10 ${
+        <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-ts-meta font-semibold text-white shadow-lg z-10 ${
           isShiftHeld ? 'bg-amber-500' : 'bg-green-500'
         }`}>
           {isShiftHeld ? 'SWAP' : 'INSERT'}
@@ -93,14 +93,8 @@ export function TileCard({ tile, titleLines, onClick, onDragStart, onDragOver, o
       )}
 
       <span
-        className="flex-none flex items-center justify-center font-bold [@media(max-height:600px)]:hidden"
+        className="flex-none flex items-center justify-center w-10 h-10 rounded-[10px] mb-[10px] text-ts-body font-bold tracking-[.015em] [@media(max-height:600px)]:hidden"
         style={{
-          width: 'clamp(26px,3.4vh,34px)',
-          height: 'clamp(26px,3.4vh,34px)',
-          borderRadius: 'clamp(7px,1vh,9px)',
-          marginBottom: 'clamp(6px,1vh,10px)',
-          fontSize: 'clamp(.6875rem,1.35vh,.8125rem)',
-          letterSpacing: '.015em',
           background: chipTint(tile.color_index),
           color: chipColor(tile.color_index),
         }}
@@ -109,20 +103,14 @@ export function TileCard({ tile, titleLines, onClick, onDragStart, onDragOver, o
       </span>
 
       <h3
-        className={`${titleLines === 3 ? 'line-clamp-3' : 'line-clamp-2'} text-ink font-semibold min-h-0 overflow-hidden`}
-        style={{
-          fontSize: 'clamp(.8125rem,1.62vh,.9375rem)',
-          lineHeight: 1.32,
-          letterSpacing: '-.008em',
-        }}
+        className={`${titleLines === 3 ? 'line-clamp-3' : 'line-clamp-2'} text-ink font-semibold text-ts-tile tracking-[-.008em] min-h-0 overflow-hidden`}
       >
         {tile.title || '---'}
       </h3>
 
       {linkCount > 0 && (
         <span
-          className="mt-auto flex-none text-ink-muted pt-[5px] [@media(max-height:600px)]:hidden"
-          style={{ fontSize: 'clamp(.6875rem,1.2vh,.75rem)' }}
+          className="mt-auto flex-none text-ink-muted text-ts-meta pt-[5px] [@media(max-height:600px)]:hidden"
         >
           {linkCount} {linkCount === 1 ? 'item' : 'items'}
         </span>

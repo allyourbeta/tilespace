@@ -27,15 +27,15 @@
 }
 
 .prose h1 {
-  @apply text-2xl font-bold mt-6 mb-4;
+  @apply text-ts-panel font-bold mt-6 mb-4;
 }
 
 .prose h2 {
-  @apply text-xl font-bold mt-5 mb-3;
+  @apply text-ts-head font-bold mt-5 mb-3;
 }
 
 .prose h3 {
-  @apply text-lg font-semibold mt-4 mb-2;
+  @apply text-ts-tile font-semibold mt-4 mb-2;
 }
 
 .prose p {
@@ -63,7 +63,7 @@
 }
 
 .prose code {
-  @apply bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono;
+  @apply bg-gray-100 px-1.5 py-0.5 rounded text-ts-meta font-mono;
 }
 
 .prose pre {

@@ -41,25 +41,25 @@ export function UserMenu({ isCollapsed = false }: UserMenuProps) {
       {!isCollapsed && (
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="text-[.8125rem] text-ink-2 truncate min-w-0 flex-1 text-left"
+          className="text-ts-body text-ink-2 truncate min-w-0 flex-1 text-left"
         >
           {user.email}
         </button>
       )}
 
       {/* Build info tooltip on hover */}
-      <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-gray-800 text-gray-200 text-xs rounded shadow-lg whitespace-nowrap opacity-0 group-hover/build:opacity-100 transition-opacity pointer-events-none z-10">
+      <div className="absolute bottom-full left-0 mb-1 px-2 py-1 bg-gray-800 text-gray-200 text-ts-meta rounded shadow-lg whitespace-nowrap opacity-0 group-hover/build:opacity-100 transition-opacity pointer-events-none z-10">
         Build: {__BUILD_HASH__} · {__BUILD_TIME__}
       </div>
 
       {isOpen && (
         <div className="absolute bottom-full left-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 min-w-[200px] z-20">
-          <p className="px-4 py-2 text-sm text-gray-600 truncate border-b border-gray-100">
+          <p className="px-4 py-2 text-ts-meta text-gray-600 truncate border-b border-gray-100">
             {user.email}
           </p>
           <button
             onClick={() => { signOut(); setIsOpen(false); }}
-            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full text-left px-4 py-2 text-ts-body text-red-600 hover:bg-red-50 transition-colors"
           >
             Sign Out
           </button>

@@ -60,11 +60,11 @@ export function PanelTempLinkItem({ tempLink, onChange, onBlur, onRemove }: Temp
         placeholder="https://..."
         className={INPUT_CLASS}
       />
-      <p className="text-xs text-ink-muted">Enter URL and press Tab or Enter to save</p>
+      <p className="text-ts-meta text-ink-muted">Enter URL and press Tab or Enter to save</p>
       <div className="flex justify-end">
         <button
           onClick={() => onRemove(tempLink.tempId)}
-          className="py-2 px-4 text-ink-muted hover:bg-ink/[0.06] rounded-[9px] transition-colors text-sm"
+          className="py-2 px-4 text-ink-muted hover:bg-ink/[0.06] rounded-[9px] transition-colors text-ts-body"
         >
           Cancel
         </button>

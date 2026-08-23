@@ -34,7 +34,7 @@ export function PageDots({ pages, currentPageId, onPageSelect }: PageDotsProps) 
               className={`
                 absolute bottom-full left-1/2 -translate-x-1/2 mb-3
                 bg-black/40 backdrop-blur-md
-                text-white text-xs font-medium
+                text-white text-ts-meta font-medium
                 px-3 py-1.5 rounded-lg
                 shadow-lg border border-white/10
                 whitespace-nowrap

@@ -5,7 +5,7 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-surface-page flex flex-col items-center justify-center p-4">
-      <h1 className="text-4xl font-bold text-ink mb-8">TileSpace</h1>
+      <h1 className="text-ts-panel font-bold text-ink mb-8">TileSpace</h1>
       <button
         onClick={signInWithGoogle}
         className="flex items-center gap-3 px-6 py-3 bg-surface-card border border-edge rounded-lg shadow-card hover:shadow-cardHi transition-shadow"

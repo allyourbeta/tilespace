@@ -49,8 +49,8 @@ export function TileSubmenu({ tiles, onCreateLink, onSelectTile, onClose }: Tile
             className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all hover:scale-[1.03]"
             style={{ backgroundColor: chipTint(tile.color_index) }}
           >
-            <span className="text-xs font-medium shrink-0 tracking-wide" style={{ color: chipColor(tile.color_index) }}>{getInitials(tile.title)}</span>
-            <span className="text-xs font-medium text-ink-2 truncate">{tile.title}</span>
+            <span className="text-ts-body font-medium shrink-0 tracking-wide" style={{ color: chipColor(tile.color_index) }}>{getInitials(tile.title)}</span>
+            <span className="text-ts-body font-medium text-ink-2 truncate">{tile.title}</span>
           </button>
         ))}
       </div>

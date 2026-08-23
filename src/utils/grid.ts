@@ -63,11 +63,12 @@ export function canAddTile(currentTileCount: number): boolean {
 // Matches TileCard's own `[@media(max-height:600px)]:hidden` rule, below
 // which the chip and item count are hidden.
 const COMPACT_BREAKPOINT_PX = 600;
-// Tile padding: vertical padding 15px x 2.
-const TITLE_ROW_PADDING_PX = 30;
-// Chip 34px + its margin 10px + the count line's reserved 17px.
-const CHIP_AND_COUNT_PX = 34 + 10 + 17;
-const TITLE_LINE_HEIGHT_PX = 20;
+// Tile padding: vertical padding 14px x 2.
+const TITLE_ROW_PADDING_PX = 28;
+// Chip 40px + its margin 10px + the count line's reserved 18.9px (ts-meta: 14px * 1.35).
+const CHIP_AND_COUNT_PX = 40 + 10 + 18.9;
+// ts-tile: 17px * 1.3 line height.
+const TITLE_LINE_HEIGHT_PX = 22.1;
 
 function tileRowHeight(rows: number, viewportHeight: number): number {
   const boardHeight = viewportHeight - LAYOUT.HEADER_HEIGHT_PX - LAYOUT.FOOTER_HEIGHT_PX - 6;

@@ -24,7 +24,7 @@ interface TilePanelProps {
   onAddNote: () => void;
 }
 
-const BTN_BASE = 'inline-flex items-center justify-center gap-[7px] h-9 px-3.5 rounded-[9px] border text-sm font-medium shadow-card transition-[border-color,color,filter] duration-150';
+const BTN_BASE = 'inline-flex items-center justify-center gap-[7px] h-9 px-3.5 rounded-[9px] border text-ts-body font-medium shadow-card transition-[border-color,color,filter] duration-150';
 const BTN_SECONDARY = `${BTN_BASE} border-edge bg-surface-card text-ink-2 hover:border-edge-hover hover:text-ink`;
 const BTN_PRIMARY = `${BTN_BASE} text-white hover:brightness-[.94] hover:text-white`;
 
@@ -162,17 +162,17 @@ export function TilePanel({
             onBlur={handleTitleBlur}
             onKeyDown={(e) => e.key === 'Enter' && titleRef.current?.blur()}
             placeholder="Tile name..."
-            className="w-full border-none outline-none bg-transparent p-0 text-[1.375rem] font-bold tracking-[-.022em] text-ink placeholder-ink-faint"
+            className="w-full border-none outline-none bg-transparent p-0 text-ts-panel font-bold tracking-[-.022em] text-ink placeholder-ink-faint"
           />
         </div>
 
         <div className="h-px bg-edge-soft flex-none" />
 
         <div className="flex-1 min-h-0 overflow-y-auto p-3.5">
-          {pasteFlash && <div className="mb-2 px-3 py-2 bg-surface-hover text-ink-2 text-sm font-medium rounded-lg text-center">Link added from clipboard</div>}
+          {pasteFlash && <div className="mb-2 px-3 py-2 bg-surface-hover text-ink-2 text-ts-body font-medium rounded-lg text-center">Link added from clipboard</div>}
           {!hasAnyLinks ? (
             <div className="text-center py-11 px-5">
-              <p className="text-[.9375rem] text-ink-muted mb-[18px]">No links yet</p>
+              <p className="text-ts-body text-ink-muted mb-[18px]">No links yet</p>
               <div className="flex gap-2 justify-center">
                 <button onClick={handleAddTempLink} className={BTN_PRIMARY} style={primaryBtnStyle}><Plus className="w-4 h-4" />Add Link</button>
                 <button onClick={onAddNote} className={BTN_SECONDARY}><FileText className="w-4 h-4" />Add Note</button>
@@ -204,7 +204,7 @@ export function TilePanel({
                 if (hasLinks) { if (confirm('This tile has links that will be permanently deleted.')) { if (confirm('Are you sure you want to delete this tile?')) onResetTile(tile.id); } }
                 else { if (confirm('Delete this tile?')) onResetTile(tile.id); }
               }}
-              className="border-none bg-transparent text-[.8125rem] text-ink-muted px-[9px] py-[5px] rounded-[7px] hover:text-danger hover:bg-danger-tint transition-colors"
+              className="border-none bg-transparent text-ts-meta text-ink-muted px-[9px] py-[5px] rounded-[7px] hover:text-danger hover:bg-danger-tint transition-colors"
             >
               Delete tile
             </button>

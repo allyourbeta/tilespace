@@ -40,7 +40,7 @@ export function EmptyCell({ position, onDragOver, onDrop, onClick }: EmptyCellPr
           : 'border border-dashed border-edge-soft bg-white/35'
       }`}
     >
-      {isDraggedOver && <span className="text-2xl font-light text-ink-muted">+</span>}
+      {isDraggedOver && <span className="text-ts-panel font-light text-ink-muted">+</span>}
     </div>
   );
 }

@@ -38,7 +38,7 @@ export function PanelEmojiPicker({ currentEmoji, onSelect }: PanelEmojiPickerPro
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-[34px] h-[34px] rounded-[9px] border border-edge bg-surface-subtle hover:border-edge-hover transition-colors flex items-center justify-center text-[1.0625rem]"
+        className="w-[34px] h-[34px] rounded-[9px] border border-edge bg-surface-subtle hover:border-edge-hover transition-colors flex items-center justify-center text-ts-tile"
         title="Change emoji"
       >
         {currentEmoji || '🌿'}
@@ -51,7 +51,7 @@ export function PanelEmojiPicker({ currentEmoji, onSelect }: PanelEmojiPickerPro
               <button
                 key={cat}
                 onClick={() => setCategory(cat as keyof typeof EMOJI_CATEGORIES)}
-                className={`flex-1 py-2.5 text-xs font-medium transition-colors ${
+                className={`flex-1 py-2.5 text-ts-meta font-medium transition-colors ${
                   category === cat
                     ? 'text-ink bg-black/[0.03]'
                     : 'text-ink-muted hover:text-ink-2 hover:bg-black/[0.02]'
@@ -66,7 +66,7 @@ export function PanelEmojiPicker({ currentEmoji, onSelect }: PanelEmojiPickerPro
               <button
                 key={emoji}
                 onClick={() => handleSelect(emoji)}
-                className={`text-xl p-1.5 rounded-lg transition-all hover:bg-black/[0.04] hover:scale-110 ${
+                className={`text-ts-head p-1.5 rounded-lg transition-all hover:bg-black/[0.04] hover:scale-110 ${
                   currentEmoji === emoji ? 'bg-black/[0.04] ring-2 ring-ink-faint' : ''
                 }`}
               >

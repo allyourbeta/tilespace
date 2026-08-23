@@ -37,6 +37,13 @@ export default {
       borderRadius: {
         tile: '11px',
       },
+      fontSize: {
+        'ts-meta':  ['0.875rem', { lineHeight: '1.35' }],
+        'ts-body':  ['1rem',     { lineHeight: '1.45' }],
+        'ts-tile':  ['1.0625rem',{ lineHeight: '1.3'  }],
+        'ts-head':  ['1.375rem', { lineHeight: '1.25' }],
+        'ts-panel': ['1.5rem',   { lineHeight: '1.25' }],
+      },
     },
   },
   plugins: [],

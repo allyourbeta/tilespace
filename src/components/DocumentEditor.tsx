@@ -124,7 +124,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
           <div className="flex items-center gap-2 bg-edge-soft rounded-lg p-1">
             <button
               onClick={() => setIsPreview(false)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-ts-body font-medium rounded-md transition-colors ${
                 !isPreview ? 'bg-surface-card shadow-card text-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -133,7 +133,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
             </button>
             <button
               onClick={() => setIsPreview(true)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+              className={`px-3 py-1.5 text-ts-body font-medium rounded-md transition-colors ${
                 isPreview ? 'bg-surface-card shadow-card text-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
@@ -144,7 +144,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
         </div>
         <div className="flex items-center gap-2">
           {hasChanges && (
-            <span className="text-xs text-ink-faint">Saving...</span>
+            <span className="text-ts-meta text-ink-faint">Saving...</span>
           )}
           <button
             onClick={handleDelete}
@@ -160,7 +160,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
         <div className="max-w-3xl mx-auto h-full flex flex-col px-4 py-6">
           {isPreview ? (
             <div className="flex-1 overflow-y-auto">
-              <h1 className="text-3xl font-bold text-ink mb-2">
+              <h1 className="text-ts-panel font-bold text-ink mb-2">
                 {title || 'Untitled'}
               </h1>
               {summary && (
@@ -182,7 +182,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
                 value={title}
                 onChange={(e) => handleChange('title', e.target.value)}
                 placeholder="Add a title..."
-                className="text-3xl font-bold text-ink placeholder-ink-faint border-none outline-none bg-transparent mb-2"
+                className="text-ts-panel font-bold text-ink placeholder-ink-faint border-none outline-none bg-transparent mb-2"
               />
               <input
                 type="text"
@@ -196,7 +196,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
                 value={content}
                 onChange={(e) => handleChange('content', e.target.value)}
                 placeholder="Write your note here... (Markdown supported)"
-                className="flex-1 text-ink placeholder-ink-faint border-none outline-none bg-transparent resize-none text-lg leading-relaxed"
+                className="flex-1 text-ink placeholder-ink-faint border-none outline-none bg-transparent resize-none text-ts-body leading-relaxed"
               />
             </div>
           )}

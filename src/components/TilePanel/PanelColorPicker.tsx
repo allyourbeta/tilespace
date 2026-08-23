@@ -37,7 +37,7 @@ export function PanelColorPicker({ colorIndex, onSelect }: PanelColorPickerProps
 
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 bg-surface-card rounded-[9px] shadow-cardHi border border-edge z-10 p-3 w-52">
-          <p className="text-xs font-medium text-ink-muted mb-2">Chip colour</p>
+          <p className="text-ts-meta font-medium text-ink-muted mb-2">Chip colour</p>
           <div className="grid grid-cols-4 gap-2">
             {CHIP_COLORS.map((color, index) => (
               <button

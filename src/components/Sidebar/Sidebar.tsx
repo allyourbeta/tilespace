@@ -110,7 +110,7 @@ export function Sidebar({
       }`}
       style={{ width: collapsed ? LAYOUT.SIDEBAR_COLLAPSED_PX : LAYOUT.SIDEBAR_WIDTH_PX }}
     >
-      <div className={`flex items-center gap-2.5 font-bold text-[.9375rem] tracking-tight pb-4 ${collapsed ? 'justify-center' : 'px-2'}`}>
+      <div className={`flex items-center gap-2.5 font-bold text-ts-body tracking-tight pb-4 ${collapsed ? 'justify-center' : 'px-2'}`}>
         <span className="w-5 h-5 rounded-md flex-none" style={{ background: `linear-gradient(135deg, ${chipColor(1)}, ${chipColor(0)})` }} />
         {!collapsed && <span>TileSpace</span>}
       </div>
@@ -143,7 +143,7 @@ export function Sidebar({
         {!collapsed && (
           <button
             onClick={onCreatePage}
-            className="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-sm text-ink-faint hover:text-ink-2 hover:bg-black/[0.03] text-left"
+            className="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-ts-body text-ink-faint hover:text-ink-2 hover:bg-black/[0.03] text-left"
           >
             <span className="w-[11px] h-[11px] rounded-[3.5px] flex-none bg-edge-placeholder" />
             New page
@@ -175,7 +175,7 @@ export function Sidebar({
               if (page) { setEditingPageId(page.id); setEditValue(page.title); }
               closeContextMenu();
             }}
-            className="w-full text-left px-4 py-2 hover:bg-black/[0.04] text-sm text-ink-2"
+            className="w-full text-left px-4 py-2 hover:bg-black/[0.04] text-ts-body text-ink-2"
           >
             Rename
           </button>
@@ -184,7 +184,7 @@ export function Sidebar({
               if (contextMenu.pageId) setShowResetConfirm(contextMenu.pageId);
               closeContextMenu();
             }}
-            className="w-full text-left px-4 py-2 hover:bg-black/[0.04] text-sm text-red-600"
+            className="w-full text-left px-4 py-2 hover:bg-black/[0.04] text-ts-body text-red-600"
           >
             Reset Page
           </button>
@@ -194,7 +194,7 @@ export function Sidebar({
       {showResetConfirm && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 max-w-sm mx-4">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Reset Page?</h3>
+            <h3 className="text-ts-head font-medium text-gray-900 mb-2">Reset Page?</h3>
             <p className="text-gray-600 mb-4">This will delete all tiles and links on this page. This action cannot be undone.</p>
             <div className="flex gap-3 justify-end">
               <button onClick={() => setShowResetConfirm(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">Cancel</button>

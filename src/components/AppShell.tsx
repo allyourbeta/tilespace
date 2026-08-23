@@ -66,8 +66,8 @@ export function AppShell({
           {currentPage && (
             <>
               <span className="w-[13px] h-[13px] rounded flex-none" style={{ background: paletteBg ?? undefined }} />
-              <h1 className="text-[1.1875rem] font-bold tracking-tight text-ink truncate">{currentPage.title}</h1>
-              {isMobile && <span className="text-ink-faint text-xs">▾</span>}
+              <h1 className="text-ts-head font-bold tracking-tight text-ink truncate">{currentPage.title}</h1>
+              {isMobile && <span className="text-ink-faint text-ts-meta">▾</span>}
             </>
           )}
         </header>
