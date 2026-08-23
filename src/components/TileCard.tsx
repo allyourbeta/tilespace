@@ -6,6 +6,7 @@ import { GripVertical } from 'lucide-react';
 
 interface TileCardProps {
   tile: Tile;
+  titleLines: 2 | 3;
   onClick: () => void;
   onDragStart: (e: React.DragEvent, tile: Tile) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -14,7 +15,7 @@ interface TileCardProps {
   isDragging: boolean;
 }
 
-export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
+export function TileCard({ tile, titleLines, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
   const linkCount = tile.links?.length || 0;
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
   const [isTileDragOver, setIsTileDragOver] = useState(false);
@@ -108,7 +109,7 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
       </span>
 
       <h3
-        className="line-clamp-2 text-ink font-semibold min-h-0 overflow-hidden"
+        className={`${titleLines === 3 ? 'line-clamp-3' : 'line-clamp-2'} text-ink font-semibold min-h-0 overflow-hidden`}
         style={{
           fontSize: 'clamp(.8125rem,1.62vh,.9375rem)',
           lineHeight: 1.32,

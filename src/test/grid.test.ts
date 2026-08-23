@@ -4,6 +4,7 @@ import {
   getGridConfig,
   findFirstEmptyPosition,
   canAddTile,
+  maxTitleLines,
   MAX_TILES,
 } from '@/utils/grid';
 
@@ -91,5 +92,35 @@ describe('canAddTile', () => {
 
   it('uses correct MAX_TILES constant', () => {
     expect(MAX_TILES).toBe(30);
+  });
+});
+
+describe('maxTitleLines', () => {
+  it('a tall viewport at 4 rows returns 3', () => {
+    expect(maxTitleLines(4, 900)).toBe(3);
+  });
+
+  it('a short viewport at 5 rows returns 2', () => {
+    expect(maxTitleLines(5, 640)).toBe(2);
+  });
+
+  it('never returns anything but 2 or 3, across a sweep of heights and row counts', () => {
+    for (const rows of [4, 5]) {
+      for (let vh = 400; vh <= 2000; vh += 10) {
+        const lines = maxTitleLines(rows, vh);
+        expect([2, 3]).toContain(lines);
+      }
+    }
+  });
+
+  it('is monotonic: increasing the viewport never decreases the line count', () => {
+    for (const rows of [4, 5]) {
+      let prev = maxTitleLines(rows, 400);
+      for (let vh = 401; vh <= 2000; vh++) {
+        const lines = maxTitleLines(rows, vh);
+        expect(lines).toBeGreaterThanOrEqual(prev);
+        prev = lines;
+      }
+    }
   });
 });

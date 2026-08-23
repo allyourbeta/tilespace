@@ -1,10 +1,12 @@
 import React, { useMemo } from 'react';
 import { getGridConfig, getGridCapacity } from '@/types';
 import { APP_CONFIG } from '@/lib/constants';
+import { maxTitleLines } from '@/utils/grid';
 import { TileCard } from '@/components/TileCard';
 import { EmptyCell } from '@/components/EmptyCell';
 import { useTileStore } from '@/state/tileStore';
 import { useUIStore } from '@/state/uiStore';
+import { useViewportHeight } from '@/hooks/useViewportHeight';
 
 export function useTileGrid() {
   const tiles = useTileStore(s => s.tiles);
@@ -16,10 +18,12 @@ export function useTileGrid() {
   const setSelectedTileId = useUIStore(s => s.setSelectedTileId);
   const draggedTileId = useUIStore(s => s.draggedTileId);
   const setDraggedTileId = useUIStore(s => s.setDraggedTileId);
+  const viewportHeight = useViewportHeight();
 
   const gridCapacity = getGridCapacity(tiles.length);
   const canAddMore = tiles.length < APP_CONFIG.MAX_TILES;
   const { cols, rows } = getGridConfig(gridCapacity);
+  const titleLines = maxTitleLines(rows, viewportHeight);
 
   const gridStyle = useMemo(() => ({
     // minmax(0, 1fr) lets tracks shrink below their content size.
@@ -90,6 +94,7 @@ export function useTileGrid() {
           <TileCard
             key={tile.id}
             tile={tile}
+            titleLines={titleLines}
             onClick={() => setSelectedTileId(tile.id)}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
@@ -113,7 +118,7 @@ export function useTileGrid() {
     }
     return cells;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tilesByPosition, gridCapacity, draggedTileId, tiles]);
+  }, [tilesByPosition, gridCapacity, draggedTileId, tiles, titleLines]);
 
   return { gridCells, gridStyle, mobileGridStyle, canAddMore };
 }
