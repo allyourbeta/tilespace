@@ -15,6 +15,8 @@ interface SidebarProps {
   onResetPage: (id: string) => void;
   onCreatePage: () => void;
   isMobile: boolean;
+  isCollapsed: boolean;
+  onToggleCollapsed: () => void;
 }
 
 interface ContextMenuState {
@@ -23,27 +25,13 @@ interface ContextMenuState {
   y: number;
 }
 
-function readCollapsed(): boolean {
-  try {
-    return localStorage.getItem(LAYOUT.SIDEBAR_COLLAPSED_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function writeCollapsed(value: boolean) {
-  try {
-    localStorage.setItem(LAYOUT.SIDEBAR_COLLAPSED_KEY, value ? '1' : '0');
-  } catch {
-    // private mode etc — collapse still works for this session
-  }
-}
+const TOGGLE_SHORTCUT_HINT = '⌘\\ / Ctrl+\\';
 
 export function Sidebar({
   pages, tileCounts, currentPageId, onPageSelect, onInsertPage,
   onUpdatePageTitle, onResetPage, onCreatePage, isMobile,
+  isCollapsed, onToggleCollapsed,
 }: SidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(() => !isMobile && readCollapsed());
   const [draggedPageId, setDraggedPageId] = useState<string | null>(null);
   const [dragOverPageId, setDragOverPageId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenuState>({ pageId: null, x: 0, y: 0 });
@@ -65,8 +53,6 @@ export function Sidebar({
 
   const sortedPages = [...pages].sort((a, b) => a.position - b.position);
   const collapsed = isCollapsed && !isMobile;
-
-  const toggleCollapsed = () => setIsCollapsed(prev => { writeCollapsed(!prev); return !prev; });
 
   const handleDragStart = (e: React.DragEvent, pageId: string) => {
     setDraggedPageId(pageId);
@@ -110,9 +96,31 @@ export function Sidebar({
       }`}
       style={{ width: collapsed ? LAYOUT.SIDEBAR_COLLAPSED_PX : LAYOUT.SIDEBAR_WIDTH_PX }}
     >
-      <div className={`flex items-center gap-2.5 font-bold text-ts-body tracking-tight pb-4 ${collapsed ? 'justify-center' : 'px-2'}`}>
-        <span className="w-5 h-5 rounded-md flex-none" style={{ background: `linear-gradient(135deg, ${chipColor(1)}, ${chipColor(0)})` }} />
-        {!collapsed && <span>TileSpace</span>}
+      <div className={`flex flex-col pb-4 ${collapsed ? 'items-center' : ''}`}>
+        <div className={`flex items-center font-bold text-ts-body tracking-tight ${collapsed ? 'justify-center' : 'justify-between px-2'}`}>
+          <div className="flex items-center gap-2.5">
+            <span className="w-5 h-5 rounded-md flex-none" style={{ background: `linear-gradient(135deg, ${chipColor(1)}, ${chipColor(0)})` }} />
+            {!collapsed && <span>TileSpace</span>}
+          </div>
+          {!isMobile && !collapsed && (
+            <button
+              onClick={onToggleCollapsed}
+              title={`Collapse sidebar (${TOGGLE_SHORTCUT_HINT})`}
+              className="w-[26px] h-[26px] rounded-md flex-none flex items-center justify-center text-ink-faint hover:bg-black/[0.05] hover:text-ink-2"
+            >
+              «
+            </button>
+          )}
+        </div>
+        {collapsed && (
+          <button
+            onClick={onToggleCollapsed}
+            title={`Expand sidebar (${TOGGLE_SHORTCUT_HINT})`}
+            className="w-[26px] h-[26px] rounded-md flex-none flex items-center justify-center text-ink-faint hover:bg-black/[0.05] hover:text-ink-2 mt-1.5"
+          >
+            »
+          </button>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-px">
@@ -153,15 +161,6 @@ export function Sidebar({
 
       <div className={`flex items-center gap-2.5 pt-2.5 mt-2 border-t border-edge-soft w-full ${collapsed ? 'flex-col' : ''}`}>
         <UserMenu isCollapsed={collapsed} />
-        {!isMobile && (
-          <button
-            onClick={toggleCollapsed}
-            title={isCollapsed ? 'Expand' : 'Collapse'}
-            className="w-[26px] h-[26px] rounded-md flex-none flex items-center justify-center text-ink-faint hover:bg-black/[0.05] hover:text-ink-2"
-          >
-            {isCollapsed ? '»' : '«'}
-          </button>
-        )}
       </div>
 
       {contextMenu.pageId && (

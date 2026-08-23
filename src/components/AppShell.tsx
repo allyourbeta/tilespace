@@ -18,6 +18,8 @@ interface AppShellProps {
   isMobileSidebarOpen: boolean;
   onMobileSidebarOpen: () => void;
   onMobileSidebarClose: () => void;
+  isSidebarCollapsed: boolean;
+  onToggleSidebarCollapsed: () => void;
   footerActions: ReactNode;
   footerCenter?: ReactNode;
   children: ReactNode;
@@ -27,6 +29,7 @@ export function AppShell({
   pages, tileCounts, currentPage, currentPageId,
   onPageSelect, onInsertPage, onUpdatePageTitle, onResetPage, onCreatePage,
   isMobile, isMobileSidebarOpen, onMobileSidebarOpen, onMobileSidebarClose,
+  isSidebarCollapsed, onToggleSidebarCollapsed,
   footerActions, footerCenter,
   children,
 }: AppShellProps) {
@@ -54,6 +57,8 @@ export function AppShell({
           onResetPage={onResetPage}
           onCreatePage={onCreatePage}
           isMobile={isMobile}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapsed={onToggleSidebarCollapsed}
         />
       )}
 

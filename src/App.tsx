@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import { usePageNavigation, useKeyboardNavigation, useIsMobile } from './hooks';
+import { usePageNavigation, useKeyboardNavigation, useSidebarCollapsed, useIsMobile } from './hooks';
 import { APP_CONFIG } from '@/lib/constants';
 import { TilePanel } from '@/components/TilePanel';
 import { FloatingActions } from '@/components/FloatingActions';
@@ -19,6 +19,7 @@ function AppContent() {
   const { user, loading: authLoading } = useAuth();
   const isMobile = useIsMobile();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const { isCollapsed: isSidebarCollapsed, toggleCollapsed: toggleSidebarCollapsed } = useSidebarCollapsed(isMobile);
 
   const pages = usePageStore(s => s.pages);
   const tileCounts = usePageStore(s => s.tileCounts);
@@ -109,7 +110,7 @@ function AppContent() {
     delta: 50,
   });
 
-  useKeyboardNavigation(goToPrevPage, goToNextPage);
+  useKeyboardNavigation(goToPrevPage, goToNextPage, toggleSidebarCollapsed);
 
   const { handlePasteLink, handleAddNote, handleSaveDocument, handleOpenDocument } =
     useTileHandlers();
@@ -170,6 +171,8 @@ function AppContent() {
       isMobileSidebarOpen={isMobileSidebarOpen}
       onMobileSidebarOpen={() => setIsMobileSidebarOpen(true)}
       onMobileSidebarClose={() => setIsMobileSidebarOpen(false)}
+      isSidebarCollapsed={isSidebarCollapsed}
+      onToggleSidebarCollapsed={toggleSidebarCollapsed}
       footerActions={
         <FloatingActions
           onAddTile={tileCreateTile}

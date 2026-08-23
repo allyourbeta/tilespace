@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
 import { Sidebar } from '@/components/Sidebar';
-import { LAYOUT } from '@/lib/constants';
 import type { Page } from '@/types';
 
 // This project has no @testing-library/react dependency (only jest-dom's
@@ -67,6 +66,7 @@ describe('Sidebar', () => {
   function renderSidebar(overrides: Partial<React.ComponentProps<typeof Sidebar>> = {}) {
     const onPageSelect = vi.fn();
     const onInsertPage = vi.fn();
+    const onToggleCollapsed = vi.fn();
     const props = {
       pages,
       tileCounts: { a: 3, b: 0, c: 5 },
@@ -77,10 +77,12 @@ describe('Sidebar', () => {
       onResetPage: vi.fn(),
       onCreatePage: vi.fn(),
       isMobile: false,
+      isCollapsed: false,
+      onToggleCollapsed,
       ...overrides,
     };
     act(() => { root.render(<Sidebar {...props} />); });
-    return { onPageSelect, onInsertPage };
+    return { onPageSelect, onInsertPage, onToggleCollapsed };
   }
 
   it('renders one row per page, in position order', () => {
@@ -111,30 +113,58 @@ describe('Sidebar', () => {
     expect(onInsertPage).toHaveBeenCalledWith('a', 2);
   });
 
-  it('the collapsed toggle writes LAYOUT.SIDEBAR_COLLAPSED_KEY and the collapsed render omits page titles', () => {
-    renderSidebar();
+  it('when expanded, the toggle sits right-aligned on the wordmark row and calls onToggleCollapsed', () => {
+    const { onToggleCollapsed } = renderSidebar({ isCollapsed: false });
     const toggle = Array.from(container.querySelectorAll('button')).find(
-      b => b.title === 'Collapse'
+      b => b.title.startsWith('Collapse sidebar')
     ) as HTMLButtonElement;
     expect(toggle).toBeTruthy();
 
-    act(() => { toggle.click(); });
+    const wordmarkRow = toggle.parentElement as HTMLElement;
+    expect(wordmarkRow.textContent).toContain('TileSpace');
+    expect(wordmarkRow.lastElementChild).toBe(toggle);
 
-    expect(localStorage.getItem(LAYOUT.SIDEBAR_COLLAPSED_KEY)).toBe('1');
-    expect(container.textContent).not.toContain('Work');
-    expect(container.textContent).not.toContain('Travel');
+    act(() => { toggle.click(); });
+    expect(onToggleCollapsed).toHaveBeenCalledTimes(1);
   });
 
-  it('a localStorage.setItem that throws does not crash the component', () => {
-    const original = localStorage.setItem;
-    localStorage.setItem = () => { throw new Error('private mode'); };
-
-    expect(() => renderSidebar()).not.toThrow();
+  it('when collapsed, the toggle sits below the glyph, centred, and page titles are hidden', () => {
+    const { onToggleCollapsed } = renderSidebar({ isCollapsed: true });
     const toggle = Array.from(container.querySelectorAll('button')).find(
-      b => b.title === 'Collapse'
+      b => b.title.startsWith('Expand sidebar')
     ) as HTMLButtonElement;
-    expect(() => act(() => { toggle.click(); })).not.toThrow();
+    expect(toggle).toBeTruthy();
 
-    localStorage.setItem = original;
+    const wrapper = toggle.parentElement as HTMLElement;
+    expect(wrapper.className).toContain('items-center');
+    expect(container.textContent).not.toContain('Work');
+    expect(container.textContent).not.toContain('Travel');
+
+    act(() => { toggle.click(); });
+    expect(onToggleCollapsed).toHaveBeenCalledTimes(1);
+  });
+
+  it('the toggle title advertises the Cmd+\\ / Ctrl+\\ shortcut', () => {
+    renderSidebar({ isCollapsed: false });
+    const toggle = Array.from(container.querySelectorAll('button')).find(
+      b => b.title.startsWith('Collapse sidebar')
+    ) as HTMLButtonElement;
+    expect(toggle.title).toContain('\\');
+  });
+
+  it('the footer holds only UserMenu — no toggle button — regardless of collapsed state', () => {
+    renderSidebar({ isCollapsed: false });
+    const footer = container.querySelector('.border-t') as HTMLElement;
+    expect(footer).toBeTruthy();
+    expect(footer.querySelector('button[title^="Collapse sidebar"]')).toBeNull();
+    expect(footer.querySelector('button[title^="Expand sidebar"]')).toBeNull();
+  });
+
+  it('no toggle is rendered on mobile', () => {
+    renderSidebar({ isMobile: true, isCollapsed: false });
+    const toggle = Array.from(container.querySelectorAll('button')).find(
+      b => b.title.startsWith('Collapse sidebar') || b.title.startsWith('Expand sidebar')
+    );
+    expect(toggle).toBeUndefined();
   });
 });
