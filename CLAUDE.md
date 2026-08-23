@@ -195,6 +195,7 @@ Configuration and magic numbers:
 - Direct Supabase imports outside `api/` → Move to API layer
 
 ## Design
+UI work follows the house design language at ~/.claude/skills/design-language/SKILL.md. Read it before changing any styling, colour, or layout.
 
 Visual language established in the 2026-08-22 visual refresh. Reference
 targets live in `docs/targets/` (`TARGET_page.html`, `TARGET_page_collapsed.html`,
