@@ -6,15 +6,13 @@ interface PageDotsProps {
   pages: Page[];
   currentPageId: string;
   onPageSelect: (pageId: string) => void;
-  onShowOverview: () => void;
-  onCreatePage: () => void;
 }
 
 export function PageDots({ pages, currentPageId, onPageSelect }: PageDotsProps) {
   const [hoveredPageId, setHoveredPageId] = useState<string | null>(null);
   const isMobile = useIsMobile();
 
-  if (isMobile) return null;
+  if (!isMobile) return null;
 
   const sortedPages = [...pages].sort((a, b) => a.position - b.position);
 

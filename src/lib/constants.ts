@@ -21,24 +21,6 @@ export const GRID_CONFIG = {
   TEMP_POSITION: -1, // Used for position swapping
 } as const;
 
-// Page title overlay
-export const PAGE_TITLE_OVERLAY = {
-  HOVER_ZONE_WIDTH_PX: 300,
-  HOVER_ZONE_HEIGHT_PX: 160,
-  FADE_TIMEOUT_MS: 2000,
-} as const;
-
-// Overview mode
-export const OVERVIEW_MODE = {
-  GRID_COLUMNS: 4,
-} as const;
-
-// Welcome-back overview
-export const WELCOME_BACK = {
-  IDLE_THRESHOLD_MS: 300000, // 300 seconds
-  LAST_ACTIVE_KEY: 'tilespace_last_active',
-} as const;
-
 // Last-viewed page persistence (survives refresh)
 export const PAGE_PERSISTENCE = {
   LAST_PAGE_KEY: 'tilespace_last_page',

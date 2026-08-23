@@ -6,8 +6,9 @@ import * as TileService from '@/services/TileService';
 import { TIMING } from '@/lib/constants';
 import { usePageStore } from './pageStore';
 import { useUIStore } from './uiStore';
+import { createLinkActions } from './tileLinkActions';
 
-interface TileState {
+export interface TileState {
   tiles: Tile[];
   loading: boolean;
 
@@ -58,6 +59,7 @@ export const useTileStore = create<TileState>((set, get) => ({
     try {
       const newTile = await api.createTile(currentPageId, paletteId, targetPosition);
       set(state => ({ tiles: [...state.tiles, newTile] }));
+      usePageStore.getState().bumpTileCount(currentPageId, 1);
       useUIStore.getState().selectTile(newTile.id, true);
     } catch (err) {
       console.error('Failed to create tile:', err);
@@ -96,6 +98,7 @@ export const useTileStore = create<TileState>((set, get) => ({
     try {
       const updatedTiles = await api.deleteTile(id, currentPageId);
       set({ tiles: updatedTiles });
+      usePageStore.getState().bumpTileCount(currentPageId, -1);
       useUIStore.getState().setSelectedTileId(null);
     } catch (err) {
       console.error('Failed to delete tile:', err);
@@ -164,118 +167,7 @@ export const useTileStore = create<TileState>((set, get) => ({
     }
   },
 
-  createLink: async (tileId, data) => {
-    const { tiles } = get();
-    const tile = tiles.find(t => t.id === tileId);
-    const normalizedUrl = data.url.trim().toLowerCase();
-    const existingLink = tile?.links?.find(l =>
-      l.url && l.url.toLowerCase() === normalizedUrl
-    );
-    if (existingLink) {
-      throw new Error('This URL already exists in this tile');
-    }
-
-    try {
-      const position = tile?.links?.length || 0;
-      const newLink = await api.createLink(tileId, position, data.title, data.url, data.summary);
-      set(state => ({
-        tiles: state.tiles.map(t =>
-          t.id === tileId
-            ? { ...t, links: [...(t.links || []), newLink] }
-            : t
-        ),
-      }));
-
-      return newLink;
-    } catch (err) {
-      console.error('Failed to create link:', err);
-      throw err;
-    }
-  },
-
-  createDocument: async (tileId, position, title, content, summary) => {
-    try {
-      const newDoc = await api.createDocument(tileId, position, title, content, summary);
-      set(state => ({
-        tiles: state.tiles.map(t =>
-          t.id === tileId
-            ? { ...t, links: [...(t.links || []), newDoc] }
-            : t
-        ),
-      }));
-
-      return newDoc;
-    } catch (err) {
-      console.error('Failed to create document:', err);
-      throw err;
-    }
-  },
-
-  updateLink: async (id, updates) => {
-    try {
-      await api.updateLink(id, updates);
-      set(state => ({
-        tiles: state.tiles.map(t => ({
-          ...t,
-          links: t.links?.map(l => l.id === id ? { ...l, ...updates } : l),
-        })),
-      }));
-      const editingDoc = useUIStore.getState().editingDocument;
-      if (editingDoc?.id === id) {
-        useUIStore.getState().setEditingDocument({ ...editingDoc, ...updates } as Link);
-      }
-    } catch (err) {
-      console.error('Failed to update link:', err);
-    }
-  },
-
-  deleteLink: async (id) => {
-    try {
-      await api.deleteLink(id);
-      set(state => ({
-        tiles: state.tiles.map(t => ({
-          ...t,
-          links: t.links?.filter(l => l.id !== id),
-        })),
-      }));
-      const editingDoc = useUIStore.getState().editingDocument;
-      if (editingDoc?.id === id) {
-        useUIStore.getState().setEditingDocument(null);
-      }
-    } catch (err) {
-      console.error('Failed to delete link:', err);
-    }
-  },
-
-  moveLink: async (linkId, targetTileId) => {
-    const { tiles } = get();
-    let sourceTileId: string | null = null;
-    for (const t of tiles) {
-      if (t.links?.some(l => l.id === linkId)) {
-        sourceTileId = t.id;
-        break;
-      }
-    }
-    if (!sourceTileId || sourceTileId === targetTileId) return;
-
-    try {
-      const movedLink = await api.moveLink(linkId, targetTileId);
-      const sourceId = sourceTileId;
-      set(state => ({
-        tiles: state.tiles.map(t => {
-          if (t.id === sourceId) {
-            return { ...t, links: t.links?.filter(l => l.id !== linkId) };
-          }
-          if (t.id === targetTileId) {
-            return { ...t, links: [...(t.links || []), movedLink] };
-          }
-          return t;
-        }),
-      }));
-    } catch (err) {
-      console.error('Failed to move link:', err);
-    }
-  },
+  ...createLinkActions(set, get),
 
   changePalette: async (paletteId) => {
     const { currentPageId } = getPageContext();

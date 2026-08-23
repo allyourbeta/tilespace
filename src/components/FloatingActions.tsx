@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, X, Link as LinkIcon, FileText, Grid3x3 } from 'lucide-react';
+import { Plus, X, Link as LinkIcon, FileText } from 'lucide-react';
 import { Tile, Link } from '@/types';
 import { PaletteSelector } from './PaletteSelector';
 import { TileSubmenu } from './TileSubmenu';
@@ -12,7 +12,6 @@ interface FloatingActionsProps {
   canAddTile: boolean;
   currentPaletteId: string;
   onSelectPalette: (paletteId: string) => void;
-  onShowOverview?: () => void;
   tiles: Tile[];
   onCreateLink: (tileId: string, data: { title: string; url: string; summary: string }) => Promise<Link>;
   onSelectTile: (tileId: string) => void;
@@ -22,7 +21,7 @@ const CLOSE_GRACE_MS = 200;
 
 export function FloatingActions({
   onAddTile, onPasteLink, onAddNote, canAddTile,
-  currentPaletteId, onSelectPalette, onShowOverview,
+  currentPaletteId, onSelectPalette,
   tiles, onCreateLink, onSelectTile,
 }: FloatingActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -230,16 +229,6 @@ export function FloatingActions({
         currentPaletteId={currentPaletteId}
         onSelectPalette={onSelectPalette}
       />
-
-      {isMobile && onShowOverview && (
-        <button
-          onClick={onShowOverview}
-          className="p-3.5 rounded-full shadow-lg bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white transition-all"
-          title="Page overview"
-        >
-          <Grid3x3 className="w-5 h-5" />
-        </button>
-      )}
     </div>
   );
 }

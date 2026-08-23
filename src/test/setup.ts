@@ -1,5 +1,10 @@
 import '@testing-library/jest-dom';
 
+// Silences React's "not configured to support act()" warning for the
+// plain react-dom + jsdom component tests (no @testing-library/react here).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,

@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import type { Page } from '@/types';
 import * as api from '@/api';
 import * as PageService from '@/services/PageService';
-import { WELCOME_BACK, PAGE_PERSISTENCE } from '@/lib/constants';
-import { useUIStore } from './uiStore';
+import { PAGE_PERSISTENCE } from '@/lib/constants';
 import { useTileStore } from './tileStore';
 
 /** Remember the last-viewed page across refreshes (per browser). */
@@ -21,6 +20,7 @@ interface PageState {
   currentPageId: string | null;
   loading: boolean;
   error: string | null;
+  tileCounts: Record<string, number>;
 
   loadPages: () => Promise<void>;
   createPage: (paletteId: string) => Promise<void>;
@@ -28,6 +28,7 @@ interface PageState {
   insertPage: (pageId: string, targetPosition: number) => Promise<void>;
   resetPage: (pageId: string) => Promise<void>;
   updatePagePalette: (pageId: string, paletteId: string) => void;
+  bumpTileCount: (pageId: string, delta: number) => void;
   setCurrentPageId: (id: string | null) => void;
   setPages: (pages: Page[]) => void;
 }
@@ -37,13 +38,14 @@ export const usePageStore = create<PageState>((set, get) => ({
   currentPageId: null,
   loading: true,
   error: null,
+  tileCounts: {},
 
   loadPages: async () => {
     try {
       set({ error: null });
-      const pagesData = await api.fetchPages();
+      const [pagesData, tileCounts] = await Promise.all([api.fetchPages(), api.fetchTileCounts()]);
       const { currentPageId } = get();
-      const updates: Partial<PageState> = { pages: pagesData };
+      const updates: Partial<PageState> = { pages: pagesData, tileCounts };
 
       if (pagesData.length > 0 && !currentPageId) {
         // Restore last-viewed page if it still exists; else first by position
@@ -59,14 +61,6 @@ export const usePageStore = create<PageState>((set, get) => ({
       }
 
       set(updates);
-
-      if (pagesData.length >= 2) {
-        const lastActive = localStorage.getItem(WELCOME_BACK.LAST_ACTIVE_KEY);
-        const idle = lastActive ? Date.now() - parseInt(lastActive, 10) : Infinity;
-        if (idle >= WELCOME_BACK.IDLE_THRESHOLD_MS) {
-          useUIStore.getState().setShowOverview(true);
-        }
-      }
     } catch (err) {
       set({ error: 'Failed to load pages' });
       console.error(err);
@@ -127,6 +121,7 @@ export const usePageStore = create<PageState>((set, get) => ({
   resetPage: async (pageId: string) => {
     try {
       await api.resetPage(pageId);
+      set(state => ({ tileCounts: { ...state.tileCounts, [pageId]: 0 } }));
       const { currentPageId } = get();
       if (currentPageId === pageId) {
         await useTileStore.getState().loadTiles();
@@ -141,6 +136,15 @@ export const usePageStore = create<PageState>((set, get) => ({
       pages: state.pages.map(p =>
         p.id === pageId ? { ...p, palette_id: paletteId } : p
       ),
+    }));
+  },
+
+  bumpTileCount: (pageId: string, delta: number) => {
+    set(state => ({
+      tileCounts: {
+        ...state.tileCounts,
+        [pageId]: Math.max(0, (state.tileCounts[pageId] ?? 0) + delta),
+      },
     }));
   },
 

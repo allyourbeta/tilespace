@@ -7,6 +7,7 @@ export {
   updatePagePalette,
   insertPageAtPosition,
   resetPage,
+  fetchTileCounts,
 } from './pages';
 
 export {

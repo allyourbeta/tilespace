@@ -1,30 +1,27 @@
-import { useEffect, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import { usePageNavigation, useKeyboardNavigation, useIsMobile } from './hooks';
-import { getPalette } from '@/types';
-import { darkenColor } from '@/utils/color';
 import { APP_CONFIG } from '@/lib/constants';
 import { TilePanel } from '@/components/TilePanel';
 import { FloatingActions } from '@/components/FloatingActions';
 import { PasteLinkModal } from '@/components/PasteLinkModal';
 import { DocumentEditor } from '@/components/DocumentEditor';
-import { UserMenu } from '@/components/UserMenu';
 import { PageDots } from '@/components/PageDots';
-import { OverviewMode } from '@/components/OverviewMode';
-import { PageTitleDisplay } from '@/components/PageTitleDisplay';
+import { AppShell } from '@/components/AppShell';
 import { Loader2 } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { usePageStore, useTileStore, useUIStore } from '@/state';
-import { useWelcomeBack } from '@/hooks/useWelcomeBack';
 import { useTileGrid } from '@/hooks/useTileGrid';
 import { useTileHandlers } from '@/hooks/useTileHandlers';
 
 function AppContent() {
   const { user, loading: authLoading } = useAuth();
   const isMobile = useIsMobile();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const pages = usePageStore(s => s.pages);
+  const tileCounts = usePageStore(s => s.tileCounts);
   const currentPageId = usePageStore(s => s.currentPageId);
   const pageError = usePageStore(s => s.error);
   const loadPages = usePageStore(s => s.loadPages);
@@ -50,13 +47,11 @@ function AppContent() {
   const isNewTile = useUIStore(s => s.isNewTile);
   const showPasteLink = useUIStore(s => s.showPasteLink);
   const editingDocument = useUIStore(s => s.editingDocument);
-  const showOverview = useUIStore(s => s.showOverview);
   const isPageTransitioning = useUIStore(s => s.isPageTransitioning);
   const setSelectedTileId = useUIStore(s => s.setSelectedTileId);
   const setIsNewTile = useUIStore(s => s.setIsNewTile);
   const setShowPasteLink = useUIStore(s => s.setShowPasteLink);
   const setEditingDocument = useUIStore(s => s.setEditingDocument);
-  const setShowOverview = useUIStore(s => s.setShowOverview);
   const setIsPageTransitioning = useUIStore(s => s.setIsPageTransitioning);
   const closeTilePanel = useUIStore(s => s.closeTilePanel);
 
@@ -70,8 +65,6 @@ function AppContent() {
     () => selectedTileId ? tiles.find(t => t.id === selectedTileId) ?? null : null,
     [tiles, selectedTileId]
   );
-
-  useWelcomeBack(pages.length, selectedTileId, editingDocument);
 
   const prevPageIdRef = useRef<string | null>(null);
   useEffect(() => {
@@ -92,7 +85,16 @@ function AppContent() {
     if (currentPageId) loadTiles();
   }, [currentPageId, loadTiles]);
 
-  const { sortedPages, goToNextPage, goToPrevPage, goToPage } = usePageNavigation({
+  useEffect(() => {
+    if (!isMobileSidebarOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileSidebarOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isMobileSidebarOpen]);
+
+  const { goToNextPage, goToPrevPage, goToPage } = usePageNavigation({
     pages,
     currentPageId,
     setCurrentPageId,
@@ -121,8 +123,8 @@ function AppContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+      <div className="min-h-screen bg-surface-page flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-ink-faint animate-spin" />
       </div>
     );
   }
@@ -131,20 +133,20 @@ function AppContent() {
 
   if (tilesLoading || !currentPage) {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
+      <div className="min-h-screen bg-surface-page flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-ink-faint animate-spin" />
       </div>
     );
   }
 
   if (pageError) {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
+      <div className="min-h-screen bg-surface-page flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600 mb-4">{pageError}</p>
+          <p className="text-ink-2 mb-4">{pageError}</p>
           <button
             onClick={() => { loadPages(); loadTiles(); }}
-            className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+            className="px-4 py-2 bg-ink text-white rounded-lg hover:opacity-90"
           >
             Try Again
           </button>
@@ -153,31 +155,26 @@ function AppContent() {
     );
   }
 
-  const currentPalette = getPalette(currentPaletteId);
-  const bgColor = currentPalette.background;
-
   return (
-    <div
-      className="h-screen w-screen overflow-hidden relative"
-      style={{ background: `radial-gradient(ellipse at center, ${bgColor} 0%, ${darkenColor(bgColor, 25)} 100%)` }}
-      {...swipeHandlers}
+    <AppShell
+      pages={pages}
+      tileCounts={tileCounts}
+      currentPage={currentPage}
+      currentPageId={currentPageId}
+      onPageSelect={goToPage}
+      onInsertPage={insertPage}
+      onUpdatePageTitle={updatePageTitle}
+      onResetPage={pageResetPage}
+      onCreatePage={handleCreatePage}
+      isMobile={isMobile}
+      isMobileSidebarOpen={isMobileSidebarOpen}
+      onMobileSidebarOpen={() => setIsMobileSidebarOpen(true)}
+      onMobileSidebarClose={() => setIsMobileSidebarOpen(false)}
     >
-      {/* Grain texture overlay */}
-      <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ opacity: 0.15 }}>
-        <filter id="tilespace-grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-        </filter>
-        <rect width="100%" height="100%" filter="url(#tilespace-grain)" />
-      </svg>
-
-      <PageTitleDisplay currentPage={currentPage} currentPageId={currentPageId} pages={pages} onShowOverview={() => setShowOverview(true)} />
-
       <div
-        className={`h-full w-full grid ${isMobile ? 'gap-2 p-2 pt-10 pb-16 overflow-y-auto' : 'gap-4 p-4'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
-        style={{
-          ...(isMobile ? mobileGridStyle : gridStyle),
-          ...(!isMobile ? {} : {}),
-        }}
+        className={`h-full w-full grid ${isMobile ? 'gap-2 pb-16 overflow-y-auto' : 'gap-3'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
+        style={isMobile ? mobileGridStyle : gridStyle}
+        {...swipeHandlers}
       >
         {gridCells}
       </div>
@@ -186,8 +183,6 @@ function AppContent() {
         pages={pages}
         currentPageId={currentPageId!}
         onPageSelect={goToPage}
-        onShowOverview={() => setShowOverview(true)}
-        onCreatePage={handleCreatePage}
       />
 
       {selectedTile && (
@@ -215,13 +210,10 @@ function AppContent() {
         canAddTile={canAddMore}
         currentPaletteId={currentPaletteId}
         onSelectPalette={changePalette}
-        onShowOverview={() => setShowOverview(true)}
         tiles={tiles}
         onCreateLink={tileCreateLink}
         onSelectTile={(id) => { setSelectedTileId(id); setIsNewTile(false); }}
       />
-
-      <UserMenu />
 
       {showPasteLink && (
         <PasteLinkModal
@@ -239,19 +231,7 @@ function AppContent() {
           onDelete={tileDeleteLink}
         />
       )}
-
-      {showOverview && (
-        <OverviewMode
-          pages={pages}
-          currentPageId={currentPageId!}
-          onClose={() => setShowOverview(false)}
-          onPageSelect={goToPage}
-          onInsertPage={insertPage}
-          onUpdatePageTitle={updatePageTitle}
-          onResetPage={pageResetPage}
-        />
-      )}
-    </div>
+    </AppShell>
   );
 }
 

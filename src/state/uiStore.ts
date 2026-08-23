@@ -7,7 +7,6 @@ interface UIState {
   draggedTileId: string | null;
   showPasteLink: boolean;
   editingDocument: Link | null;
-  showOverview: boolean;
   isPageTransitioning: boolean;
 
   selectTile: (id: string | null, isNew?: boolean) => void;
@@ -16,7 +15,6 @@ interface UIState {
   setDraggedTileId: (id: string | null) => void;
   setShowPasteLink: (value: boolean) => void;
   setEditingDocument: (doc: Link | null) => void;
-  setShowOverview: (value: boolean) => void;
   setIsPageTransitioning: (value: boolean) => void;
   closeTilePanel: () => void;
 }
@@ -27,7 +25,6 @@ export const useUIStore = create<UIState>((set) => ({
   draggedTileId: null,
   showPasteLink: false,
   editingDocument: null,
-  showOverview: false,
   isPageTransitioning: false,
 
   selectTile: (id, isNew = false) => set({
@@ -40,7 +37,6 @@ export const useUIStore = create<UIState>((set) => ({
   setDraggedTileId: (id) => set({ draggedTileId: id }),
   setShowPasteLink: (value) => set({ showPasteLink: value }),
   setEditingDocument: (doc) => set({ editingDocument: doc }),
-  setShowOverview: (value) => set({ showOverview: value }),
   setIsPageTransitioning: (value) => set({ isPageTransitioning: value }),
   closeTilePanel: () => set({ selectedTileId: null, isNewTile: false }),
 }));

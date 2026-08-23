@@ -60,6 +60,21 @@ export async function insertPageAtPosition(pageId: string, targetPosition: numbe
   return fetchPages();
 }
 
+/** Tile count per page, for the sidebar. One lightweight query, no schema change. */
+export async function fetchTileCounts(): Promise<Record<string, number>> {
+  const { data, error } = await supabase
+    .from('tiles')
+    .select('page_id');
+
+  if (error) throw error;
+
+  const counts: Record<string, number> = {};
+  for (const row of data || []) {
+    counts[row.page_id] = (counts[row.page_id] || 0) + 1;
+  }
+  return counts;
+}
+
 export async function resetPage(pageId: string): Promise<void> {
   const { data: tiles } = await supabase
     .from('tiles')
