@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TileSpace target — Life Advice</title>
+<style>
+:root{
+  --page:#FAFAF8; --card:#FFFFFF; --border:#E8E6E1; --border-soft:#EFEDE8;
+  --ink:#1C1B19; --ink-2:#4B4A46; --muted:#8C8A83;
+  --shadow:0 1px 2px rgba(28,27,25,.04), 0 1px 3px rgba(28,27,25,.05);
+  --shadow-hi:0 4px 14px rgba(28,27,25,.09);
+  --rail:236px; --rail-collapsed:60px;
+  --gutter:28px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+  color:var(--ink); overflow:hidden;
+  /* PAGE TINT: the active page's colour, at a whisper. Pages feel different
+     from one another without any surface becoming coloured. */
+  background:
+    radial-gradient(1200px 620px at 18% -12%, var(--tint) 0%, rgba(0,0,0,0) 62%),
+    var(--page);
+}
+.app{height:100vh;display:flex}
+
+/* ---------------- sidebar ---------------- */
+.rail{
+  width:var(--rail); flex:none; display:flex; flex-direction:column;
+  border-right:1px solid var(--border-soft); padding:16px 12px 12px;
+}
+.brand{
+  display:flex;align-items:center;gap:9px;padding:4px 8px 16px;
+  font-size:.9375rem;font-weight:700;letter-spacing:-.02em;
+}
+.brand .glyph{
+  width:20px;height:20px;border-radius:6px;flex:none;
+  background:linear-gradient(135deg,#7C3AED,#2563EB);
+}
+.rail-scroll{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:1px}
+.prow{
+  display:flex;align-items:center;gap:10px;
+  padding:7px 9px;border-radius:8px;cursor:pointer;
+  font-size:.875rem;color:var(--ink-2);position:relative;
+  transition:background .12s;
+}
+.prow:hover{background:rgba(28,27,25,.04)}
+.prow .grip{
+  position:absolute;left:-1px;width:10px;opacity:0;color:#B9B7B0;
+  font-size:.75rem;line-height:1;cursor:grab;
+}
+.prow:hover .grip{opacity:1}
+.prow .sw{width:11px;height:11px;border-radius:3.5px;flex:none;background:var(--pc)}
+.prow .nm{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow .ct{font-size:.75rem;color:#B4B2AB;font-variant-numeric:tabular-nums}
+.prow.on{background:var(--pc-tint);color:var(--ink);font-weight:600}
+.prow.on .ct{color:var(--muted)}
+.rail-foot{
+  padding-top:10px;margin-top:8px;border-top:1px solid var(--border-soft);
+  display:flex;align-items:center;gap:9px;
+}
+.avatar{width:26px;height:26px;border-radius:50%;background:#CFCDC6;flex:none;
+  border:1px solid var(--border)}
+.who{font-size:.8125rem;color:var(--ink-2);flex:1;white-space:nowrap;overflow:hidden}
+.iconbtn{
+  width:26px;height:26px;border-radius:7px;flex:none;border:1px solid transparent;
+  background:none;color:#9C9A93;display:flex;align-items:center;justify-content:center;
+  font-size:.875rem;cursor:pointer;
+}
+.iconbtn:hover{background:rgba(28,27,25,.05);color:var(--ink-2)}
+
+/* collapsed rail */
+.rail.mini{width:var(--rail-collapsed);align-items:center;padding:16px 8px 12px}
+.rail.mini .brand{padding:4px 0 16px}
+.rail.mini .brand span:not(.glyph){display:none}
+.rail.mini .nm,.rail.mini .ct,.rail.mini .grip,.rail.mini .who{display:none}
+.rail.mini .prow{justify-content:center;padding:8px 0;width:40px}
+.rail.mini .prow .sw{width:15px;height:15px;border-radius:4.5px}
+.rail.mini .rail-foot{flex-direction:column;gap:8px;width:100%}
+
+/* ---------------- main ---------------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+header{
+  height:60px;flex:none;display:flex;align-items:center;gap:11px;
+  padding:0 var(--gutter);
+}
+header .sw{width:13px;height:13px;border-radius:4px;background:var(--pc);flex:none}
+h1{font-size:1.1875rem;font-weight:700;letter-spacing:-.022em}
+.stamp{margin-left:auto;font-size:.6875rem;color:#B4B2AB}
+
+.board{flex:1;min-height:0;padding:0 var(--gutter) 6px}
+.grid{
+  height:100%;display:grid;gap:12px;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  grid-template-rows:repeat(5,minmax(0,1fr));
+}
+.tile{
+  background:var(--card);border:1px solid var(--border);border-radius:11px;
+  box-shadow:var(--shadow);
+  padding:clamp(10px,1.5vh,15px) clamp(11px,1.5vh,16px);
+  display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;
+  cursor:pointer;transition:box-shadow .14s,transform .14s,border-color .14s;
+}
+.tile:hover{box-shadow:var(--shadow-hi);transform:translateY(-1px);border-color:#DEDCD6}
+.chip{
+  width:clamp(26px,3.4vh,34px);height:clamp(26px,3.4vh,34px);
+  border-radius:clamp(7px,1vh,9px);flex:none;
+  margin-bottom:clamp(6px,1vh,10px);
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(.6875rem,1.35vh,.8125rem);font-weight:700;letter-spacing:.015em;
+  background:var(--tc-bg);color:var(--tc);
+}
+.t-title{
+  font-size:clamp(.8125rem,1.62vh,.9375rem);
+  font-weight:600;line-height:1.32;letter-spacing:-.008em;color:var(--ink);
+  /* TWO lines, never three: the row height is fixed, so a third line is what
+     got sliced in v1. Overflow ends in an ellipsis, never mid-glyph. */
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;min-height:0;
+}
+.t-count{
+  margin-top:auto;padding-top:5px;flex:none;
+  font-size:clamp(.6875rem,1.2vh,.75rem);color:var(--muted);
+}
+.empty{border:1px dashed #E6E4DE;border-radius:11px;background:rgba(255,255,255,.35)}
+
+/* short windows: drop the chip and the count, keep the title whole */
+@media (max-height:600px){
+  .chip,.t-count{display:none}
+}
+
+footer{
+  height:52px;flex:none;display:flex;align-items:center;gap:9px;padding:0 var(--gutter);
+}
+.ctl{
+  height:34px;min-width:34px;padding:0 10px;border-radius:9px;background:var(--card);
+  border:1px solid var(--border);box-shadow:var(--shadow);color:#6B6A64;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  font-size:.8125rem;font-weight:500;cursor:pointer;
+}
+.ctl:hover{border-color:#DAD8D2;color:var(--ink-2)}
+
+/* ---------------- mobile ---------------- */
+body{background:radial-gradient(700px 400px at 50% -14%, var(--tint) 0%, rgba(0,0,0,0) 66%), var(--page)}
+.app{position:relative}
+.rail{
+  position:absolute;inset:0 auto 0 0;z-index:20;background:var(--page);
+  box-shadow:0 0 40px rgba(28,27,25,.16);border-right:1px solid var(--border);
+}
+.scrim{position:absolute;inset:0;z-index:10;background:rgba(28,27,25,.28)}
+.main{width:100%}
+header{padding:0 16px;height:54px}
+.title-tap{display:flex;align-items:center;gap:9px;cursor:pointer}
+.title-tap .caret{color:#B4B2AB;font-size:.75rem}
+.board{padding:0 16px 4px}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr))}
+footer{padding:0 16px;height:56px}
+.dots{margin:0 auto;display:flex;gap:7px;align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:#DAD8D2}
+.dot.on{background:var(--pc);width:6px;height:6px}
+</style></head>
+<body style="--pc:#7C3AED;--tint:#7C3AED12">
+  <div class="app">
+    <div class="scrim"></div>
+    <aside class="rail">
+      <div class="brand"><span class="glyph"></span><span>TileSpace</span></div>
+      <div class="rail-scroll">
+        <div class="prow" style="--pc:#2563EB;--pc-tint:#2563EB14" title="Work"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Work</span><span class="ct">18</span></div>
+        <div class="prow" style="--pc:#E11D48;--pc-tint:#E11D4814" title="Clients"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Clients</span><span class="ct">12</span></div>
+        <div class="prow on" style="--pc:#7C3AED;--pc-tint:#7C3AED14" title="Life Advice"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Life Advice</span><span class="ct">21</span></div>
+        <div class="prow" style="--pc:#EA580C;--pc-tint:#EA580C14" title="Reading"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Reading</span><span class="ct">9</span></div>
+        <div class="prow" style="--pc:#0891B2;--pc-tint:#0891B214" title="Travel"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Travel</span><span class="ct">14</span></div>
+        <div class="prow" style="--pc:#CA8A04;--pc-tint:#CA8A0414" title="Music"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Music</span><span class="ct">7</span></div>
+        <div class="prow" style="--pc:#16A34A;--pc-tint:#16A34A14" title="Chess"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Chess</span><span class="ct">11</span></div>
+        <div class="prow" style="--pc:#DB2777;--pc-tint:#DB277714" title="Health"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Health</span><span class="ct">6</span></div>
+        <div class="prow" style="--pc:#9333EA;--pc-tint:#9333EA14" title="Ideas"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Ideas</span><span class="ct">16</span></div>
+        <div class="prow" style="--pc:#D97706;--pc-tint:#D9770614" title="Cooking"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Cooking</span><span class="ct">8</span></div>
+        <div class="prow" style="--pc:#0D9488;--pc-tint:#0D948814" title="Finance"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Finance</span><span class="ct">10</span></div>
+        <div class="prow" style="--pc:#6B7280;--pc-tint:#6B728014" title="Archive"><span class="grip">⠿</span><span class="sw"></span><span class="nm">Archive</span><span class="ct">24</span></div>
+        <div class="prow" style="--pc:#D8D6D0" title="New page"><span class="sw"></span><span class="nm" style="color:#A9A7A0">New page</span></div>
+      </div>
+      <div class="rail-foot">
+        <span class="avatar"></span><span class="who">Ashish</span><button class="iconbtn" title="Settings">⚙</button>
+      </div>
+    </aside>
+    <div class="main">
+      <header>
+        <div class="title-tap"><span class="sw"></span><h1>Life Advice</h1><span class="caret">▾</span></div>
+      </header>
+      <div class="board"><div class="grid">
+        <div class="tile" style="--tc:#EA580C;--tc-bg:#EA580C16" title="FIGHTING SPIRIT!"><span class="chip">FS</span><div class="t-title">FIGHTING SPIRIT!</div></div>
+        <div class="tile" style="--tc:#2563EB;--tc-bg:#2563EB16" title=""Looking back, which choice will I feel best about?""><span class="chip">LB</span><div class="t-title">"Looking back, which choice will I feel best about?"</div></div>
+        <div class="tile" style="--tc:#7C3AED;--tc-bg:#7C3AED16" title="CONFIDENCE and Triggers"><span class="chip">CT</span><div class="t-title">CONFIDENCE and Triggers</div><div class="t-count">2 items</div></div>
+        <div class="tile" style="--tc:#0D9488;--tc-bg:#0D948816" title="Work I like: with people, in meatspace"><span class="chip">WI</span><div class="t-title">Work I like: with people, in meatspace</div><div class="t-count">1 item</div></div>
+        <div class="tile" style="--tc:#DB2777;--tc-bg:#DB277716" title=""Tell them how they'll be different""><span class="chip">TT</span><div class="t-title">"Tell them how they'll be different"</div></div>
+        <div class="tile" style="--tc:#4F46E5;--tc-bg:#4F46E516" title="Explanation v Excuse"><span class="chip">EV</span><div class="t-title">Explanation v Excuse</div><div class="t-count">1 item</div></div>
+        <div class="tile" style="--tc:#E11D48;--tc-bg:#E11D4816" title="Step into the ARENA!"><span class="chip">SI</span><div class="t-title">Step into the ARENA!</div></div>
+        <div class="tile" style="--tc:#D97706;--tc-bg:#D9770616" title="Turn difficult experiences into fuel"><span class="chip">TD</span><div class="t-title">Turn difficult experiences into fuel</div></div>
+      </div></div>
+      <footer>
+        <button class="ctl">+</button>
+        <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+        <button class="ctl">◐</button>
+      </footer>
+    </div>
+  </div>
+</body></html>
