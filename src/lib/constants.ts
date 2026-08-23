@@ -43,15 +43,3 @@ export const TIMING = {
   DEBOUNCE_DELAY_MS: 300,
 } as const;
 
-// Tile visual effects — tweak these to taste
-export const TILE_VISUALS = {
-  /** Resting tilt angle in degrees. 0 = flat, 2-3 = subtle, 5 = dramatic */
-  TILT_DEGREES: 4,
-  /** Shadow offset and blur for resting tiles (directional, top-left light) */
-  RESTING_SHADOW: '4px 6px 16px rgba(60, 40, 100, 0.3), 2px 2px 4px rgba(60, 40, 100, 0.15)',
-  /** Shadow on hover (flatter, softer — card settles down) */
-  HOVER_SHADOW: '2px 3px 10px rgba(60, 40, 100, 0.2), 1px 1px 3px rgba(60, 40, 100, 0.1)',
-  /** Shadow when lifted (on hover for tile cards on pages — card rises up) */
-  LIFTED_SHADOW: '8px 12px 32px rgba(60, 40, 100, 0.35), 3px 4px 8px rgba(60, 40, 100, 0.15)',
-} as const;
-

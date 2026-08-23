@@ -67,7 +67,7 @@ export function PageRow({
       } ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'ring-1 ring-ink-faint' : ''}`}
       style={isActive ? { background: `${bg}14` } : undefined}
     >
-      <span className="absolute -left-px w-2.5 text-[.75rem] leading-none text-[#B9B7B0] opacity-0 group-hover:opacity-100 cursor-grab">⠿</span>
+      <span className="absolute -left-px w-2.5 text-[.75rem] leading-none text-ink-grip opacity-0 group-hover:opacity-100 cursor-grab">⠿</span>
       <span className="w-[11px] h-[11px] rounded-[3.5px] flex-none" style={{ background: bg }} />
       {isEditing ? (
         <input

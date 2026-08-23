@@ -188,7 +188,6 @@ function AppContent() {
       {selectedTile && (
         <TilePanel
           tile={selectedTile}
-          currentPaletteId={currentPaletteId}
           isNewTile={isNewTile}
           isDocumentOpen={!!editingDocument}
           onClose={closeTilePanel}

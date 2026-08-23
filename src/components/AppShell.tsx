@@ -27,18 +27,18 @@ export function AppShell({
   isMobile, isMobileSidebarOpen, onMobileSidebarOpen, onMobileSidebarClose,
   children,
 }: AppShellProps) {
-  const paletteBg = currentPage ? getPalette(currentPage.palette_id).background : '#FAFAF8';
+  const paletteBg = currentPage ? getPalette(currentPage.palette_id).background : null;
   const gutter = isMobile ? 16 : LAYOUT.GUTTER_PX;
 
   return (
     <div
-      className="h-screen w-screen overflow-hidden flex"
-      style={{
-        background: `radial-gradient(1200px 620px at 18% -12%, ${paletteBg}12 0%, rgba(0,0,0,0) 62%), #FAFAF8`,
-      }}
+      className="h-screen w-screen overflow-hidden flex bg-surface-page"
+      style={paletteBg ? {
+        backgroundImage: `radial-gradient(1200px 620px at 18% -12%, ${paletteBg}12 0%, rgba(0,0,0,0) 62%)`,
+      } : undefined}
     >
       {isMobile && isMobileSidebarOpen && (
-        <div className="fixed inset-0 z-10 bg-[rgba(28,27,25,0.28)]" onClick={onMobileSidebarClose} />
+        <div className="fixed inset-0 z-10 bg-black/[0.28]" onClick={onMobileSidebarClose} />
       )}
       {(!isMobile || isMobileSidebarOpen) && (
         <Sidebar
@@ -62,7 +62,7 @@ export function AppShell({
         >
           {currentPage && (
             <>
-              <span className="w-[13px] h-[13px] rounded flex-none" style={{ background: paletteBg }} />
+              <span className="w-[13px] h-[13px] rounded flex-none" style={{ background: paletteBg ?? undefined }} />
               <h1 className="text-[1.1875rem] font-bold tracking-tight text-ink truncate">{currentPage.title}</h1>
               {isMobile && <span className="text-ink-faint text-xs">▾</span>}
             </>

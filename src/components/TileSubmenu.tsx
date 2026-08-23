@@ -1,6 +1,7 @@
 import { Tile, Link } from '@/types';
 import { isValidUrl } from '@/utils/url';
 import { getInitials } from '@/utils';
+import { chipColor, chipTint } from '@/lib/chipColors';
 
 interface TileSubmenuProps {
   tiles: Tile[];
@@ -40,16 +41,16 @@ export function TileSubmenu({ tiles, onCreateLink, onSelectTile, onClose }: Tile
 
   return (
     <div data-testid="tile-submenu" className="absolute left-full bottom-0 ml-2 z-50">
-      <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-2 grid grid-cols-2 gap-1.5 min-w-[220px] max-h-[300px] overflow-y-auto">
+      <div className="bg-surface-card rounded-lg shadow-cardHi border border-edge p-2 grid grid-cols-2 gap-1.5 min-w-[220px] max-h-[300px] overflow-y-auto">
         {sortedTiles.map((tile) => (
           <button
             key={tile.id}
             onClick={() => handleTileClick(tile.id)}
-            className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all hover:scale-[1.03] hover:brightness-110"
-            style={{ backgroundColor: tile.accent_color + '20' }}
+            className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-all hover:scale-[1.03]"
+            style={{ backgroundColor: chipTint(tile.color_index) }}
           >
-            <span className="text-xs font-medium shrink-0 tracking-wide" style={{ color: tile.accent_color }}>{getInitials(tile.title)}</span>
-            <span className="text-xs font-medium text-gray-700 truncate">{tile.title}</span>
+            <span className="text-xs font-medium shrink-0 tracking-wide" style={{ color: chipColor(tile.color_index) }}>{getInitials(tile.title)}</span>
+            <span className="text-xs font-medium text-ink-2 truncate">{tile.title}</span>
           </button>
         ))}
       </div>

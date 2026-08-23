@@ -112,20 +112,20 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
   const isEmpty = !content.trim();
 
   return (
-    <div className="fixed inset-0 bg-white z-50 flex flex-col">
-      <div className="border-b border-gray-200 px-4 py-3 flex items-center justify-between bg-gray-50">
+    <div className="fixed inset-0 bg-surface-card z-50 flex flex-col">
+      <div className="border-b border-edge px-4 py-3 flex items-center justify-between bg-surface-page">
         <div className="flex items-center gap-3">
           <button
             onClick={handleClose}
-            className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+            className="p-2 hover:bg-black/[0.05] rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-gray-600" />
+            <X className="w-5 h-5 text-ink-2" />
           </button>
-          <div className="flex items-center gap-2 bg-gray-200 rounded-lg p-1">
+          <div className="flex items-center gap-2 bg-edge-soft rounded-lg p-1">
             <button
               onClick={() => setIsPreview(false)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                !isPreview ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
+                !isPreview ? 'bg-surface-card shadow-card text-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
               <Edit3 className="w-4 h-4 inline-block mr-1.5" />
@@ -134,7 +134,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
             <button
               onClick={() => setIsPreview(true)}
               className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                isPreview ? 'bg-white shadow-sm text-gray-900' : 'text-gray-600 hover:text-gray-900'
+                isPreview ? 'bg-surface-card shadow-card text-ink' : 'text-ink-2 hover:text-ink'
               }`}
             >
               <Eye className="w-4 h-4 inline-block mr-1.5" />
@@ -144,7 +144,7 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
         </div>
         <div className="flex items-center gap-2">
           {hasChanges && (
-            <span className="text-xs text-gray-400">Saving...</span>
+            <span className="text-xs text-ink-faint">Saving...</span>
           )}
           <button
             onClick={handleDelete}
@@ -160,14 +160,14 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
         <div className="max-w-3xl mx-auto h-full flex flex-col px-4 py-6">
           {isPreview ? (
             <div className="flex-1 overflow-y-auto">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-ink mb-2">
                 {title || 'Untitled'}
               </h1>
               {summary && (
-                <p className="text-gray-500 mb-6 italic">{summary}</p>
+                <p className="text-ink-muted mb-6 italic">{summary}</p>
               )}
               {isEmpty ? (
-                <p className="text-gray-400 italic">No content yet. Switch to Edit mode to add some.</p>
+                <p className="text-ink-faint italic">No content yet. Switch to Edit mode to add some.</p>
               ) : (
                 <div className="prose prose-gray max-w-none">
                   <ReactMarkdown>{content}</ReactMarkdown>
@@ -182,21 +182,21 @@ export function DocumentEditor({ document, onClose, onSave, onDelete }: Document
                 value={title}
                 onChange={(e) => handleChange('title', e.target.value)}
                 placeholder="Add a title..."
-                className="text-3xl font-bold text-gray-900 placeholder-gray-300 border-none outline-none bg-transparent mb-2"
+                className="text-3xl font-bold text-ink placeholder-ink-faint border-none outline-none bg-transparent mb-2"
               />
               <input
                 type="text"
                 value={summary}
                 onChange={(e) => handleChange('summary', e.target.value)}
                 placeholder="Brief description (optional)"
-                className="text-gray-500 placeholder-gray-300 border-none outline-none bg-transparent mb-4 italic"
+                className="text-ink-muted placeholder-ink-faint border-none outline-none bg-transparent mb-4 italic"
               />
               <textarea
                 ref={contentRef}
                 value={content}
                 onChange={(e) => handleChange('content', e.target.value)}
                 placeholder="Write your note here... (Markdown supported)"
-                className="flex-1 text-gray-800 placeholder-gray-300 border-none outline-none bg-transparent resize-none text-lg leading-relaxed"
+                className="flex-1 text-ink placeholder-ink-faint border-none outline-none bg-transparent resize-none text-lg leading-relaxed"
               />
             </div>
           )}

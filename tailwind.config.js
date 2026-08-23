@@ -11,12 +11,16 @@ export default {
         edge: {
           DEFAULT: '#E8E6E1',
           soft: '#EFEDE8',
+          hover: '#DAD8D2',
+          tilehover: '#DEDCD6',
+          placeholder: '#D8D6D0',
         },
         ink: {
           DEFAULT: '#1C1B19',
           2: '#4B4A46',
           muted: '#8C8A83',
           faint: '#B4B2AB',
+          grip: '#B9B7B0',
         },
       },
       boxShadow: {

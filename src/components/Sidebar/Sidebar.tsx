@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Page } from '@/types';
 import { LAYOUT } from '@/lib/constants';
+import { chipColor } from '@/lib/chipColors';
 import { PageRow } from './PageRow';
 import { UserMenu } from '@/components/UserMenu';
 
@@ -110,7 +111,7 @@ export function Sidebar({
       style={{ width: collapsed ? LAYOUT.SIDEBAR_COLLAPSED_PX : LAYOUT.SIDEBAR_WIDTH_PX }}
     >
       <div className={`flex items-center gap-2.5 font-bold text-[.9375rem] tracking-tight pb-4 ${collapsed ? 'justify-center' : 'px-2'}`}>
-        <span className="w-5 h-5 rounded-md flex-none" style={{ background: 'linear-gradient(135deg,#7C3AED,#2563EB)' }} />
+        <span className="w-5 h-5 rounded-md flex-none" style={{ background: `linear-gradient(135deg, ${chipColor(1)}, ${chipColor(0)})` }} />
         {!collapsed && <span>TileSpace</span>}
       </div>
 
@@ -144,7 +145,7 @@ export function Sidebar({
             onClick={onCreatePage}
             className="flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-sm text-ink-faint hover:text-ink-2 hover:bg-black/[0.03] text-left"
           >
-            <span className="w-[11px] h-[11px] rounded-[3.5px] flex-none bg-[#D8D6D0]" />
+            <span className="w-[11px] h-[11px] rounded-[3.5px] flex-none bg-edge-placeholder" />
             New page
           </button>
         )}

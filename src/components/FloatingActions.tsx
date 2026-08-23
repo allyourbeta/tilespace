@@ -209,7 +209,7 @@ export function FloatingActions({
           onClick={() => { if (isMobile) setIsOpen(!isOpen); }}
           className={`
             h-[34px] min-w-[34px] px-2.5 rounded-lg bg-surface-card border border-edge shadow-card
-            hover:border-[#DAD8D2] transition-colors duration-150
+            hover:border-edge-hover transition-colors duration-150
             flex items-center justify-center
             ${isOpen ? 'text-ink' : 'text-ink-2'}
           `}

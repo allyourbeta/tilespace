@@ -1,14 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import type { Palette } from '@/types';
+import { CHIP_COLORS, chipColor } from '@/lib/chipColors';
 
 interface PanelColorPickerProps {
-  accentColor: string;
   colorIndex: number;
-  palette: Palette;
   onSelect: (colorIndex: number) => void;
 }
 
-export function PanelColorPicker({ accentColor, colorIndex, palette, onSelect }: PanelColorPickerProps) {
+export function PanelColorPicker({ colorIndex, onSelect }: PanelColorPickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -31,21 +29,21 @@ export function PanelColorPicker({ accentColor, colorIndex, palette, onSelect }:
     <div className="relative" ref={ref}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-8 h-8 rounded-lg shadow-md border-2 border-white hover:scale-110 transition-transform"
-        style={{ backgroundColor: accentColor }}
+        className="w-8 h-8 rounded-lg shadow-card border border-edge hover:scale-110 transition-transform"
+        style={{ backgroundColor: chipColor(colorIndex) }}
         title="Change color"
       />
 
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 z-10 p-3 w-52">
-          <p className="text-xs font-medium text-gray-500 mb-2">{palette.name} palette</p>
+        <div className="absolute top-full left-0 mt-2 bg-surface-card rounded-lg shadow-cardHi border border-edge z-10 p-3 w-52">
+          <p className="text-xs font-medium text-ink-muted mb-2">Chip colour</p>
           <div className="grid grid-cols-4 gap-2">
-            {palette.colors.map((color, index) => (
+            {CHIP_COLORS.map((color, index) => (
               <button
                 key={index}
                 onClick={() => handleSelect(index)}
-                className={`w-10 h-10 rounded-lg shadow-sm transition-transform hover:scale-110 ${
-                  colorIndex === index ? 'ring-2 ring-offset-2 ring-gray-400' : ''
+                className={`w-10 h-10 rounded-lg shadow-card transition-transform hover:scale-110 ${
+                  colorIndex === index ? 'ring-2 ring-offset-2 ring-ink-faint' : ''
                 }`}
                 style={{ backgroundColor: color }}
               />

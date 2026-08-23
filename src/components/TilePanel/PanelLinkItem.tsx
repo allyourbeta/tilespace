@@ -91,17 +91,17 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
         draggable
         onDragStart={(e) => onDragStart(e, link.id)}
         onDragEnd={onDragEnd}
-        className="group flex items-center gap-3 py-2.5 px-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-grab active:cursor-grabbing"
+        className="group flex items-center gap-3 py-2.5 px-3 bg-black/[0.02] rounded-lg hover:bg-black/[0.04] transition-colors cursor-grab active:cursor-grabbing"
       >
         {isDocument ? (
           <button
             onClick={handleClick}
             className="flex-1 min-w-0 text-left flex items-center gap-2"
           >
-            <FileText className="w-4 h-4 text-teal-600 flex-shrink-0" />
-            <span className="text-gray-900 text-base font-medium truncate">{link.title || 'Untitled'}</span>
+            <FileText className="w-4 h-4 text-ink-muted flex-shrink-0" />
+            <span className="text-ink text-base font-medium truncate">{link.title || 'Untitled'}</span>
             {link.summary && (
-              <span className="text-sm text-gray-500 truncate hidden sm:inline">· {link.summary}</span>
+              <span className="text-sm text-ink-muted truncate hidden sm:inline">· {link.summary}</span>
             )}
           </button>
         ) : (
@@ -112,10 +112,10 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
             className="flex-1 min-w-0 flex items-center gap-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <ExternalLink className="w-4 h-4 text-gray-500 flex-shrink-0" />
-            <span className="text-gray-900 text-base font-medium truncate">{link.title || link.url}</span>
+            <ExternalLink className="w-4 h-4 text-ink-muted flex-shrink-0" />
+            <span className="text-ink text-base font-medium truncate">{link.title || link.url}</span>
             {link.summary && (
-              <span className="text-sm text-gray-500 truncate hidden sm:inline">· {link.summary}</span>
+              <span className="text-sm text-ink-muted truncate hidden sm:inline">· {link.summary}</span>
             )}
           </a>
         )}
@@ -129,7 +129,7 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
                 setTimeout(() => titleRef.current?.focus(), 0);
               }
             }}
-            className="p-2 hover:bg-gray-200 rounded-lg transition-colors text-gray-600 font-medium text-sm"
+            className="p-2 hover:bg-black/[0.06] rounded-lg transition-colors text-ink-2 font-medium text-sm"
           >
             {isDocument ? 'View' : 'Edit'}
           </button>
@@ -145,7 +145,7 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
   }
 
   return (
-    <div className="p-4 bg-gray-50 rounded-xl space-y-3">
+    <div className="p-4 bg-black/[0.02] rounded-lg space-y-3">
       <input
         ref={titleRef}
         type="text"
@@ -153,7 +153,7 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
         onChange={(e) => setTitle(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Link title"
-        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+        className="w-full px-3 py-2 bg-surface-card border border-edge rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint"
       />
       <input
         type="text"
@@ -161,7 +161,7 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
         onChange={(e) => setSummary(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Brief note (optional)"
-        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+        className="w-full px-3 py-2 bg-surface-card border border-edge rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint"
       />
       <input
         type="url"
@@ -170,7 +170,7 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
         onBlur={handleUrlBlur}
         onKeyDown={handleUrlKeyDown}
         placeholder="https://..."
-        className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300"
+        className="w-full px-3 py-2 bg-surface-card border border-edge rounded-lg text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint"
       />
       <div className="flex justify-end gap-2">
         <button
@@ -180,7 +180,7 @@ export function PanelLinkItem({ link, onUpdate, onDelete, onDragStart, onDragEnd
             setSummary(link.summary);
             setIsEditing(false);
           }}
-          className="py-2 px-4 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors text-sm"
+          className="py-2 px-4 text-ink-2 hover:bg-black/[0.06] rounded-lg transition-colors text-sm"
         >
           Cancel
         </button>

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Plus, FileText, Check } from 'lucide-react';
-import { Tile, Link, getPalette } from '@/types';
-import { getButtonStyles } from '@/utils';
+import { Tile, Link } from '@/types';
+import { chipColor, chipTint } from '@/lib/chipColors';
 import { useIsMobile } from '@/hooks';
 import { isValidUrl } from '@/utils/url';
 import { PanelLinkItem } from './PanelLinkItem';
@@ -11,7 +11,6 @@ import { PanelColorPicker } from './PanelColorPicker';
 
 interface TilePanelProps {
   tile: Tile;
-  currentPaletteId: string;
   isNewTile?: boolean;
   isDocumentOpen?: boolean;
   onClose: () => void;
@@ -26,7 +25,7 @@ interface TilePanelProps {
 }
 
 export function TilePanel({
-  tile, currentPaletteId, isNewTile = false, isDocumentOpen = false,
+  tile, isNewTile = false, isDocumentOpen = false,
   onClose, onUpdateTile, onUpdateTileColor, onResetTile,
   onCreateLink, onUpdateLink, onDeleteLink, onOpenDocument, onAddNote,
 }: TilePanelProps) {
@@ -41,7 +40,6 @@ export function TilePanel({
   const titleRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  const palette = getPalette(currentPaletteId);
 
   const saveAndClose = useCallback(() => {
     if (title !== tile.title) onUpdateTile(tile.id, { title });
@@ -123,7 +121,10 @@ export function TilePanel({
 
   const realLinks = tile.links || [];
   const hasAnyLinks = realLinks.length > 0 || tempLinks.length > 0;
-  const btnStyles = getButtonStyles(tile.accent_color);
+  const accent = chipColor(tile.color_index);
+  const headerTint = chipTint(tile.color_index);
+  const primaryBtn = { backgroundColor: accent, color: 'white' };
+  const secondaryBtn = { borderColor: accent, color: accent, backgroundColor: headerTint };
 
   return (
     <>
@@ -131,39 +132,39 @@ export function TilePanel({
       <div
         data-testid="tile-panel"
         ref={panelRef}
-        className={`fixed bg-white shadow-2xl z-50 flex flex-col overflow-hidden ${isMobile ? 'inset-0 rounded-none' : 'w-full max-w-md rounded-l-2xl'}`}
+        className={`fixed bg-surface-card shadow-cardHi z-50 flex flex-col overflow-hidden ${isMobile ? 'inset-0 rounded-none' : 'w-full max-w-md rounded-l-tile'}`}
         style={isMobile ? {} : { right: -panelPosition.x, top: Math.max(8, panelPosition.y), bottom: Math.max(8, -panelPosition.y), cursor: isDragging ? 'grabbing' : 'default' }}
       >
         {!isMobile && (
-          <div onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); setDragStart({ x: e.clientX, y: e.clientY }); }} className="h-6 bg-gray-100 cursor-grab active:cursor-grabbing flex items-center justify-center hover:bg-gray-200 transition-colors" title="Drag to move panel">
-            <div className="w-12 h-1 bg-gray-300 rounded-full" />
+          <div onMouseDown={(e) => { e.preventDefault(); setIsDragging(true); setDragStart({ x: e.clientX, y: e.clientY }); }} className="h-6 bg-edge-soft cursor-grab active:cursor-grabbing flex items-center justify-center hover:bg-edge transition-colors" title="Drag to move panel">
+            <div className="w-12 h-1 bg-ink-faint/50 rounded-full" />
           </div>
         )}
 
-        <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2" style={{ backgroundColor: tile.accent_color + '15' }}>
+        <div className="px-4 py-3 border-b border-edge flex items-center gap-2" style={{ backgroundColor: headerTint }}>
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <PanelEmojiPicker currentEmoji={tile.emoji} onSelect={(emoji) => onUpdateTile(tile.id, { emoji })} />
-              <PanelColorPicker accentColor={tile.accent_color} colorIndex={tile.color_index} palette={palette} onSelect={(idx) => onUpdateTileColor(tile.id, idx)} />
+              <PanelColorPicker colorIndex={tile.color_index} onSelect={(idx) => onUpdateTileColor(tile.id, idx)} />
             </div>
           </div>
-          <button onClick={saveAndClose} className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-            <X className="w-5 h-5 text-gray-500" />
+          <button onClick={saveAndClose} className="p-2 hover:bg-black/[0.05] rounded-lg transition-colors">
+            <X className="w-5 h-5 text-ink-2" />
           </button>
         </div>
 
-        <div className="px-4 pb-3 border-b border-gray-100" style={{ backgroundColor: tile.accent_color + '15' }}>
-          <input ref={titleRef} type="text" value={title} onChange={(e) => setTitle(e.target.value)} onBlur={handleTitleBlur} onKeyDown={(e) => e.key === 'Enter' && titleRef.current?.blur()} placeholder="Tile name..." className="w-full text-xl font-semibold bg-transparent border-none outline-none text-gray-800 placeholder-gray-400" />
+        <div className="px-4 pb-3 border-b border-edge" style={{ backgroundColor: headerTint }}>
+          <input ref={titleRef} type="text" value={title} onChange={(e) => setTitle(e.target.value)} onBlur={handleTitleBlur} onKeyDown={(e) => e.key === 'Enter' && titleRef.current?.blur()} placeholder="Tile name..." className="w-full text-xl font-semibold bg-transparent border-none outline-none text-ink placeholder-ink-faint" />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
           {pasteFlash && <div className="mb-2 px-3 py-2 bg-green-50 text-green-700 text-sm font-medium rounded-lg text-center">Link added from clipboard</div>}
           {!hasAnyLinks ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 text-base font-medium mb-4">No links yet</p>
+              <p className="text-ink-muted text-base font-medium mb-4">No links yet</p>
               <div className="flex gap-2 justify-center">
-                <button onClick={handleAddTempLink} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm hover:opacity-90" style={btnStyles.primary}><Plus className="w-4 h-4" />Add Link</button>
-                <button onClick={onAddNote} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border-2 hover:opacity-80" style={btnStyles.secondary}><FileText className="w-4 h-4" />Add Note</button>
+                <button onClick={handleAddTempLink} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm hover:opacity-90" style={primaryBtn}><Plus className="w-4 h-4" />Add Link</button>
+                <button onClick={onAddNote} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all text-sm border hover:opacity-80" style={secondaryBtn}><FileText className="w-4 h-4" />Add Note</button>
               </div>
             </div>
           ) : (
@@ -178,11 +179,11 @@ export function TilePanel({
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-100 space-y-2">
+        <div className="p-4 border-t border-edge space-y-2">
           {hasAnyLinks && (
             <div className="flex gap-2">
-              <button onClick={handleAddTempLink} className="flex-1 py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm hover:opacity-90" style={btnStyles.primary}><Plus className="w-4 h-4" />Add Link</button>
-              <button onClick={onAddNote} className="flex-1 py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm border-2 hover:opacity-80" style={btnStyles.secondary}><FileText className="w-4 h-4" />Add Note</button>
+              <button onClick={handleAddTempLink} className="flex-1 py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm hover:opacity-90" style={primaryBtn}><Plus className="w-4 h-4" />Add Link</button>
+              <button onClick={onAddNote} className="flex-1 py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 text-sm border hover:opacity-80" style={secondaryBtn}><FileText className="w-4 h-4" />Add Note</button>
             </div>
           )}
           <button
@@ -200,7 +201,7 @@ export function TilePanel({
         {/* Saved indicator */}
         {showSaved && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10 animate-in fade-in duration-200">
-            <div className="flex items-center gap-3 bg-green-50 border border-green-200 px-6 py-4 rounded-2xl shadow-lg">
+            <div className="flex items-center gap-3 bg-green-50 border border-green-200 px-6 py-4 rounded-lg shadow-cardHi">
               <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
                 <Check className="w-6 h-6 text-white" strokeWidth={3} />
               </div>

@@ -216,3 +216,6 @@ items:
     title: Backup reminders
     status: open
     section: Data
+  - title: Mobile drawer visual polish — deferred from the 2026-08-22 visual refresh
+    status: open
+    section: UX Improvements
