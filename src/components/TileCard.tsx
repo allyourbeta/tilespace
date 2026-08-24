@@ -3,10 +3,10 @@ import { Tile } from '@/types';
 import { getInitials } from '@/utils';
 import { chipColor, chipTint } from '@/lib/chipColors';
 import { GripVertical } from 'lucide-react';
+import { useFittingLines } from '@/hooks/useFittingLines';
 
 interface TileCardProps {
   tile: Tile;
-  titleLines: 2 | 3;
   onClick: () => void;
   onDragStart: (e: React.DragEvent, tile: Tile) => void;
   onDragOver: (e: React.DragEvent) => void;
@@ -15,8 +15,10 @@ interface TileCardProps {
   isDragging: boolean;
 }
 
-export function TileCard({ tile, titleLines, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
+export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
   const linkCount = tile.links?.length || 0;
+  // Measured, not predicted: however many lines the card can actually show.
+  const { ref: titleRef, lines: titleLines } = useFittingLines(1, 6);
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
   const [isTileDragOver, setIsTileDragOver] = useState(false);
   const [isShiftHeld, setIsShiftHeld] = useState(false);
@@ -103,7 +105,13 @@ export function TileCard({ tile, titleLines, onClick, onDragStart, onDragOver, o
       </span>
 
       <h3
-        className={`${titleLines === 3 ? 'line-clamp-3' : 'line-clamp-2'} text-ink font-semibold text-ts-tile tracking-[-.008em] min-h-0 overflow-hidden`}
+        ref={titleRef as React.RefObject<HTMLHeadingElement>}
+        className="flex-1 text-ink font-semibold text-ts-tile tracking-[-.008em] min-h-0 overflow-hidden"
+        style={{
+          display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: titleLines,
+        }}
       >
         {tile.title || '---'}
       </h3>

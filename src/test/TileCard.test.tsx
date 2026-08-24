@@ -55,12 +55,11 @@ describe('TileCard', () => {
     container.remove();
   });
 
-  function renderTile(tile: Tile, titleLines: 2 | 3 = 2) {
+  function renderTile(tile: Tile) {
     act(() => {
       root.render(
         <TileCard
           tile={tile}
-          titleLines={titleLines}
           onClick={vi.fn()}
           onDragStart={vi.fn()}
           onDragOver={vi.fn()}
@@ -72,26 +71,8 @@ describe('TileCard', () => {
     });
   }
 
-  it('titleLines={2} renders line-clamp-2', () => {
-    const tile = makeTile({
-      title: 'This is a very long tile title that would definitely wrap across several lines of text',
-    });
-    renderTile(tile, 2);
-    const heading = container.querySelector('h3')!;
-    expect(heading.className).toMatch(/line-clamp-2/);
-    expect(heading.className).not.toMatch(/line-clamp-3/);
-  });
-
-  it('titleLines={3} renders line-clamp-3', () => {
-    const tile = makeTile({
-      title: 'This is a very long tile title that would definitely wrap across several lines of text',
-    });
-    renderTile(tile, 3);
-    const heading = container.querySelector('h3')!;
-    expect(heading.className).toMatch(/line-clamp-3/);
-    expect(heading.className).not.toMatch(/line-clamp-2/);
-  });
-
+  
+  
   it("the chip's inline colour equals chipColor(tile.color_index)", () => {
     const tile = makeTile({ color_index: 5 });
     renderTile(tile);
@@ -113,6 +94,17 @@ describe('TileCard', () => {
     renderTile(tile);
     expect(container.textContent).toMatch(/1 item/);
   });
+
+  it('clamps the title to a measured number of lines', () => {
+    // jsdom reports clientHeight 0, so the hook floors at its minimum of 1.
+    // The assertion that matters: a WebkitLineClamp is always applied, so a
+    // title can never spill past its box and get sliced mid-glyph.
+    renderTile(makeTile({ title: 'A very long tile title that would wrap several times over' }));
+    const h3 = container.querySelector('h3') as HTMLElement;
+    expect(h3.style.webkitLineClamp).not.toBe('');
+    expect(Number(h3.style.webkitLineClamp)).toBeGreaterThanOrEqual(1);
+  });
+
 });
 
 // jsdom normalizes inline style colours to rgb(); compare like for like.
