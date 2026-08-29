@@ -175,3 +175,6 @@ To run from source:
 # Go >= 1.22
 go run . help
 ```
+## FAQ
+
+Click here for more information about [FAQ](docs/FAQ.md)
