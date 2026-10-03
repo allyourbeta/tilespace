@@ -250,3 +250,11 @@ NEVER proactively create documentation files (*.md) or README files. Only create
 **Tenzing backlog.** File findings as you go, not batched into a report: `tenzing backlog add ts "<title>"`. Close what you finish in the same commit as the work that finished it: `tenzing backlog done <ref>`. If either command fails for any reason (network, lock, whatever), that is not a reason to stop the task -- note it and continue; do not block the actual work on Tenzing's own plumbing.
 
 **Test economy.** Run only the tests covering what you just changed. Run the full suite once, at the end of the session, not after every phase. Never re-run a passing tier to confirm it still passes. Live-model tests are the slowest and most expensive -- run each one once unless it failed or its input changed.
+
+## PWA icons
+
+This project's manifest and icons are covered by a PWA icon contract test
+(see `~/Droppbox/programming/dev-kit/pwa-icons/CHECKLIST.md` for the
+invariants). Any change to the manifest, the icon files, or how either is
+linked must keep that test green — run it before calling such a change
+done, not after.
