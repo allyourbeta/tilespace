@@ -246,3 +246,7 @@ Do what has been asked; nothing more, nothing less.
 NEVER create files unless they're absolutely necessary for achieving your goal.
 ALWAYS prefer editing an existing file to creating a new one.
 NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+**Tenzing backlog.** File findings as you go, not batched into a report: `tenzing backlog add ts "<title>"`. Close what you finish in the same commit as the work that finished it: `tenzing backlog done <ref>`. If either command fails for any reason (network, lock, whatever), that is not a reason to stop the task -- note it and continue; do not block the actual work on Tenzing's own plumbing.
+
+**Test economy.** Run only the tests covering what you just changed. Run the full suite once, at the end of the session, not after every phase. Never re-run a passing tier to confirm it still passes. Live-model tests are the slowest and most expensive -- run each one once unless it failed or its input changed.
