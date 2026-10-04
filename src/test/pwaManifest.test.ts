@@ -226,14 +226,18 @@ describe('TileSpace PWA manifest contract', () => {
     expect(sha1(bytes)).toBe(sha1(repoBytes));
   });
 
-  it('any-purpose icons have no partially-transparent content pixels', async () => {
+  it('any-purpose icons have no partially-transparent content fill', async () => {
     // The rounded-corner padding on an any-purpose icon is legitimately
-    // alpha=0 — only a pixel strictly between 0 and 255 is a bug. This is
-    // the gap that let TileSpace ship any-purpose icons with their tile
-    // fills rendered at 59-78% opacity (SPEC_pwa_icons_dock.md Phase 2):
-    // visibly washed-out colour, invisible to the maskable-only check above
-    // since Chrome's installed .icns is built from the maskable icon, not
-    // this one — but still a real authoring defect in its own right.
+    // alpha=0, and a normal antialiased corner curve leaves a thin fringe of
+    // genuinely-partial pixels — calibrated 2026-10-04 at 743/262144 (0.28%)
+    // on Timeboxxer's known-good any-purpose icon. That's nothing like the
+    // bug this guards: TileSpace shipped every tile fill at 59-78% opacity,
+    // 91668/262144 (35%) partial pixels (SPEC_pwa_icons_dock.md Phase 2) —
+    // invisible to the maskable-only check above since Chrome's installed
+    // .icns is built from the maskable icon, not this one, but still a real
+    // authoring defect in its own right. MAX_PARTIAL_ALPHA_FRACTION sits
+    // well above the AA-fringe noise floor and well below a real mismatch.
+    const MAX_PARTIAL_ALPHA_FRACTION = 0.02;
     const manifest = await (await fetch(BASE_URL + '/manifest.json')).json();
     const anyIcons = manifest.icons.filter((i: { purpose?: string }) => !i.purpose || i.purpose === 'any');
     expect(anyIcons.length).toBeGreaterThan(0);
@@ -248,7 +252,12 @@ describe('TileSpace PWA manifest contract', () => {
         const a = png.pixels[i];
         if (a > 0 && a < 255) partial++;
       }
-      expect(partial, `${icon.src} has ${partial} partially-transparent content pixel(s)`).toBe(0);
+      const total = png.width * png.height;
+      const fraction = partial / total;
+      expect(
+        fraction,
+        `${icon.src}: ${partial}/${total} (${(fraction * 100).toFixed(1)}%) partially-transparent pixels`
+      ).toBeLessThanOrEqual(MAX_PARTIAL_ALPHA_FRACTION);
     }
   });
 
