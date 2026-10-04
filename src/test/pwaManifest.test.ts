@@ -226,6 +226,32 @@ describe('TileSpace PWA manifest contract', () => {
     expect(sha1(bytes)).toBe(sha1(repoBytes));
   });
 
+  it('any-purpose icons have no partially-transparent content pixels', async () => {
+    // The rounded-corner padding on an any-purpose icon is legitimately
+    // alpha=0 — only a pixel strictly between 0 and 255 is a bug. This is
+    // the gap that let TileSpace ship any-purpose icons with their tile
+    // fills rendered at 59-78% opacity (SPEC_pwa_icons_dock.md Phase 2):
+    // visibly washed-out colour, invisible to the maskable-only check above
+    // since Chrome's installed .icns is built from the maskable icon, not
+    // this one — but still a real authoring defect in its own right.
+    const manifest = await (await fetch(BASE_URL + '/manifest.json')).json();
+    const anyIcons = manifest.icons.filter((i: { purpose?: string }) => !i.purpose || i.purpose === 'any');
+    expect(anyIcons.length).toBeGreaterThan(0);
+
+    for (const icon of anyIcons as { src: string }[]) {
+      const url = new URL(icon.src, BASE_URL);
+      const res = await fetch(url);
+      const bytes = Buffer.from(await res.arrayBuffer());
+      const png = decodePng(bytes);
+      let partial = 0;
+      for (let i = 3; i < png.pixels.length; i += 4) {
+        const a = png.pixels[i];
+        if (a > 0 && a < 255) partial++;
+      }
+      expect(partial, `${icon.src} has ${partial} partially-transparent content pixel(s)`).toBe(0);
+    }
+  });
+
   it('maskable icons are fully opaque with a corner fill that matches the background', async () => {
     const manifest = await (await fetch(BASE_URL + '/manifest.json')).json();
     const maskableIcons = manifest.icons.filter((i: { purpose?: string }) => i.purpose === 'maskable');
