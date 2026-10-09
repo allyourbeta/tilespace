@@ -30,6 +30,7 @@ export {
   getPagePaletteId,
   calculateOverviewColumns,
   computeInsertPositions,
+  pageSwatchIndex,
 } from './PageService';
 
 export {

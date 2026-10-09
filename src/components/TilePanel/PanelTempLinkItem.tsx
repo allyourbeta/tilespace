@@ -14,7 +14,7 @@ interface TempLinkItemProps {
   onRemove: (tempId: string) => void;
 }
 
-const INPUT_CLASS = 'w-full px-3 py-2 bg-surface-card border border-edge rounded-[9px] text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint';
+const INPUT_CLASS = 'w-full px-3 py-2 bg-surface-card border border-edge rounded-[9px] shadow-inset text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint';
 
 export function PanelTempLinkItem({ tempLink, onChange, onBlur, onRemove }: TempLinkItemProps) {
   const titleRef = useRef<HTMLInputElement>(null);

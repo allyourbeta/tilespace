@@ -12,7 +12,7 @@ interface LinkItemProps {
   onOpenDocument: (link: Link) => void;
 }
 
-const INPUT_CLASS = 'w-full px-3 py-2 bg-surface-card border border-edge rounded-[9px] text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint';
+const INPUT_CLASS = 'w-full px-3 py-2 bg-surface-card border border-edge rounded-[9px] shadow-inset text-ink placeholder-ink-faint focus:outline-none focus:ring-2 focus:ring-ink-faint';
 
 export function PanelLinkItem({ link, tileAccent, onUpdate, onDelete, onDragStart, onDragEnd, onOpenDocument }: LinkItemProps) {
   const [title, setTitle] = useState(link.title);

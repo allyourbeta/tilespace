@@ -69,7 +69,7 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
         group relative cursor-pointer
         h-full w-full min-h-0 min-w-0 overflow-hidden
         flex flex-col
-        bg-surface-card border border-edge rounded-tile shadow-card
+        bg-surface-card border border-edge rounded-tile shadow-tileLift
         hover:shadow-cardHi hover:-translate-y-px hover:border-edge-tilehover
         transition-[box-shadow,transform,border-color] duration-[140ms]
         ${isDragging ? 'opacity-50' : ''}

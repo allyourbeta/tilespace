@@ -1,5 +1,6 @@
 import { supabase } from './client';
-import { getPalette } from '@/types';
+import { rainbowSwatch } from '@/lib/swatches';
+import { pageSwatchIndex } from '@/services';
 import type { DocTheme, MasterViewDoc, AskResultDoc } from '@/types/masterView';
 
 export interface RefreshResult {
@@ -43,12 +44,14 @@ export async function fetchThemes(): Promise<DocTheme[]> {
  * select, to sidestep foreign-key-path ambiguity on tiles/pages.
  */
 export async function fetchMasterViewDocs(): Promise<MasterViewDoc[]> {
-  const [{ data: insights, error: insightsErr }, { data: docs, error: docsErr }] = await Promise.all([
+  const [{ data: insights, error: insightsErr }, { data: docs, error: docsErr }, { data: allPages, error: allPagesErr }] = await Promise.all([
     supabase.from('doc_insight').select('link_id, summary, hidden, theme_id'),
     supabase.from('links').select('id, title, created_at, tile_id').eq('type', 'document'),
+    supabase.from('pages').select('id, title, position'),
   ]);
   if (insightsErr) throw insightsErr;
   if (docsErr) throw docsErr;
+  if (allPagesErr) throw allPagesErr;
 
   const tileIds = [...new Set((docs ?? []).map((d) => d.tile_id))];
   const { data: tiles, error: tilesErr } = tileIds.length
@@ -56,16 +59,14 @@ export async function fetchMasterViewDocs(): Promise<MasterViewDoc[]> {
     : { data: [], error: null };
   if (tilesErr) throw tilesErr;
 
-  const pageIds = [...new Set((tiles ?? []).map((t) => t.page_id))];
-  const { data: pages, error: pagesErr } = pageIds.length
-    ? await supabase.from('pages').select('id, title, palette_id').in('id', pageIds)
-    : { data: [], error: null };
-  if (pagesErr) throw pagesErr;
-
-  const pageByTileId = new Map<string, { title: string; palette_id: string }>();
+  // Same rank-by-position the sidebar uses, so a page's dot here always matches its sidebar dot.
+  const pageByTileId = new Map<string, { title: string; swatch: string }>();
   for (const tile of tiles ?? []) {
-    const page = (pages ?? []).find((p) => p.id === tile.page_id);
-    if (page) pageByTileId.set(tile.id, page);
+    const page = (allPages ?? []).find((p) => p.id === tile.page_id);
+    if (page) {
+      const index = pageSwatchIndex(allPages ?? [], page.id);
+      pageByTileId.set(tile.id, { title: page.title, swatch: rainbowSwatch(index) });
+    }
   }
 
   const docById = new Map((docs ?? []).map((d) => [d.id, d]));
@@ -83,7 +84,7 @@ export async function fetchMasterViewDocs(): Promise<MasterViewDoc[]> {
         hidden: insight.hidden,
         themeId: insight.theme_id,
         pageTitle: page?.title ?? '',
-        pageSwatch: page ? getPalette(page.palette_id).swatch : '#8C8A83',
+        pageSwatch: page?.swatch ?? '#8C8A83',
       } satisfies MasterViewDoc;
     })
     .filter((doc): doc is MasterViewDoc => doc !== null);

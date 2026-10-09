@@ -4,10 +4,21 @@
  * `index.ts` which can only run on Deno.
  */
 
-// The eight bright swatches from the 2026-10-09 sidebar refresh, in the
-// fixed rainbow order: blue, violet, raspberry, red, orange, gold, deep
-// teal, slate. Matches src/lib/swatches.ts on the frontend.
-export const SWATCHES = ["#2563EB", "#7C3AED", "#DB2777", "#E02718", "#FF8A00", "#F5C518", "#0F766E", "#475569"];
+// The "Clear" palette (2026-10-09 depth + palette refresh): eight hues in
+// one key, in the fixed rainbow order red, orange, gold, green, teal,
+// blue, indigo, plum. Matches src/lib/swatches.ts on the frontend.
+export const SWATCHES = ["#D8625C", "#EB883B", "#CF9B00", "#47A34E", "#00A7A8", "#3690E3", "#7C7FE5", "#BE67B7"];
+
+// The swatch set this replaces (2026-10-09 sidebar refresh), same order, so
+// a theme's stored colour can be mapped onto its new positional equivalent
+// instead of just being treated as a stray non-member colour.
+const LEGACY_SWATCHES = ["#2563EB", "#7C3AED", "#DB2777", "#E02718", "#FF8A00", "#F5C518", "#0F766E", "#475569"];
+
+/** Maps a theme's old Clear-predecessor swatch onto its positional replacement; passes through anything else unchanged. */
+export function remapLegacySwatch(swatch: string): string {
+  const index = LEGACY_SWATCHES.indexOf(swatch);
+  return index === -1 ? swatch : SWATCHES[index];
+}
 
 export function swatchForName(name: string): string {
   let hash = 0;

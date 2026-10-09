@@ -33,9 +33,17 @@ export default {
       boxShadow: {
         card: '0 1px 2px rgba(28,27,25,.04), 0 1px 3px rgba(28,27,25,.05)',
         cardHi: '0 4px 14px rgba(28,27,25,.09)',
+        panel: '0 1px 0 rgba(255,255,255,.8) inset, 0 1px 2px rgba(28,25,23,.05), 0 10px 30px rgba(28,25,23,.09)',
+        tileLift: 'inset 0 1px 0 rgba(255,255,255,.25), 0 1px 2px rgba(0,0,0,.1), 0 6px 16px rgba(0,0,0,.08)',
+        inset: 'inset 0 1px 2px rgba(28,25,23,.06)',
       },
       borderRadius: {
         tile: '11px',
+        panel: '16px',
+      },
+      backgroundImage: {
+        backdrop: 'linear-gradient(180deg, #F3F0EA 0%, #E9E5DD 100%)',
+        panel: 'linear-gradient(180deg, #FFFFFF 0%, #F8F7F3 100%)',
       },
       fontSize: {
         'ts-meta':  ['0.875rem', { lineHeight: '1.35' }],

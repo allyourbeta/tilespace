@@ -43,10 +43,8 @@ export function AppShell({
 
   return (
     <div
-      className="h-screen w-screen overflow-hidden flex bg-surface-page"
-      style={paletteBg ? {
-        backgroundImage: `radial-gradient(1200px 620px at 18% -12%, ${paletteBg}12 0%, rgba(0,0,0,0) 62%)`,
-      } : undefined}
+      className="h-screen w-screen overflow-hidden flex bg-backdrop"
+      style={{ padding: isMobile ? '8px' : '8px 8px 8px 0' }}
     >
       {isMobile && isMobileSidebarOpen && (
         <div className="fixed inset-0 z-10 bg-black/[0.28]" onClick={onMobileSidebarClose} />
@@ -69,7 +67,14 @@ export function AppShell({
         />
       )}
 
-      <div className="flex-1 min-w-0 flex flex-col">
+      <div
+        className="flex-1 min-w-0 flex flex-col overflow-hidden rounded-panel border border-black/[0.07] shadow-panel bg-panel"
+        style={paletteBg ? {
+          // Inline style replaces (not layers on) the `bg-panel` utility's background-image,
+          // so the panel gradient is repeated here to stay under the page wash.
+          backgroundImage: `radial-gradient(1200px 620px at 18% -12%, ${paletteBg}12 0%, rgba(0,0,0,0) 62%), linear-gradient(180deg, #FFFFFF 0%, #F8F7F3 100%)`,
+        } : undefined}
+      >
         <header
           className={`flex-none flex items-center gap-2.5 ${isMobile ? 'cursor-pointer' : ''}`}
           style={{ height: LAYOUT.HEADER_HEIGHT_PX, padding: `0 ${gutter}px` }}

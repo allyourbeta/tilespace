@@ -94,7 +94,7 @@ export function Sidebar({
 
   return (
     <aside
-      className={`flex-none flex flex-col border-r border-edge-soft py-4 pb-3 ${collapsed ? 'items-center px-2' : 'px-3'} ${
+      className={`flex-none flex flex-col py-4 pb-3 ${collapsed ? 'items-center px-2' : 'px-3'} ${
         isMobile ? 'fixed inset-y-0 left-0 z-20 bg-surface-page shadow-[0_0_40px_rgba(28,27,25,0.16)] border-r border-edge' : ''
       }`}
       style={{ width: collapsed ? LAYOUT.SIDEBAR_COLLAPSED_PX : LAYOUT.SIDEBAR_WIDTH_PX }}

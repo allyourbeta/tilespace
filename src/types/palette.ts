@@ -5,14 +5,11 @@ export interface Palette {
   background: string;
   border: string;
   colors: string[];
-  /** Bright sidebar swatch (2026-10-09 refresh) — distinct from `background`, which still drives the page wash and tile accents. */
-  swatch: string;
 }
 
 export const PALETTES: Palette[] = [
   {
     id: 'coral-reef',
-    swatch: '#E02718',
     name: 'Coral Reef',
     category: 'vibrant',
     background: '#FF6B5B',
@@ -25,7 +22,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'ocean-bold',
-    swatch: '#2563EB',
     name: 'Ocean Bold',
     category: 'vibrant',
     background: '#0891B2',
@@ -38,7 +34,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'sunset-glow',
-    swatch: '#FF8A00',
     name: 'Sunset',
     category: 'vibrant',
     background: '#F97316',
@@ -51,7 +46,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'emerald',
-    swatch: '#0F766E',
     name: 'Emerald',
     category: 'vibrant',
     background: '#047857',
@@ -64,7 +58,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'berry-pop',
-    swatch: '#DB2777',
     name: 'Berry',
     category: 'vibrant',
     background: '#BE185D',
@@ -77,7 +70,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'cobalt',
-    swatch: '#2563EB',
     name: 'Cobalt',
     category: 'vibrant',
     background: '#1D4ED8',
@@ -90,7 +82,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'sage-clay',
-    swatch: '#0F766E',
     name: 'Sage & Clay',
     category: 'muted',
     background: '#A3B18A',
@@ -103,7 +94,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'dusty-rose',
-    swatch: '#DB2777',
     name: 'Dusty Rose',
     category: 'muted',
     background: '#E8B4B8',
@@ -116,7 +106,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'ocean-mist',
-    swatch: '#475569',
     name: 'Ocean Mist',
     category: 'muted',
     background: '#B8C5D6',
@@ -129,7 +118,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'sand-dune',
-    swatch: '#F5C518',
     name: 'Sand Dune',
     category: 'muted',
     background: '#D5C4A1',
@@ -142,7 +130,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'lavender',
-    swatch: '#7C3AED',
     name: 'Lavender',
     category: 'muted',
     background: '#C4B7D2',
@@ -155,7 +142,6 @@ export const PALETTES: Palette[] = [
   },
   {
     id: 'nordic',
-    swatch: '#475569',
     name: 'Nordic',
     category: 'muted',
     background: '#F5F1EB',

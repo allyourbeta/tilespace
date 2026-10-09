@@ -23,6 +23,16 @@ export function getPagePaletteId(pages: Page[], pageId: string | null): string {
   return page?.palette_id ?? 'ocean';
 }
 
+/**
+ * A page's rank among all pages sorted by position — the same order the
+ * sidebar uses to pick a page's swatch, so any other UI (e.g. the Master
+ * View document page dot) that indexes into the rainbow swatches by this
+ * rank always matches the sidebar dot for the same page.
+ */
+export function pageSwatchIndex(pages: { id: string; position: number }[], pageId: string): number {
+  return [...pages].sort((a, b) => a.position - b.position).findIndex(p => p.id === pageId);
+}
+
 export function calculateOverviewColumns(pageCount: number): number {
   const aspect = typeof window !== 'undefined' ? window.innerWidth / window.innerHeight : 1.5;
   return Math.max(2, Math.min(Math.ceil(Math.sqrt(pageCount * aspect)), 6));

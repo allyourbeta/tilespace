@@ -113,13 +113,18 @@ describe('ThemeTile', () => {
     expect(buttons.some((b) => b.textContent?.includes('more'))).toBe(false);
   });
 
-  it('uses dark text (#1C1917) on a gold tile, and white on every other swatch', () => {
-    const goldGroup: ThemeGroup = { theme: theme({ swatch: '#F5C518' }), docs: [doc()] };
+  it('uses dark text (#1C1917) on gold and orange tiles, and white on every other swatch', () => {
+    const goldGroup: ThemeGroup = { theme: theme({ swatch: '#CF9B00' }), docs: [doc()] };
     const { container: goldContainer } = renderTile(goldGroup);
     const goldTile = goldContainer.firstElementChild as HTMLElement;
     expect(goldTile.style.color).toBe(hexToRgb('#1C1917'));
 
-    const blueGroup: ThemeGroup = { theme: theme({ swatch: '#2563EB' }), docs: [doc()] };
+    const orangeGroup: ThemeGroup = { theme: theme({ swatch: '#EB883B' }), docs: [doc()] };
+    const { container: orangeContainer } = renderTile(orangeGroup);
+    const orangeTile = orangeContainer.firstElementChild as HTMLElement;
+    expect(orangeTile.style.color).toBe(hexToRgb('#1C1917'));
+
+    const blueGroup: ThemeGroup = { theme: theme({ swatch: '#3690E3' }), docs: [doc()] };
     const { container: blueContainer } = renderTile(blueGroup);
     const blueTile = blueContainer.firstElementChild as HTMLElement;
     expect(blueTile.style.color).toBe(hexToRgb('#FFFFFF'));

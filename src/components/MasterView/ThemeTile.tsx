@@ -25,7 +25,7 @@ export function ThemeTile({ group, rank, onClick, onOpenDoc }: ThemeTileProps) {
   return (
     <div
       onClick={onClick}
-      className={`${SPAN_CLASSES[size]} rounded-tile p-4 overflow-hidden flex flex-col transition-transform duration-150 hover:-translate-y-px cursor-pointer`}
+      className={`${SPAN_CLASSES[size]} rounded-tile shadow-tileLift p-4 overflow-hidden flex flex-col transition-transform duration-150 hover:-translate-y-px cursor-pointer`}
       style={{ background: group.theme.swatch, color }}
     >
       <button

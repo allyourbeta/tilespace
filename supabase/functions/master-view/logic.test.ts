@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SWATCHES, swatchForName, assignDistinctSwatches, validateThemingResult, extractAskResults } from './logic';
+import { SWATCHES, swatchForName, assignDistinctSwatches, remapLegacySwatch, validateThemingResult, extractAskResults } from './logic';
 import { extractJSON, AIClientError } from '../_shared/aiClient';
 
 // Pure logic only (no Deno, no network), run through plain vitest/Node —
@@ -24,22 +24,22 @@ describe('swatchForName', () => {
 
 describe('assignDistinctSwatches', () => {
   it('gives 6 themes 6 distinct colours even when all 6 currently collide on one swatch', () => {
-    const themes = Array.from({ length: 6 }, () => ({ swatch: '#2563EB' }));
+    const themes = Array.from({ length: 6 }, () => ({ swatch: '#3690E3' }));
     const result = assignDistinctSwatches(themes);
     expect(new Set(result).size).toBe(6);
     for (const swatch of result) expect(SWATCHES).toContain(swatch);
   });
 
   it('keeps a theme\'s existing swatch if it is still unique', () => {
-    const themes = [{ swatch: '#0F766E' }, { swatch: '#2563EB' }, { swatch: '#2563EB' }];
+    const themes = [{ swatch: '#00A7A8' }, { swatch: '#3690E3' }, { swatch: '#3690E3' }];
     const result = assignDistinctSwatches(themes);
-    expect(result[0]).toBe('#0F766E');
-    expect(result[1]).toBe('#2563EB');
-    expect(result[2]).not.toBe('#2563EB');
+    expect(result[0]).toBe('#00A7A8');
+    expect(result[1]).toBe('#3690E3');
+    expect(result[2]).not.toBe('#3690E3');
   });
 
   it('only repeats a colour once all 8 are taken by 9+ themes', () => {
-    const themes = Array.from({ length: 9 }, () => ({ swatch: '#2563EB' }));
+    const themes = Array.from({ length: 9 }, () => ({ swatch: '#3690E3' }));
     const result = assignDistinctSwatches(themes);
     expect(new Set(result).size).toBe(8);
   });
@@ -47,6 +47,26 @@ describe('assignDistinctSwatches', () => {
   it('is a no-op when every theme already has a distinct swatch', () => {
     const themes = SWATCHES.slice(0, 5).map((swatch) => ({ swatch }));
     expect(assignDistinctSwatches(themes)).toEqual(themes.map((t) => t.swatch));
+  });
+});
+
+describe('remapLegacySwatch', () => {
+  it('maps every pre-Clear-palette swatch onto its positional replacement', () => {
+    expect(remapLegacySwatch('#2563EB')).toBe('#D8625C'); // old index 0 -> new index 0
+    expect(remapLegacySwatch('#475569')).toBe('#BE67B7'); // old index 7 -> new index 7
+  });
+
+  it('passes through a swatch that was never a legacy colour unchanged', () => {
+    expect(remapLegacySwatch('#3690E3')).toBe('#3690E3');
+  });
+
+  it('feeding assignDistinctSwatches remapped legacy themes keeps 6 themes distinct', () => {
+    const legacyThemes = ['#2563EB', '#7C3AED', '#DB2777', '#E02718', '#FF8A00', '#F5C518'].map((swatch) => ({
+      swatch: remapLegacySwatch(swatch),
+    }));
+    const result = assignDistinctSwatches(legacyThemes);
+    expect(new Set(result).size).toBe(6);
+    for (const swatch of result) expect(SWATCHES).toContain(swatch);
   });
 });
 

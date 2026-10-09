@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { completeJSON, completeText, AIClientError } from "../_shared/aiClient.ts";
-import { swatchForName, assignDistinctSwatches, validateThemingResult, type ThemingResult } from "./logic.ts";
+import { swatchForName, assignDistinctSwatches, remapLegacySwatch, validateThemingResult, type ThemingResult } from "./logic.ts";
 import { jsonResponse } from "./http.ts";
 
 interface DocRow {
@@ -146,7 +146,9 @@ async function applyTheming(
 /**
  * Runs on every refresh, not only when themes are (re)made — fixes any
  * colour collisions left over from the old hash-based assignment (Decision
- * 6) as soon as the user next opens Master View, no migration needed.
+ * 6), and maps any theme still on the pre-Clear-palette swatches onto its
+ * positional replacement (SPEC_depth_2026-10-09.md, Decision 5), as soon
+ * as the user next opens Master View. No migration needed.
  */
 async function dedupeThemeSwatches(supabase: SupabaseClient): Promise<void> {
   const { data: themes, error } = await supabase
@@ -155,7 +157,8 @@ async function dedupeThemeSwatches(supabase: SupabaseClient): Promise<void> {
     .order("created_at", { ascending: true });
   if (error || !themes || themes.length === 0) return;
 
-  const assigned = assignDistinctSwatches(themes as { swatch: string }[]);
+  const remapped = (themes as { swatch: string }[]).map((t) => ({ ...t, swatch: remapLegacySwatch(t.swatch) }));
+  const assigned = assignDistinctSwatches(remapped);
   for (let i = 0; i < themes.length; i++) {
     if (assigned[i] !== themes[i].swatch) {
       await supabase.from("doc_theme").update({ swatch: assigned[i] }).eq("id", themes[i].id);

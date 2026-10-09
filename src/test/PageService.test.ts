@@ -3,6 +3,7 @@ import {
   sortPagesByPosition,
   getNextPagePosition,
   computeInsertPositions,
+  pageSwatchIndex,
 } from '@/services/PageService';
 import type { Page } from '@/types';
 
@@ -94,5 +95,29 @@ describe('PageService.computeInsertPositions', () => {
     expect(result.get('p1')).toBe(2);
     expect(result.get('p2')).toBe(1);
     expect(result.size).toBe(2);
+  });
+});
+
+describe('PageService.pageSwatchIndex', () => {
+  it('ranks pages by position regardless of input order, matching the sidebar', () => {
+    const pages = [
+      { id: 'c', position: 2 },
+      { id: 'a', position: 0 },
+      { id: 'b', position: 1 },
+    ];
+    expect(pageSwatchIndex(pages, 'a')).toBe(0);
+    expect(pageSwatchIndex(pages, 'b')).toBe(1);
+    expect(pageSwatchIndex(pages, 'c')).toBe(2);
+  });
+
+  it('returns -1 for a page id not in the list', () => {
+    const pages = [{ id: 'a', position: 0 }];
+    expect(pageSwatchIndex(pages, 'missing')).toBe(-1);
+  });
+
+  it('does not mutate the input array', () => {
+    const pages = [{ id: 'b', position: 1 }, { id: 'a', position: 0 }];
+    pageSwatchIndex(pages, 'a');
+    expect(pages[0].id).toBe('b');
   });
 });
