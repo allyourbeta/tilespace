@@ -3,11 +3,12 @@
  * - 1-16 tiles: 4x4 grid (16 slots)
  * - 17-20 tiles: 5x4 grid (20 slots)
  * - 21-30 tiles: 6x5 grid (30 slots)
+ * - 31-36 tiles: 6x6 grid (36 slots)
  */
-export const GRID_CAPACITIES = [16, 20, 30] as const;
+export const GRID_CAPACITIES = [16, 20, 30, 36] as const;
 export type GridCapacity = (typeof GRID_CAPACITIES)[number];
 
-export const MAX_TILES = 30;
+export const MAX_TILES = 36;
 
 /**
  * Determines the grid capacity based on the current tile count
@@ -15,7 +16,8 @@ export const MAX_TILES = 30;
 export function getGridCapacity(tileCount: number): GridCapacity {
   if (tileCount <= 16) return 16;
   if (tileCount <= 20) return 20;
-  return 30;
+  if (tileCount <= 30) return 30;
+  return 36;
 }
 
 /**
@@ -29,6 +31,8 @@ export function getGridConfig(capacity: GridCapacity): { cols: number; rows: num
       return { cols: 5, rows: 4 };
     case 30:
       return { cols: 6, rows: 5 };
+    case 36:
+      return { cols: 6, rows: 6 };
   }
 }
 

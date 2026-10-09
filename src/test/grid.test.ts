@@ -28,9 +28,14 @@ describe('getGridCapacity', () => {
     expect(getGridCapacity(30)).toBe(30);
   });
 
-  it('returns 30 for more than 30 tiles', () => {
-    expect(getGridCapacity(31)).toBe(30);
-    expect(getGridCapacity(100)).toBe(30);
+  it('returns 36 for 31-36 tiles', () => {
+    expect(getGridCapacity(31)).toBe(36);
+    expect(getGridCapacity(36)).toBe(36);
+  });
+
+  it('returns 36 for more than 36 tiles', () => {
+    expect(getGridCapacity(37)).toBe(36);
+    expect(getGridCapacity(100)).toBe(36);
   });
 });
 
@@ -45,6 +50,10 @@ describe('getGridConfig', () => {
 
   it('returns 6x5 for capacity 30', () => {
     expect(getGridConfig(30)).toEqual({ cols: 6, rows: 5 });
+  });
+
+  it('returns 6x6 for capacity 36', () => {
+    expect(getGridConfig(36)).toEqual({ cols: 6, rows: 6 });
   });
 });
 
@@ -81,16 +90,16 @@ describe('findFirstEmptyPosition', () => {
 describe('canAddTile', () => {
   it('returns true when under max tiles', () => {
     expect(canAddTile(0)).toBe(true);
-    expect(canAddTile(29)).toBe(true);
+    expect(canAddTile(35)).toBe(true);
   });
 
   it('returns false when at or over max tiles', () => {
-    expect(canAddTile(30)).toBe(false);
-    expect(canAddTile(35)).toBe(false);
+    expect(canAddTile(36)).toBe(false);
+    expect(canAddTile(40)).toBe(false);
   });
 
   it('uses correct MAX_TILES constant', () => {
-    expect(MAX_TILES).toBe(30);
+    expect(MAX_TILES).toBe(36);
   });
 });
 

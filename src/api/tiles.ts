@@ -56,7 +56,7 @@ export async function createTile(pageId: string, paletteId: string, targetPositi
   if (targetPosition !== undefined && !occupied.has(targetPosition)) {
     position = targetPosition;
   } else {
-    const capacity = count < GRID_CONFIG.BREAKPOINTS[0] ? GRID_CONFIG.BREAKPOINTS[0] : count < GRID_CONFIG.BREAKPOINTS[1] ? GRID_CONFIG.BREAKPOINTS[1] : GRID_CONFIG.BREAKPOINTS[2];
+    const capacity = GRID_CONFIG.BREAKPOINTS.find(b => count < b) ?? GRID_CONFIG.MAX_TILES;
     position = 0;
     while (position < capacity && occupied.has(position)) {
       position++;

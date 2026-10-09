@@ -10,13 +10,13 @@ export const INBOX_TILE = {
 // App configuration
 export const APP_CONFIG = {
   TITLE: 'TileSpace',
-  MAX_TILES: 30,
+  MAX_TILES: 36,
 } as const;
 
 // Grid configuration
 export const GRID_CONFIG = {
-  BREAKPOINTS: [16, 20, 30] as const,
-  MAX_TILES: 30,
+  BREAKPOINTS: [16, 20, 30, 36] as const,
+  MAX_TILES: 36,
   COLORS_PER_PALETTE: 12,
   TEMP_POSITION: -1, // Used for position swapping
 } as const;
