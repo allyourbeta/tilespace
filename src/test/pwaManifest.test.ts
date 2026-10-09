@@ -275,4 +275,11 @@ describe('TileSpace PWA manifest contract', () => {
       expect(cornersMatchBackground(png), `${icon.src} corner doesn't match its local background`).toBe(true);
     }
   });
+
+  it('the 512 icon background is deep blue (#1E40AF), not the old black (SPEC_icon_blue_background_2026-10-09.md)', async () => {
+    const res = await fetch(BASE_URL + '/icons/icon-maskable-512x512.png');
+    const bytes = Buffer.from(await res.arrayBuffer());
+    const png = decodePng(bytes);
+    expect(pixelAt(png, 0, 0)).toEqual([0x1e, 0x40, 0xaf, 255]);
+  });
 });
