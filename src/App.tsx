@@ -12,7 +12,7 @@ import { MasterView } from '@/components/MasterView';
 import { Loader2, LayoutGrid } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
-import { usePageStore, useTileStore, useUIStore } from '@/state';
+import { usePageStore, useTileStore, useUIStore, useMasterViewStore } from '@/state';
 import { useTileGrid } from '@/hooks/useTileGrid';
 import { useTileHandlers } from '@/hooks/useTileHandlers';
 
@@ -58,6 +58,9 @@ function AppContent() {
   const setIsPageTransitioning = useUIStore(s => s.setIsPageTransitioning);
   const setMasterViewOpen = useUIStore(s => s.setMasterViewOpen);
   const closeTilePanel = useUIStore(s => s.closeTilePanel);
+
+  const masterViewSelectTheme = useMasterViewStore(s => s.selectTheme);
+  const masterViewClearAsk = useMasterViewStore(s => s.clearAsk);
 
   const currentPage = useMemo(
     () => currentPageId ? pages.find(p => p.id === currentPageId) ?? null : null,
@@ -131,8 +134,10 @@ function AppContent() {
   }, [goToPage, setMasterViewOpen]);
 
   const handleOpenMasterView = useCallback(() => {
+    masterViewSelectTheme(null);
+    masterViewClearAsk();
     setMasterViewOpen(true);
-  }, [setMasterViewOpen]);
+  }, [masterViewSelectTheme, masterViewClearAsk, setMasterViewOpen]);
 
   if (authLoading) {
     return (

@@ -39,6 +39,8 @@ export {
   groupDocsByTheme,
   tileSizeForRank,
   maxTitlesForRank,
+  titlesForTile,
   type ThemeGroup,
   type TileSize,
+  type TileTitles,
 } from './MasterViewService';

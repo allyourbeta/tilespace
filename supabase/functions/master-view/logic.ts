@@ -4,10 +4,10 @@
  * `index.ts` which can only run on Deno.
  */
 
-// The eight bright swatches from the 2026-10-09 sidebar refresh. A theme's
-// swatch is a stable hash of its name, not an insertion order, so the same
-// theme name always lands on the same colour across refreshes.
-export const SWATCHES = ["#E02718", "#2563EB", "#FF8A00", "#0F766E", "#DB2777", "#475569", "#F5C518", "#7C3AED"];
+// The eight bright swatches from the 2026-10-09 sidebar refresh, in the
+// fixed rainbow order: blue, violet, raspberry, red, orange, gold, deep
+// teal, slate. Matches src/lib/swatches.ts on the frontend.
+export const SWATCHES = ["#2563EB", "#7C3AED", "#DB2777", "#E02718", "#FF8A00", "#F5C518", "#0F766E", "#475569"];
 
 export function swatchForName(name: string): string {
   let hash = 0;
@@ -15,6 +15,35 @@ export function swatchForName(name: string): string {
     hash = (hash * 31 + name.charCodeAt(i)) | 0;
   }
   return SWATCHES[Math.abs(hash) % SWATCHES.length];
+}
+
+/**
+ * Gives each theme a distinct swatch from the fixed 8, keeping a theme's
+ * existing swatch if no earlier theme in the list already claimed it.
+ * Only once all 8 are taken does a later theme repeat one (round-robin by
+ * position). `themes` should be ordered oldest-first so a theme that has
+ * held a colour the longest keeps priority over one assigned moments ago.
+ */
+export function assignDistinctSwatches(themes: { swatch: string }[]): string[] {
+  const used = new Set<string>();
+  const kept: (string | null)[] = themes.map((t) => {
+    if (used.has(t.swatch)) return null;
+    used.add(t.swatch);
+    return t.swatch;
+  });
+
+  let cursor = 0;
+  return kept.map((swatch, i) => {
+    if (swatch) return swatch;
+    while (cursor < SWATCHES.length && used.has(SWATCHES[cursor])) cursor++;
+    if (cursor < SWATCHES.length) {
+      const next = SWATCHES[cursor];
+      used.add(next);
+      cursor++;
+      return next;
+    }
+    return SWATCHES[i % SWATCHES.length]; // past 8 distinct themes: repeats are unavoidable
+  });
 }
 
 export interface ThemingResult {

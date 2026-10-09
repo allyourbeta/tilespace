@@ -55,3 +55,18 @@ export function tileSizeForRank(rank: number): TileSize {
 export function maxTitlesForRank(rank: number): number {
   return rank === 0 ? 5 : 3;
 }
+
+export interface TileTitles {
+  titles: MasterViewDoc[];
+  moreCount: number;
+}
+
+/**
+ * All titles fit within `max`, shown in full. Past that, the newest titles
+ * that still fit alongside a trailing "N more" row (which opens the theme's
+ * category instead of a document) — so the row count never exceeds `max`.
+ */
+export function titlesForTile(docs: MasterViewDoc[], max: number): TileTitles {
+  if (docs.length <= max) return { titles: docs, moreCount: 0 };
+  return { titles: docs.slice(0, max - 1), moreCount: docs.length - (max - 1) };
+}

@@ -138,10 +138,11 @@ export function Sidebar({
       </button>
 
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-px">
-        {sortedPages.map(page => (
+        {sortedPages.map((page, index) => (
           <PageRow
             key={page.id}
             page={page}
+            index={index}
             tileCount={tileCounts[page.id] ?? 0}
             isActive={!isMasterViewActive && page.id === currentPageId}
             isCollapsed={collapsed}

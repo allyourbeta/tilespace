@@ -1,10 +1,12 @@
 import type { ThemeGroup } from '@/services';
-import { tileSizeForRank, maxTitlesForRank, visibleDocs } from '@/services';
+import { tileSizeForRank, maxTitlesForRank, titlesForTile, visibleDocs } from '@/services';
+import { swatchTextColor } from '@/lib/swatches';
 
 interface ThemeTileProps {
   group: ThemeGroup;
   rank: number;
   onClick: () => void;
+  onOpenDoc: (linkId: string) => void;
 }
 
 const SPAN_CLASSES = {
@@ -13,31 +15,51 @@ const SPAN_CLASSES = {
   sm: 'col-span-1 row-span-1',
 } as const;
 
-export function ThemeTile({ group, rank, onClick }: ThemeTileProps) {
+export function ThemeTile({ group, rank, onClick, onOpenDoc }: ThemeTileProps) {
   const size = tileSizeForRank(rank);
   const docs = visibleDocs(group.docs);
-  const titles = docs.slice(0, maxTitlesForRank(rank));
+  const { titles, moreCount } = titlesForTile(docs, maxTitlesForRank(rank));
+  const color = swatchTextColor(group.theme.swatch);
+  const dividerClass = color === '#FFFFFF' ? 'border-white/20' : 'border-black/15';
 
   return (
-    <button
+    <div
       onClick={onClick}
-      className={`${SPAN_CLASSES[size]} rounded-tile p-4 text-left text-white overflow-hidden flex flex-col transition-transform duration-150 hover:-translate-y-px`}
-      style={{ background: group.theme.swatch }}
+      className={`${SPAN_CLASSES[size]} rounded-tile p-4 overflow-hidden flex flex-col transition-transform duration-150 hover:-translate-y-px cursor-pointer`}
+      style={{ background: group.theme.swatch, color }}
     >
-      <div className="flex items-baseline justify-between gap-2">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); onClick(); }}
+        className="flex items-baseline justify-between gap-2 text-left"
+      >
         <span className="text-ts-tile font-bold truncate">{group.theme.name}</span>
         <span className="text-ts-meta font-semibold opacity-80 flex-none">{docs.length}</span>
-      </div>
+      </button>
       <ul className="mt-2.5 min-h-0 overflow-hidden">
         {titles.map((doc) => (
-          <li
-            key={doc.linkId}
-            className="text-ts-meta leading-snug py-1 border-t border-white/20 opacity-95 truncate first:border-t-0 first:pt-0"
-          >
-            {doc.title || 'Untitled'}
+          <li key={doc.linkId} className={`border-t ${dividerClass} first:border-t-0 first:pt-0`}>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onOpenDoc(doc.linkId); }}
+              className="w-full text-left text-ts-meta leading-snug py-1 opacity-95 truncate"
+            >
+              {doc.title || 'Untitled'}
+            </button>
           </li>
         ))}
+        {moreCount > 0 && (
+          <li className={`border-t ${dividerClass}`}>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onClick(); }}
+              className="w-full text-left text-ts-meta leading-snug py-1 opacity-95 truncate font-semibold"
+            >
+              {moreCount} more
+            </button>
+          </li>
+        )}
       </ul>
-    </button>
+    </div>
   );
 }

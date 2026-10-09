@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import { act } from 'react-dom/test-utils';
 import { Sidebar } from '@/components/Sidebar';
+import { rainbowSwatch } from '@/lib/swatches';
 import type { Page } from '@/types';
 
 // This project has no @testing-library/react dependency (only jest-dom's
@@ -212,4 +213,37 @@ describe('Sidebar', () => {
     act(() => { entry.click(); });
     expect(onOpenMasterView).toHaveBeenCalledTimes(1);
   });
+
+  it('dots follow list position, not the page palette — same palette, different position, different colour', () => {
+    renderSidebar(); // all three fixture pages share palette_id 'ocean-bold'
+    const rows = container.querySelectorAll('[draggable="true"]');
+    const dotColors = Array.from(rows).map((r) => (r.querySelector('span[style]') as HTMLElement).style.background);
+    expect(dotColors).toEqual([rainbowSwatch(0), rainbowSwatch(1), rainbowSwatch(2)].map(hexToRgb));
+  });
+
+  it('no two neighbouring page dots share a colour, across 18 pages', () => {
+    const manyPages = Array.from({ length: 18 }, (_, i) => makePage({ id: `p${i}`, title: `Page ${i}`, position: i }));
+    renderSidebar({ pages: manyPages, tileCounts: {} });
+    const rows = container.querySelectorAll('[draggable="true"]');
+    expect(rows.length).toBe(18);
+    const dotColors = Array.from(rows).map((r) => (r.querySelector('span[style]') as HTMLElement).style.background);
+    for (let i = 1; i < dotColors.length; i++) {
+      expect(dotColors[i]).not.toBe(dotColors[i - 1]);
+    }
+  });
+
+  it('collapsed sidebar dots use the same position-based colour as expanded', () => {
+    renderSidebar({ isCollapsed: true });
+    const rows = container.querySelectorAll('[draggable="true"]');
+    const dotColors = Array.from(rows).map((r) => (r.querySelector('span[style]') as HTMLElement).style.background);
+    expect(dotColors).toEqual([rainbowSwatch(0), rainbowSwatch(1), rainbowSwatch(2)].map(hexToRgb));
+  });
 });
+
+// jsdom normalizes inline style colours to rgb(); compare like for like.
+function hexToRgb(hex: string): string {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgb(${r}, ${g}, ${b})`;
+}

@@ -218,4 +218,43 @@ describe('MasterView', () => {
     expect(container.textContent).not.toContain('A reason');
     expect(container.textContent).toContain('Clients and work');
   });
+
+  it('returning to the overview (what the sidebar Master View entry does) clears an open category', async () => {
+    vi.mocked(api.fetchThemes).mockResolvedValue([theme({ id: 'big' })]);
+    vi.mocked(api.fetchMasterViewDocs).mockResolvedValue([doc({ linkId: 'a' })]);
+    await renderAndFlush();
+
+    const tile = Array.from(container.querySelectorAll('button')).find((b) => b.textContent?.includes('Clients and work'))!;
+    await act(async () => { tile.click(); });
+    expect(container.textContent).toContain('1 documents'); // ThemeDetail-only text
+
+    // This is exactly what App.tsx's handleOpenMasterView calls when the
+    // sidebar's Master View entry is clicked (Decision 2).
+    await act(async () => {
+      useMasterViewStore.getState().selectTheme(null);
+      useMasterViewStore.getState().clearAsk();
+    });
+
+    expect(container.textContent).not.toContain('1 documents');
+    expect(container.textContent).toContain('Clients and work');
+  });
+
+  it('returning to the overview (what the sidebar Master View entry does) clears Ask results', async () => {
+    vi.mocked(api.fetchThemes).mockResolvedValue([theme({ id: 'big' })]);
+    vi.mocked(api.fetchMasterViewDocs).mockResolvedValue([doc({ linkId: 'a' })]);
+    await renderAndFlush();
+
+    await act(async () => {
+      useMasterViewStore.setState({ askResults: [{ linkId: 'a', reason: 'A reason' }] });
+    });
+    expect(container.textContent).toContain('A reason');
+
+    await act(async () => {
+      useMasterViewStore.getState().selectTheme(null);
+      useMasterViewStore.getState().clearAsk();
+    });
+
+    expect(container.textContent).not.toContain('A reason');
+    expect(container.textContent).toContain('Clients and work');
+  });
 });

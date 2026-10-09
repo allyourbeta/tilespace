@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { completeJSON, completeText, AIClientError } from "../_shared/aiClient.ts";
-import { swatchForName, validateThemingResult, type ThemingResult } from "./logic.ts";
+import { swatchForName, assignDistinctSwatches, validateThemingResult, type ThemingResult } from "./logic.ts";
 import { jsonResponse } from "./http.ts";
 
 interface DocRow {
@@ -143,6 +143,26 @@ async function applyTheming(
   }
 }
 
+/**
+ * Runs on every refresh, not only when themes are (re)made — fixes any
+ * colour collisions left over from the old hash-based assignment (Decision
+ * 6) as soon as the user next opens Master View, no migration needed.
+ */
+async function dedupeThemeSwatches(supabase: SupabaseClient): Promise<void> {
+  const { data: themes, error } = await supabase
+    .from("doc_theme")
+    .select("id, swatch, created_at")
+    .order("created_at", { ascending: true });
+  if (error || !themes || themes.length === 0) return;
+
+  const assigned = assignDistinctSwatches(themes as { swatch: string }[]);
+  for (let i = 0; i < themes.length; i++) {
+    if (assigned[i] !== themes[i].swatch) {
+      await supabase.from("doc_theme").update({ swatch: assigned[i] }).eq("id", themes[i].id);
+    }
+  }
+}
+
 export async function handleRefresh(supabase: SupabaseClient, corsHdrs: Record<string, string>) {
   const { data: docs, error: docsErr } = await supabase
     .from("links")
@@ -186,17 +206,19 @@ export async function handleRefresh(supabase: SupabaseClient, corsHdrs: Record<s
   ).length;
   const needsTheming = (themes ?? []).length === 0 || changedSinceTheming >= 5;
 
-  const respond = (ok: boolean, rethemed: boolean, error?: string) =>
-    jsonResponse({ ok, rethemed, summarized: changedDocs.length, errors: summaryErrors, error }, corsHdrs);
+  const respond = async (ok: boolean, rethemed: boolean, error?: string) => {
+    await dedupeThemeSwatches(supabase);
+    return jsonResponse({ ok, rethemed, summarized: changedDocs.length, errors: summaryErrors, error }, corsHdrs);
+  };
 
-  if (!needsTheming) return respond(true, false);
+  if (!needsTheming) return await respond(true, false);
 
   const titleById = new Map<string, string>(((docs ?? []) as DocRow[]).map((d) => [d.id, d.title]));
   const docsForTheming = (freshInsights ?? [])
     .filter((i: InsightRow) => i.summary)
     .map((i: InsightRow) => ({ link_id: i.link_id, title: titleById.get(i.link_id) ?? "", summary: i.summary }));
 
-  if (docsForTheming.length === 0) return respond(true, false);
+  if (docsForTheming.length === 0) return await respond(true, false);
 
   try {
     const { data: userData } = await supabase.auth.getUser();
@@ -206,10 +228,10 @@ export async function handleRefresh(supabase: SupabaseClient, corsHdrs: Record<s
     const themed = await retheme(docsForTheming, (themes ?? []).map((t: ThemeRow) => t.name));
     await applyTheming(supabase, themed, themes ?? [], titleById, userId);
 
-    return respond(true, true);
+    return await respond(true, true);
   } catch (err) {
     // Keep whatever themes/assignments already existed; surface the error, don't throw.
     const message = err instanceof Error ? err.message : String(err);
-    return respond(false, false, message);
+    return await respond(false, false, message);
   }
 }

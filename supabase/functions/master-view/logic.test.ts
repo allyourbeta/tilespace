@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { SWATCHES, swatchForName, validateThemingResult, extractAskResults } from './logic';
+import { SWATCHES, swatchForName, assignDistinctSwatches, validateThemingResult, extractAskResults } from './logic';
 import { extractJSON, AIClientError } from '../_shared/aiClient';
 
 // Pure logic only (no Deno, no network), run through plain vitest/Node —
@@ -19,6 +19,34 @@ describe('swatchForName', () => {
   it('is not simply insertion order — two different names can land anywhere in the set', () => {
     const colors = new Set(['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'].map(swatchForName));
     expect(colors.size).toBeGreaterThan(1);
+  });
+});
+
+describe('assignDistinctSwatches', () => {
+  it('gives 6 themes 6 distinct colours even when all 6 currently collide on one swatch', () => {
+    const themes = Array.from({ length: 6 }, () => ({ swatch: '#2563EB' }));
+    const result = assignDistinctSwatches(themes);
+    expect(new Set(result).size).toBe(6);
+    for (const swatch of result) expect(SWATCHES).toContain(swatch);
+  });
+
+  it('keeps a theme\'s existing swatch if it is still unique', () => {
+    const themes = [{ swatch: '#0F766E' }, { swatch: '#2563EB' }, { swatch: '#2563EB' }];
+    const result = assignDistinctSwatches(themes);
+    expect(result[0]).toBe('#0F766E');
+    expect(result[1]).toBe('#2563EB');
+    expect(result[2]).not.toBe('#2563EB');
+  });
+
+  it('only repeats a colour once all 8 are taken by 9+ themes', () => {
+    const themes = Array.from({ length: 9 }, () => ({ swatch: '#2563EB' }));
+    const result = assignDistinctSwatches(themes);
+    expect(new Set(result).size).toBe(8);
+  });
+
+  it('is a no-op when every theme already has a distinct swatch', () => {
+    const themes = SWATCHES.slice(0, 5).map((swatch) => ({ swatch }));
+    expect(assignDistinctSwatches(themes)).toEqual(themes.map((t) => t.swatch));
   });
 });
 

@@ -1,8 +1,9 @@
-import { getPalette } from '@/types';
+import { rainbowSwatch } from '@/lib/swatches';
 import type { Page } from '@/types';
 
 interface PageRowProps {
   page: Page;
+  index: number;
   tileCount: number;
   isActive: boolean;
   isCollapsed: boolean;
@@ -24,12 +25,12 @@ interface PageRowProps {
 }
 
 export function PageRow({
-  page, tileCount, isActive, isCollapsed, isDragging, isDragOver,
+  page, index, tileCount, isActive, isCollapsed, isDragging, isDragOver,
   editingPageId, editValue,
   onClick, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop,
   onContextMenu, onEditStart, onEditChange, onEditSubmit, onEditCancel,
 }: PageRowProps) {
-  const bg = getPalette(page.palette_id).swatch;
+  const bg = rainbowSwatch(index);
   const isEditing = editingPageId === page.id;
 
   if (isCollapsed) {

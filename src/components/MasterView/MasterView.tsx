@@ -129,7 +129,13 @@ export function MasterView({ onOpenDocument }: MasterViewProps) {
           style={{ gridTemplateColumns: 'repeat(4, 1fr)', gridAutoRows: '150px' }}
         >
           {groupDocsByTheme(docs, themes).map((group, rank) => (
-            <ThemeTile key={group.theme.id} group={group} rank={rank} onClick={() => selectTheme(group.theme.id)} />
+            <ThemeTile
+              key={group.theme.id}
+              group={group}
+              rank={rank}
+              onClick={() => selectTheme(group.theme.id)}
+              onOpenDoc={handleOpen}
+            />
           ))}
         </div>
       )}
