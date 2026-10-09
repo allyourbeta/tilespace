@@ -29,7 +29,7 @@ export function PageRow({
   onClick, onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop,
   onContextMenu, onEditStart, onEditChange, onEditSubmit, onEditCancel,
 }: PageRowProps) {
-  const bg = getPalette(page.palette_id).background;
+  const bg = getPalette(page.palette_id).swatch;
   const isEditing = editingPageId === page.id;
 
   if (isCollapsed) {
@@ -62,13 +62,13 @@ export function PageRow({
       onDragLeave={onDragLeave}
       onDrop={onDrop}
       onContextMenu={onContextMenu}
-      className={`group relative flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg cursor-pointer text-ts-body transition-colors ${
+      className={`group relative flex items-start gap-2.5 px-2.5 py-[7px] rounded-lg cursor-pointer text-ts-body transition-colors ${
         isActive ? 'text-ink font-semibold' : 'text-ink-2 hover:bg-black/[0.04]'
       } ${isDragging ? 'opacity-50' : ''} ${isDragOver ? 'ring-1 ring-ink-faint' : ''}`}
       style={isActive ? { background: `${bg}14` } : undefined}
     >
-      <span className="absolute -left-px w-2.5 text-ts-meta leading-none text-ink-grip opacity-0 group-hover:opacity-100 cursor-grab">⠿</span>
-      <span className="w-[11px] h-[11px] rounded-[3.5px] flex-none" style={{ background: bg }} />
+      <span className="absolute -left-px top-[7px] w-2.5 text-ts-meta leading-none text-ink-grip opacity-0 group-hover:opacity-100 cursor-grab">⠿</span>
+      <span className="w-[11px] h-[11px] rounded-[3.5px] flex-none mt-[3px]" style={{ background: bg }} />
       {isEditing ? (
         <input
           autoFocus
@@ -85,14 +85,14 @@ export function PageRow({
         />
       ) : (
         <span
-          className="flex-1 min-w-0 truncate"
+          className="flex-1 min-w-0 line-clamp-2 break-words"
           onDoubleClick={(e) => { e.stopPropagation(); onEditStart(page.id, page.title); }}
         >
           {page.title}
         </span>
       )}
       {!isEditing && (
-        <span className="text-ts-meta text-ink-faint tabular-nums">{tileCount}</span>
+        <span className="flex-none text-ts-meta text-ink-faint tabular-nums mt-px">{tileCount}</span>
       )}
     </div>
   );

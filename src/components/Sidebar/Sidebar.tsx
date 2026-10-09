@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { LayoutGrid } from 'lucide-react';
 import type { Page } from '@/types';
 import { LAYOUT } from '@/lib/constants';
 import { chipColor } from '@/lib/chipColors';
@@ -17,6 +18,8 @@ interface SidebarProps {
   isMobile: boolean;
   isCollapsed: boolean;
   onToggleCollapsed: () => void;
+  isMasterViewActive: boolean;
+  onOpenMasterView: () => void;
 }
 
 interface ContextMenuState {
@@ -30,7 +33,7 @@ const TOGGLE_SHORTCUT_HINT = '⌘\\ / Ctrl+\\';
 export function Sidebar({
   pages, tileCounts, currentPageId, onPageSelect, onInsertPage,
   onUpdatePageTitle, onResetPage, onCreatePage, isMobile,
-  isCollapsed, onToggleCollapsed,
+  isCollapsed, onToggleCollapsed, isMasterViewActive, onOpenMasterView,
 }: SidebarProps) {
   const [draggedPageId, setDraggedPageId] = useState<string | null>(null);
   const [dragOverPageId, setDragOverPageId] = useState<string | null>(null);
@@ -122,6 +125,17 @@ export function Sidebar({
           </button>
         )}
       </div>
+
+      <button
+        onClick={onOpenMasterView}
+        title="Master View"
+        className={`flex items-center gap-2.5 rounded-lg font-semibold text-ts-body mb-3.5 flex-none ${
+          collapsed ? 'w-10 h-10 justify-center mx-auto' : 'px-2.5 py-[9px] shadow-card'
+        } ${isMasterViewActive ? 'bg-white text-ink' : collapsed ? 'text-ink-2 hover:bg-black/[0.04]' : 'bg-white text-ink-2 hover:text-ink'}`}
+      >
+        <LayoutGrid className="w-[18px] h-[18px] flex-none" strokeWidth={2} />
+        {!collapsed && <span>Master View</span>}
+      </button>
 
       <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-px">
         {sortedPages.map(page => (

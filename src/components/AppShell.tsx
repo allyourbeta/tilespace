@@ -20,7 +20,11 @@ interface AppShellProps {
   onMobileSidebarClose: () => void;
   isSidebarCollapsed: boolean;
   onToggleSidebarCollapsed: () => void;
-  footerActions: ReactNode;
+  isMasterViewActive: boolean;
+  onOpenMasterView: () => void;
+  /** Replaces the default page-title header when set (used by Master View). */
+  header?: ReactNode;
+  footerActions?: ReactNode;
   footerCenter?: ReactNode;
   children: ReactNode;
 }
@@ -30,10 +34,11 @@ export function AppShell({
   onPageSelect, onInsertPage, onUpdatePageTitle, onResetPage, onCreatePage,
   isMobile, isMobileSidebarOpen, onMobileSidebarOpen, onMobileSidebarClose,
   isSidebarCollapsed, onToggleSidebarCollapsed,
-  footerActions, footerCenter,
+  isMasterViewActive, onOpenMasterView,
+  header, footerActions, footerCenter,
   children,
 }: AppShellProps) {
-  const paletteBg = currentPage ? getPalette(currentPage.palette_id).background : null;
+  const paletteBg = currentPage && !isMasterViewActive ? getPalette(currentPage.palette_id).background : null;
   const gutter = isMobile ? 16 : LAYOUT.GUTTER_PX;
 
   return (
@@ -59,6 +64,8 @@ export function AppShell({
           isMobile={isMobile}
           isCollapsed={isSidebarCollapsed}
           onToggleCollapsed={onToggleSidebarCollapsed}
+          isMasterViewActive={isMasterViewActive}
+          onOpenMasterView={onOpenMasterView}
         />
       )}
 
@@ -68,13 +75,13 @@ export function AppShell({
           style={{ height: LAYOUT.HEADER_HEIGHT_PX, padding: `0 ${gutter}px` }}
           onClick={isMobile ? onMobileSidebarOpen : undefined}
         >
-          {currentPage && (
+          {header ?? (currentPage && (
             <>
               <span className="w-[13px] h-[13px] rounded flex-none" style={{ background: paletteBg ?? undefined }} />
               <h1 className="text-ts-head font-bold tracking-tight text-ink truncate">{currentPage.title}</h1>
               {isMobile && <span className="text-ink-faint text-ts-meta">▾</span>}
             </>
-          )}
+          ))}
         </header>
 
         <div className="flex-1 min-h-0" style={{ padding: `0 ${gutter}px 6px` }}>

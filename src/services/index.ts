@@ -31,3 +31,14 @@ export {
   calculateOverviewColumns,
   computeInsertPositions,
 } from './PageService';
+
+export {
+  sortDocsNewestFirst,
+  visibleDocs,
+  hiddenDocs,
+  groupDocsByTheme,
+  tileSizeForRank,
+  maxTitlesForRank,
+  type ThemeGroup,
+  type TileSize,
+} from './MasterViewService';

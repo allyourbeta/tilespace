@@ -79,6 +79,8 @@ describe('Sidebar', () => {
       isMobile: false,
       isCollapsed: false,
       onToggleCollapsed,
+      isMasterViewActive: false,
+      onOpenMasterView: vi.fn(),
       ...overrides,
     };
     act(() => { root.render(<Sidebar {...props} />); });
@@ -166,5 +168,40 @@ describe('Sidebar', () => {
       b => b.title.startsWith('Collapse sidebar') || b.title.startsWith('Expand sidebar')
     );
     expect(toggle).toBeUndefined();
+  });
+
+  it('is 272px wide expanded — long page names wrap (line-clamp-2) instead of truncating', () => {
+    renderSidebar({
+      pages: [...pages, makePage({ id: 'd', title: 'Evening PEOPLE-time conversations', position: 3 })],
+    });
+    const aside = container.querySelector('aside') as HTMLElement;
+    expect(aside.style.width).toBe('272px');
+
+    const row = Array.from(container.querySelectorAll('[draggable="true"]')).find(
+      (r) => r.textContent?.includes('Evening PEOPLE-time')
+    ) as HTMLElement;
+    const titleSpan = row.querySelector('span.line-clamp-2') as HTMLElement;
+    expect(titleSpan).toBeTruthy();
+    expect(titleSpan.className).not.toContain('truncate');
+    expect(titleSpan.textContent).toBe('Evening PEOPLE-time conversations');
+  });
+
+  it('renders a Master View entry above the page list, not as a page row', () => {
+    const { onOpenMasterView } = (() => {
+      const onOpenMasterView = vi.fn();
+      renderSidebar({ onOpenMasterView });
+      return { onOpenMasterView };
+    })();
+    const entry = Array.from(container.querySelectorAll('button')).find(
+      (b) => b.title === 'Master View'
+    ) as HTMLButtonElement;
+    expect(entry).toBeTruthy();
+    expect(entry.getAttribute('draggable')).not.toBe('true');
+
+    const rows = container.querySelectorAll('[draggable="true"]');
+    expect(entry.compareDocumentPosition(rows[0]) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+
+    act(() => { entry.click(); });
+    expect(onOpenMasterView).toHaveBeenCalledTimes(1);
   });
 });

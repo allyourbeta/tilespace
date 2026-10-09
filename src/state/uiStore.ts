@@ -8,6 +8,7 @@ interface UIState {
   showPasteLink: boolean;
   editingDocument: Link | null;
   isPageTransitioning: boolean;
+  isMasterViewOpen: boolean;
 
   selectTile: (id: string | null, isNew?: boolean) => void;
   setSelectedTileId: (id: string | null) => void;
@@ -16,6 +17,7 @@ interface UIState {
   setShowPasteLink: (value: boolean) => void;
   setEditingDocument: (doc: Link | null) => void;
   setIsPageTransitioning: (value: boolean) => void;
+  setMasterViewOpen: (value: boolean) => void;
   closeTilePanel: () => void;
 }
 
@@ -26,6 +28,7 @@ export const useUIStore = create<UIState>((set) => ({
   showPasteLink: false,
   editingDocument: null,
   isPageTransitioning: false,
+  isMasterViewOpen: false,
 
   selectTile: (id, isNew = false) => set({
     selectedTileId: id,
@@ -38,5 +41,6 @@ export const useUIStore = create<UIState>((set) => ({
   setShowPasteLink: (value) => set({ showPasteLink: value }),
   setEditingDocument: (doc) => set({ editingDocument: doc }),
   setIsPageTransitioning: (value) => set({ isPageTransitioning: value }),
+  setMasterViewOpen: (value) => set({ isMasterViewOpen: value, ...(value ? { selectedTileId: null, isNewTile: false } : {}) }),
   closeTilePanel: () => set({ selectedTileId: null, isNewTile: false }),
 }));

@@ -28,7 +28,7 @@ export const PAGE_PERSISTENCE = {
 
 // Shell layout
 export const LAYOUT = {
-  SIDEBAR_WIDTH_PX: 236,
+  SIDEBAR_WIDTH_PX: 272,
   SIDEBAR_COLLAPSED_PX: 60,
   GUTTER_PX: 28,
   HEADER_HEIGHT_PX: 60,

@@ -23,6 +23,7 @@ export {
 } from './tiles';
 
 export {
+  fetchLink,
   createLink,
   createDocument,
   updateLink,
@@ -34,3 +35,11 @@ export {
   fetchPreferences,
   updatePalette,
 } from './preferences';
+
+export {
+  refreshMasterView,
+  askMasterView,
+  fetchThemes,
+  fetchMasterViewDocs,
+  setDocHidden,
+} from './masterView';

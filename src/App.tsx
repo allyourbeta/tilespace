@@ -8,7 +8,8 @@ import { PasteLinkModal } from '@/components/PasteLinkModal';
 import { DocumentEditor } from '@/components/DocumentEditor';
 import { PageDots } from '@/components/PageDots';
 import { AppShell } from '@/components/AppShell';
-import { Loader2 } from 'lucide-react';
+import { MasterView } from '@/components/MasterView';
+import { Loader2, LayoutGrid } from 'lucide-react';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { usePageStore, useTileStore, useUIStore } from '@/state';
@@ -49,11 +50,13 @@ function AppContent() {
   const showPasteLink = useUIStore(s => s.showPasteLink);
   const editingDocument = useUIStore(s => s.editingDocument);
   const isPageTransitioning = useUIStore(s => s.isPageTransitioning);
+  const isMasterViewOpen = useUIStore(s => s.isMasterViewOpen);
   const setSelectedTileId = useUIStore(s => s.setSelectedTileId);
   const setIsNewTile = useUIStore(s => s.setIsNewTile);
   const setShowPasteLink = useUIStore(s => s.setShowPasteLink);
   const setEditingDocument = useUIStore(s => s.setEditingDocument);
   const setIsPageTransitioning = useUIStore(s => s.setIsPageTransitioning);
+  const setMasterViewOpen = useUIStore(s => s.setMasterViewOpen);
   const closeTilePanel = useUIStore(s => s.closeTilePanel);
 
   const currentPage = useMemo(
@@ -122,6 +125,15 @@ function AppContent() {
     await pageCreatePage(currentPaletteId);
   }, [pageCreatePage, currentPaletteId]);
 
+  const handlePageSelect = useCallback((id: string) => {
+    setMasterViewOpen(false);
+    goToPage(id);
+  }, [goToPage, setMasterViewOpen]);
+
+  const handleOpenMasterView = useCallback(() => {
+    setMasterViewOpen(true);
+  }, [setMasterViewOpen]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen bg-surface-page flex items-center justify-center">
@@ -162,7 +174,7 @@ function AppContent() {
       tileCounts={tileCounts}
       currentPage={currentPage}
       currentPageId={currentPageId}
-      onPageSelect={goToPage}
+      onPageSelect={handlePageSelect}
       onInsertPage={insertPage}
       onUpdatePageTitle={updatePageTitle}
       onResetPage={pageResetPage}
@@ -173,7 +185,15 @@ function AppContent() {
       onMobileSidebarClose={() => setIsMobileSidebarOpen(false)}
       isSidebarCollapsed={isSidebarCollapsed}
       onToggleSidebarCollapsed={toggleSidebarCollapsed}
-      footerActions={
+      isMasterViewActive={isMasterViewOpen}
+      onOpenMasterView={handleOpenMasterView}
+      header={isMasterViewOpen ? (
+        <>
+          <LayoutGrid className="w-[15px] h-[15px] flex-none text-ink-2" strokeWidth={2} />
+          <h1 className="text-ts-head font-bold tracking-tight text-ink truncate">Master View</h1>
+        </>
+      ) : undefined}
+      footerActions={isMasterViewOpen ? null : (
         <FloatingActions
           onAddTile={tileCreateTile}
           onPasteLink={handlePasteLink}
@@ -185,22 +205,26 @@ function AppContent() {
           onCreateLink={tileCreateLink}
           onSelectTile={(id) => { setSelectedTileId(id); setIsNewTile(false); }}
         />
-      }
-      footerCenter={
+      )}
+      footerCenter={isMasterViewOpen ? null : (
         <PageDots
           pages={pages}
           currentPageId={currentPageId!}
-          onPageSelect={goToPage}
+          onPageSelect={handlePageSelect}
         />
-      }
+      )}
     >
-      <div
-        className={`h-full w-full grid ${isMobile ? 'gap-2 overflow-y-auto' : 'gap-3'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
-        style={isMobile ? mobileGridStyle : gridStyle}
-        {...swipeHandlers}
-      >
-        {gridCells}
-      </div>
+      {isMasterViewOpen ? (
+        <MasterView onOpenDocument={handleOpenDocument} />
+      ) : (
+        <div
+          className={`h-full w-full grid ${isMobile ? 'gap-2 overflow-y-auto' : 'gap-3'} transition-all duration-150 ease-out ${isPageTransitioning ? 'opacity-0 scale-[0.97]' : 'opacity-100 scale-100'}`}
+          style={isMobile ? mobileGridStyle : gridStyle}
+          {...swipeHandlers}
+        >
+          {gridCells}
+        </div>
+      )}
 
       {selectedTile && (
         <TilePanel

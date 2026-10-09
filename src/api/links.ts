@@ -2,6 +2,17 @@ import { supabase, getCurrentUserId } from './client';
 import type { Link } from '@/types';
 import { normalizeUrl } from '@/utils/url';
 
+export async function fetchLink(id: string): Promise<Link> {
+  const { data, error } = await supabase
+    .from('links')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function createLink(
   tileId: string,
   position: number,

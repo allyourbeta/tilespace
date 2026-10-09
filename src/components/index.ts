@@ -10,3 +10,4 @@ export { PasteLinkModal } from './PasteLinkModal';
 export { UserMenu } from './UserMenu';
 export { AppShell } from './AppShell';
 export { Sidebar, PageRow } from './Sidebar';
+export { MasterView } from './MasterView';
