@@ -143,7 +143,7 @@ export function Sidebar({
             key={page.id}
             page={page}
             tileCount={tileCounts[page.id] ?? 0}
-            isActive={page.id === currentPageId}
+            isActive={!isMasterViewActive && page.id === currentPageId}
             isCollapsed={collapsed}
             isDragging={draggedPageId === page.id}
             isDragOver={dragOverPageId === page.id && draggedPageId !== page.id}

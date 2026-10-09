@@ -186,6 +186,14 @@ describe('Sidebar', () => {
     expect(titleSpan.textContent).toBe('Evening PEOPLE-time conversations');
   });
 
+  it('clears the active page highlight while Master View is active', () => {
+    renderSidebar({ isMasterViewActive: true });
+    const activeRow = Array.from(container.querySelectorAll('[draggable="true"]')).find(
+      (r) => r.className.includes('font-semibold')
+    );
+    expect(activeRow).toBeUndefined();
+  });
+
   it('renders a Master View entry above the page list, not as a page row', () => {
     const { onOpenMasterView } = (() => {
       const onOpenMasterView = vi.fn();
