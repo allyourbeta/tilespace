@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TileSpace mockup: Master View, sidebar, colours</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--page:#FAFAF7;--card:#fff;--ink:#1C1917;--ink2:#3B3733;--muted:#8A8580;--edge:#EBE8E3;--shadow:0 1px 2px rgba(28,25,23,.05),0 4px 16px rgba(28,25,23,.04);
+--c1:#2563EB;--c2:#7C3AED;--c3:#E02718;--c4:#FF8A00;--c5:#F5C518;--c6:#DB2777;--c7:#0F766E;--c8:#475569;}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#E7E4DE;font-family:Inter,system-ui,sans-serif;color:var(--ink);padding:28px 20px 80px}
+.wrap{max-width:1240px;margin:0 auto}
+h1.top{font-size:22px;font-weight:600}.stamp{color:var(--muted);font-size:14px;margin:4px 0 22px}
+.note{font-size:15px;color:var(--ink2);line-height:1.5;max-width:80ch;margin:6px 0 16px}
+.win{border-radius:12px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.18);background:var(--page)}
+.bar{height:40px;display:flex;align-items:center;gap:8px;padding:0 14px;font-size:14px;font-weight:600}
+.bar i{width:12px;height:12px;border-radius:50%;display:inline-block}
+.bar .r{background:#FF5F57}.bar .y{background:#FEBC2E}.bar .g{background:#28C840}
+.bar .t{margin-left:10px}
+.bar.light{background:var(--page);color:var(--ink);border-bottom:1px solid var(--edge)}
+.bar.dark{background:#1C1917;color:#F5F3EF}
+.bar.old{background:#0891B2;color:#fff}
+.app{display:flex;min-height:760px}
+.side{width:272px;flex:none;border-right:1px solid var(--edge);padding:18px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;margin:4px 6px 18px}
+.brand b{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#6366F1,#7C3AED)}
+.mv{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;background:#fff;box-shadow:var(--shadow);font-weight:600;font-size:16px;margin-bottom:14px}
+.mv svg{flex:none}
+.row{display:flex;align-items:flex-start;gap:12px;padding:7px 10px;border-radius:8px;font-size:16px;line-height:1.3}
+.row s{width:12px;height:12px;border-radius:4px;flex:none;margin-top:4px;text-decoration:none}
+.row span{flex:1}
+.row em{font-style:normal;color:var(--muted);font-size:14px;margin-top:1px}
+.main{flex:1;padding:34px 40px 40px}
+.eyebrow{font-size:15px;color:var(--muted)}
+h2{font-size:36px;font-weight:700;letter-spacing:-.02em;margin:2px 0 6px}
+.sub{font-size:15px;color:var(--muted);margin-bottom:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.doc{background:var(--card);border:1px solid var(--edge);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px;display:flex;flex-direction:column;min-height:150px;position:relative}
+.doc .pg{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted)}
+.doc .pg s{width:9px;height:9px;border-radius:3px;text-decoration:none}
+.doc .tt{font-size:17px;font-weight:600;line-height:1.3;margin:10px 0 12px;flex:1}
+.doc .ft{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid var(--edge)}
+.doc .hide{color:var(--muted)}
+.doc.hover{box-shadow:0 2px 4px rgba(28,25,23,.06),0 10px 28px rgba(28,25,23,.1)}
+.doc.hover .hide{color:var(--ink);font-weight:600}
+.hidden{margin-top:22px;font-size:14px;color:var(--muted)}
+.hidden u{color:var(--ink);text-decoration:none;border-bottom:1px solid #D6D2C8}
+.trio{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;margin-top:10px}
+.trio .win{background:var(--page)}
+.trio p{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+.mini{padding:14px;font-size:14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.chips div{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--edge);border-radius:9px;padding:6px 10px;font-size:14px}
+.chips s{width:14px;height:14px;border-radius:4px;text-decoration:none}
+section{margin-bottom:46px}
+@media(max-width:800px){.side{display:none}.main{padding:24px 18px}}
+</style></head><body><div class="wrap">
+<h1 class="top">TileSpace: Master View, sidebar, colours</h1>
+<p class="stamp">TARGET v1. Approved 2026-10-09: the SIDEBAR (width, wrapping names, Master View entry) and the EIGHT SWATCHES only. Ignore its flat card grid (superseded by TARGET_master_view.html section C) and its title-bar strip (title bar is blue #2563EB). Read-only.</p>
+
+<section>
+<p class="note"><b>1. Master View.</b> Every saved conversation and advice document, newest first, as cards. Each card shows which page it lives on. Click a card to read it in TileSpace's existing reader. Hover shows "Hide"; hidden ones collect in one link at the bottom, where you can bring them back. <b>2. Sidebar.</b> 40px wider, and long page names wrap to a second line instead of being cut off. <b>3. Colours.</b> New bright swatches, and a calm title bar.</p>
+<div class="win">
+<div class="bar light"><i class="r"></i><i class="y"></i><i class="g"></i><span class="t">TileSpace</span></div>
+<div class="app">
+<nav class="side">
+<div class="brand"><b></b>TileSpace</div>
+<div class="mv"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Master View</div>
+<div class="row"><s style="background:var(--c8)"></s><span>Inbox</span><em>8</em></div>
+<div class="row"><s style="background:var(--c1)"></s><span>DAILY</span><em>10</em></div>
+<div class="row"><s style="background:var(--c2)"></s><span>My Inspirations!</span><em>16</em></div>
+<div class="row"><s style="background:var(--c6)"></s><span>Life Advice</span><em>22</em></div>
+<div class="row"><s style="background:var(--c4)"></s><span>$$$$ - project ideas</span><em>5</em></div>
+<div class="row"><s style="background:var(--c4)"></s><span>$$$$$</span><em>5</em></div>
+<div class="row"><s style="background:var(--c1)"></s><span>IHouse 2026</span><em>5</em></div>
+<div class="row"><s style="background:var(--c3)"></s><span>Favorite recipes</span><em>23</em></div>
+<div class="row"><s style="background:var(--c7)"></s><span>Travel</span><em>1</em></div>
+<div class="row"><s style="background:var(--c4)"></s><span>Mini-adventures</span><em>1</em></div>
+<div class="row"><s style="background:var(--c2)"></s><span>CONCEPTS to explore</span><em>0</em></div>
+<div class="row"><s style="background:var(--c5)"></s><span>2026 Goals</span><em>8</em></div>
+<div class="row"><s style="background:var(--c8)"></s><span>Chess</span><em>29</em></div>
+<div class="row"><s style="background:var(--c3)"></s><span>My BRAND</span><em>7</em></div>
+<div class="row"><s style="background:var(--c5)"></s><span>WEEKEND FUN</span><em>9</em></div>
+<div class="row"><s style="background:var(--c2)"></s><span>TBD Software Apps</span><em>14</em></div>
+<div class="row"><s style="background:var(--c6)"></s><span>Evening PEOPLE-time conversations</span><em>16</em></div>
+</nav>
+<main class="main">
+<p class="eyebrow">Everything you saved to think about</p>
+<h2>Master View</h2>
+<p class="sub">41 documents, newest first</p>
+<div class="grid">
+<div class="doc hover"><div class="pg"><s style="background:var(--c6)"></s>Life Advice</div><div class="tt">How to say no to extra client work without losing the client</div><div class="ft"><span>Oct 7</span><span class="hide">Hide</span></div></div>
+<div class="doc"><div class="pg"><s style="background:var(--c6)"></s>Evening PEOPLE-time</div><div class="tt">Reconnecting with old friends after a long gap</div><div class="ft"><span>Oct 3</span><span class="hide"></span></div></div>
+<div class="doc"><div class="pg"><s style="background:var(--c5)"></s>2026 Goals</div><div class="tt">Choosing three goals instead of ten</div><div class="ft"><span>Sep 29</span><span></span></div></div>
+<div class="doc"><div class="pg"><s style="background:var(--c6)"></s>Life Advice</div><div class="tt">Working with ADHD: starting the hard task first</div><div class="ft"><span>Sep 22</span><span></span></div></div>
+<div class="doc"><div class="pg"><s style="background:var(--c3)"></s>My BRAND</div><div class="tt">Speaking at events as a way to find clients</div><div class="ft"><span>Sep 14</span><span></span></div></div>
+<div class="doc"><div class="pg"><s style="background:var(--c2)"></s>My Inspirations!</div><div class="tt">What a good week looks like, written down</div><div class="ft"><span>Sep 9</span><span></span></div></div>
+<div class="doc"><div class="pg"><s style="background:var(--c6)"></s>Life Advice</div><div class="tt">Handling a hard conversation with family</div><div class="ft"><span>Aug 30</span><span></span></div></div>
+<div class="doc"><div class="pg"><s style="background:var(--c8)"></s>Inbox</div><div class="tt">Notes on rest, sleep and evening routines</div><div class="ft"><span>Aug 21</span><span></span></div></div>
+</div>
+<p class="hidden">3 hidden. <u>Show hidden</u></p>
+</main></div></div>
+</section>
+
+<section>
+<p class="note"><b>The title bar.</b> Today it is a blue-green (left). I recommend the middle one: the same warm off-white as the app, so the window looks like one calm piece. The dark one is the alternative.</p>
+<div class="trio">
+<div><p>Today</p><div class="win"><div class="bar old"><i class="r"></i><i class="y"></i><i class="g"></i><span class="t">TileSpace</span></div><div class="mini">current #0891B2</div></div></div>
+<div><p>Recommended: off-white</p><div class="win"><div class="bar light"><i class="r"></i><i class="y"></i><i class="g"></i><span class="t">TileSpace</span></div><div class="mini">matches the page, #FAFAF7</div></div></div>
+<div><p>Alternative: dark</p><div class="win"><div class="bar dark"><i class="r"></i><i class="y"></i><i class="g"></i><span class="t">TileSpace</span></div><div class="mini">near-black, #1C1917</div></div></div>
+</div>
+</section>
+
+<section>
+<p class="note"><b>The swatch colours.</b> Today's sidebar uses pale, greyed tints. These eight are bright and distinct, from the same family as Tenzing's. The only green-ish one is a deep teal. Each page picks one; you can change a page's colour as you can today.</p>
+<div class="chips">
+<div><s style="background:var(--c1)"></s>Blue</div><div><s style="background:var(--c2)"></s>Violet</div><div><s style="background:var(--c6)"></s>Raspberry</div><div><s style="background:var(--c3)"></s>Red</div>
+<div><s style="background:var(--c4)"></s>Orange</div><div><s style="background:var(--c5)"></s>Gold</div><div><s style="background:var(--c7)"></s>Deep teal</div><div><s style="background:var(--c8)"></s>Slate</div>
+</div>
+</section>
+</div></body></html>
