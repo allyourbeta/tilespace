@@ -78,6 +78,32 @@ export function validateThemingResult(raw: unknown): ThemingResult {
   return { themes: value.themes as string[], assignments: value.assignments as Record<string, string> };
 }
 
+/**
+ * Keeps only the entries of a `{assignments: {id: name}}` reply whose name
+ * is verbatim one of `existingNames` — the model's one job below 5 changed
+ * docs (Decision 1/2, SPEC_new_docs_get_a_theme_2026-10-09.md): file a new
+ * document into an existing theme, or leave it alone. Any other shape, a
+ * missing id, or an invented name is dropped rather than guessed at.
+ */
+export function filterValidThemeAssignments(raw: unknown, existingNames: string[]): Record<string, string> {
+  const value = raw as { assignments?: unknown } | null;
+  if (
+    !value ||
+    typeof value.assignments !== "object" ||
+    value.assignments === null ||
+    Array.isArray(value.assignments)
+  ) {
+    return {};
+  }
+
+  const validNames = new Set(existingNames);
+  const out: Record<string, string> = {};
+  for (const [linkId, name] of Object.entries(value.assignments as Record<string, unknown>)) {
+    if (typeof name === "string" && validNames.has(name)) out[linkId] = name;
+  }
+  return out;
+}
+
 export interface AskResultItem {
   link_id: string;
   reason: string;

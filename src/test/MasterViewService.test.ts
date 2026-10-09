@@ -67,9 +67,33 @@ describe('MasterViewService.groupDocsByTheme', () => {
     expect(groups[0].docs).toHaveLength(3);
   });
 
-  it('ignores documents whose theme_id does not match any known theme', () => {
-    const docs = [makeDoc({ linkId: 'a', themeId: 'ghost' }), makeDoc({ linkId: 'b', themeId: null })];
-    expect(groupDocsByTheme(docs, themes)).toEqual([]);
+  it('collects documents with no theme, or a theme_id that matches nothing, into "Not sorted yet", sorted last', () => {
+    const docs = [
+      makeDoc({ linkId: 'a', themeId: 'ghost' }),
+      makeDoc({ linkId: 'b', themeId: null }),
+      makeDoc({ linkId: 'c', themeId: 'big' }),
+    ];
+    const groups = groupDocsByTheme(docs, themes);
+    expect(groups.map((g) => g.theme.id)).toEqual(['big', '__unsorted__']);
+    const unsortedGroup = groups[1];
+    expect(unsortedGroup.theme.name).toBe('Not sorted yet');
+    expect(unsortedGroup.docs.map((d) => d.linkId).sort()).toEqual(['a', 'b']);
+  });
+
+  it('omits "Not sorted yet" entirely when every document has a known theme', () => {
+    const docs = [makeDoc({ linkId: 'a', themeId: 'big' })];
+    expect(groupDocsByTheme(docs, themes).map((g) => g.theme.id)).toEqual(['big']);
+  });
+
+  it('sorts "Not sorted yet" last even when it is the largest group', () => {
+    const docs = [
+      makeDoc({ linkId: 'a', themeId: 'small' }),
+      makeDoc({ linkId: 'b', themeId: null }),
+      makeDoc({ linkId: 'c', themeId: null }),
+      makeDoc({ linkId: 'd', themeId: null }),
+    ];
+    const groups = groupDocsByTheme(docs, themes);
+    expect(groups.map((g) => g.theme.id)).toEqual(['small', '__unsorted__']);
   });
 });
 

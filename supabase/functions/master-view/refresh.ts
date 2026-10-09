@@ -2,28 +2,12 @@ import type { SupabaseClient } from "npm:@supabase/supabase-js@2";
 import { completeJSON, completeText, AIClientError } from "../_shared/aiClient.ts";
 import { swatchForName, assignDistinctSwatches, remapLegacySwatch, validateThemingResult, type ThemingResult } from "./logic.ts";
 import { jsonResponse } from "./http.ts";
+import { themeNewlyUnsorted, type InsightRow, type ThemeRow } from "./unsorted.ts";
 
 interface DocRow {
   id: string;
   title: string;
   content: string | null;
-}
-
-interface InsightRow {
-  link_id: string;
-  summary: string;
-  content_hash: string;
-  theme_id: string | null;
-  hidden: boolean;
-  updated_at: string;
-}
-
-interface ThemeRow {
-  id: string;
-  name: string;
-  swatch: string;
-  sort: number;
-  created_at: string;
 }
 
 async function sha256(text: string): Promise<string> {
@@ -214,9 +198,13 @@ export async function handleRefresh(supabase: SupabaseClient, corsHdrs: Record<s
     return jsonResponse({ ok, rethemed, summarized: changedDocs.length, errors: summaryErrors, error }, corsHdrs);
   };
 
-  if (!needsTheming) return await respond(true, false);
-
   const titleById = new Map<string, string>(((docs ?? []) as DocRow[]).map((d) => [d.id, d.title]));
+
+  if (!needsTheming) {
+    await themeNewlyUnsorted(supabase, freshInsights ?? [], titleById, themes ?? []);
+    return await respond(true, false);
+  }
+
   const docsForTheming = (freshInsights ?? [])
     .filter((i: InsightRow) => i.summary)
     .map((i: InsightRow) => ({ link_id: i.link_id, title: titleById.get(i.link_id) ?? "", summary: i.summary }));

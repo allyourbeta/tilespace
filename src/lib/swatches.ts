@@ -19,6 +19,9 @@ export const RAINBOW_SWATCHES = [
 export const GOLD_SWATCH = '#CF9B00';
 export const ORANGE_SWATCH = '#EB883B';
 
+/** The "Not sorted yet" tile's colour — deliberately outside the rainbow set, so it never reads as a real theme. */
+export const UNSORTED_SWATCH = '#8C8A83';
+
 /** Round-robins by position, so consecutive indices always land on different colours. */
 export function rainbowSwatch(index: number): string {
   const n = RAINBOW_SWATCHES.length;
