@@ -95,6 +95,22 @@ describe('TileCard', () => {
     expect(container.textContent).toMatch(/1 item/);
   });
 
+  it('an unmeasured tile still shows its title (no zero maxHeight)', () => {
+    // jsdom has no layout, so the hook never measures: lineHeight stays 0.
+    renderTile(makeTile({ title: 'Visible before measurement' }));
+    const h3 = container.querySelector('h3') as HTMLElement;
+    expect(h3.style.maxHeight).toBe('');
+  });
+
+  it('shows the title before the first measurement (no zero max-height)', () => {
+    // jsdom has no ResizeObserver, so the hook never measures: lineHeight stays 0.
+    // The title must not be capped at 0px, or it renders blank until measured.
+    renderTile(makeTile({ title: 'Visible before measuring' }));
+    const h3 = container.querySelector('h3') as HTMLElement;
+    expect(h3.textContent).toBe('Visible before measuring');
+    expect(h3.style.maxHeight).toBe('');
+  });
+
   describe('whole-line clamp (measure one element, clamp another)', () => {
     let originalGetComputedStyle: typeof window.getComputedStyle;
     let originalResizeObserver: typeof ResizeObserver;

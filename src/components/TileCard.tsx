@@ -121,7 +121,8 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical',
             WebkitLineClamp: titleLines,
-            maxHeight: titleLines * lineHeight,
+            // Unmeasured (lineHeight 0): no limit yet, so the title never renders blank.
+            maxHeight: lineHeight > 0 ? titleLines * lineHeight : undefined,
           }}
         >
           {tile.title || '---'}
