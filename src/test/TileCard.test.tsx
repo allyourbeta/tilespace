@@ -95,14 +95,84 @@ describe('TileCard', () => {
     expect(container.textContent).toMatch(/1 item/);
   });
 
-  it('clamps the title to a measured number of lines', () => {
-    // jsdom reports clientHeight 0, so the hook floors at its minimum of 1.
-    // The assertion that matters: a WebkitLineClamp is always applied, so a
-    // title can never spill past its box and get sliced mid-glyph.
-    renderTile(makeTile({ title: 'A very long tile title that would wrap several times over' }));
+  describe('whole-line clamp (measure one element, clamp another)', () => {
+    let originalGetComputedStyle: typeof window.getComputedStyle;
+    let originalResizeObserver: typeof ResizeObserver;
+    let clientHeightDescriptor: PropertyDescriptor | undefined;
+
+    beforeEach(() => {
+      originalGetComputedStyle = window.getComputedStyle;
+      originalResizeObserver = globalThis.ResizeObserver;
+      clientHeightDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'clientHeight');
+
+      // Stub the layout engine only: the measured element reports a fixed
+      // clientHeight and lineHeight, and the ResizeObserver fires once,
+      // synchronously, the way a real one fires after first layout.
+      window.getComputedStyle = ((el: Element) => ({
+        ...originalGetComputedStyle(el),
+        lineHeight: '22.1px',
+      })) as typeof window.getComputedStyle;
+
+      Object.defineProperty(HTMLElement.prototype, 'clientHeight', {
+        configurable: true,
+        get() {
+          return 53;
+        },
+      });
+
+      class FakeResizeObserver {
+        private callback: ResizeObserverCallback;
+        constructor(callback: ResizeObserverCallback) {
+          this.callback = callback;
+        }
+        observe() {
+          this.callback([] as unknown as ResizeObserverEntry[], this as unknown as ResizeObserver);
+        }
+        unobserve() {}
+        disconnect() {}
+      }
+      globalThis.ResizeObserver = FakeResizeObserver as unknown as typeof ResizeObserver;
+    });
+
+    afterEach(() => {
+      window.getComputedStyle = originalGetComputedStyle;
+      globalThis.ResizeObserver = originalResizeObserver;
+      if (clientHeightDescriptor) {
+        Object.defineProperty(HTMLElement.prototype, 'clientHeight', clientHeightDescriptor);
+      }
+    });
+
+    it('clamps the h3 to whole lines: webkitLineClamp 2 and maxHeight <= 44.2px', () => {
+      renderTile(makeTile({ title: 'A very long tile title that would wrap several times over' }));
+      const h3 = container.querySelector('h3') as HTMLElement;
+      expect(h3.style.webkitLineClamp).toBe('2');
+      expect(parseFloat(h3.style.maxHeight)).toBeGreaterThan(0);
+      expect(parseFloat(h3.style.maxHeight)).toBeLessThanOrEqual(44.2);
+    });
+  });
+
+  it('the badge and count share one parent, and that parent precedes the title in DOM order', () => {
+    const tile = makeTile({ links: [makeLink()] });
+    renderTile(tile);
+    const card = container.querySelector('[draggable]') as HTMLElement;
+    const badge = Array.from(container.querySelectorAll('span')).find(
+      (s) => s.textContent === 'ST' // getInitials('Short title')
+    ) as HTMLElement;
+    const count = Array.from(container.querySelectorAll('span')).find(
+      (s) => /item/.test(s.textContent || '')
+    ) as HTMLElement;
+    expect(badge).toBeTruthy();
+    expect(count).toBeTruthy();
+    expect(badge.parentElement).toBe(count.parentElement);
+    // Must be a dedicated row, not just "both are direct children of the card".
+    expect(badge.parentElement).not.toBe(card);
+
+    const topRow = badge.parentElement as HTMLElement;
     const h3 = container.querySelector('h3') as HTMLElement;
-    expect(h3.style.webkitLineClamp).not.toBe('');
-    expect(Number(h3.style.webkitLineClamp)).toBeGreaterThanOrEqual(1);
+    expect(topRow.contains(h3)).toBe(false);
+    expect(
+      topRow.compareDocumentPosition(h3) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
   });
 
 });

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TileSpace target — tile text (option B)</title>
+<!--
+  TARGET v1 · built 2026-10-22 13:10 PDT
+  Approved by Ashish 2026-10-22 as "option B" from four mockups.
+  Tile size here (207 x 131 px) is the real size on his desktop window at the
+  time of the screenshot. In the app, tile size comes from the grid; the number
+  of title lines comes from measuring. Match the STRUCTURE and VALUES below,
+  not the fixed tile size.
+-->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+<style>
+:root{
+  --card:#FFFFFF; --border:#E8E6E1; --ink:#1C1B19; --muted:#8C8A83;
+  --lift:inset 0 1px 0 rgba(255,255,255,.25), 0 1px 2px rgba(0,0,0,.1), 0 6px 16px rgba(0,0,0,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Nunito,ui-sans-serif,system-ui,sans-serif;color:var(--ink);
+  background:linear-gradient(180deg,#FFFFFF 0%,#F8F7F3 100%);padding:28px 37px}
+.stamp{font-size:12px;color:var(--muted);margin-bottom:12px}
+h2{font-size:22px;line-height:1.25;font-weight:700;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(3,207px);gap:12px}
+
+/* ---- the tile ---- */
+.tile{height:131px;padding:14px 16px;background:var(--card);border:1px solid var(--border);
+  border-radius:11px;box-shadow:var(--lift);display:flex;flex-direction:column;overflow:hidden;position:relative}
+/* Top row: badge on the left, item count on the right.
+   padding-right keeps the count clear of the hover drag handle,
+   which sits absolutely at top 10px / right 10px, 16px wide. */
+.top{flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding-right:18px;margin-bottom:8px}
+.badge{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;
+  justify-content:center;font-size:11px;font-weight:700;letter-spacing:.015em}
+.count{font-size:14px;line-height:1.35;color:var(--muted)}
+/* Measured box: takes the rest of the card. Lines = floor(height / line-height). */
+.fit{flex:1;min-height:0;font-size:17px;line-height:1.3;font-weight:600;letter-spacing:-.008em}
+/* Clamped text: whole lines only. max-height = lines x line-height (here 3 x 22.1px). */
+.title{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;
+  -webkit-line-clamp:3;max-height:66.3px}
+</style></head>
+<body>
+<p class="stamp">TARGET v1 · built 2026-10-22 13:10 PDT · option B</p>
+<h2>Life Advice</h2>
+<div class="grid">
+  <div class="tile"><div class="top"><span class="badge" style="background:#4F46E516;color:#4F46E5">LB</span></div>
+    <div class="fit"><h3 class="title">"Looking back, which choice will I feel happier about?"</h3></div></div>
+  <div class="tile"><div class="top"><span class="badge" style="background:#D9770616;color:#D97706">BS</span></div>
+    <div class="fit"><h3 class="title">Be structured, offer them simple choice(s) to REACT to</h3></div></div>
+  <div class="tile"><div class="top"><span class="badge" style="background:#7C3AED16;color:#7C3AED">LP</span></div>
+    <div class="fit"><h3 class="title">Leave People Alone (to work out their worries)</h3></div></div>
+  <div class="tile"><div class="top"><span class="badge" style="background:#0891B216;color:#0891B2">AQ</span></div>
+    <div class="fit"><h3 class="title">"Answer the question that you want to answer"</h3></div></div>
+  <div class="tile"><div class="top"><span class="badge" style="background:#CA8A0416;color:#CA8A04">BW</span></div>
+    <div class="fit"><h3 class="title">BRAND what people say when I'm not in the room</h3></div></div>
+  <div class="tile"><div class="top"><span class="badge" style="background:#2563EB16;color:#2563EB">ZV</span><span class="count">2 items</span></div>
+    <div class="fit"><h3 class="title">Zorba v Adler</h3></div></div>
+</div>
+</body></html>

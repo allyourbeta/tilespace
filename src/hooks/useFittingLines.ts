@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { fitLines } from '@/utils/fitLines';
 
 /**
  * How many lines of text actually fit in an element, measured.
@@ -8,12 +9,20 @@ import { useEffect, useRef, useState } from 'react';
  * of those changed, clamping titles to two lines in cards with room for four.
  * A ResizeObserver reports the real box, so there is nothing to keep in sync.
  *
- * Returns at least 1. The element must be a flex child that is allowed to
- * shrink (min-h-0) for its measured height to mean anything.
+ * The caller must measure one element and clamp a different one: clamping
+ * the same element that is measured leaves it flex-sized, so
+ * `-webkit-line-clamp` cannot shrink it and an extra sliced line paints into
+ * the leftover space. Pair this hook's `ref` with a wrapper around the
+ * clamped element, and apply `lines` / `lineHeight` to the clamped element's
+ * own `maxHeight`.
+ *
+ * Returns at least `min`. The measured element must be a flex child that is
+ * allowed to shrink (min-h-0) for its measured height to mean anything.
  */
 export function useFittingLines(min = 1, max = 6) {
   const ref = useRef<HTMLElement | null>(null);
   const [lines, setLines] = useState(min);
+  const [lineHeight, setLineHeight] = useState(0);
 
   useEffect(() => {
     const el = ref.current;
@@ -21,15 +30,14 @@ export function useFittingLines(min = 1, max = 6) {
 
     const measure = () => {
       const style = window.getComputedStyle(el);
-      let lineHeight = parseFloat(style.lineHeight);
-      if (!Number.isFinite(lineHeight) || lineHeight <= 0) {
+      let height = parseFloat(style.lineHeight);
+      if (!Number.isFinite(height) || height <= 0) {
         // 'normal' — approximate the way browsers do, ~1.2x font size
-        lineHeight = parseFloat(style.fontSize) * 1.2;
+        height = parseFloat(style.fontSize) * 1.2;
       }
-      if (!Number.isFinite(lineHeight) || lineHeight <= 0) return;
-
-      const fits = Math.floor(el.clientHeight / lineHeight);
-      setLines(Math.min(max, Math.max(min, fits)));
+      if (!Number.isFinite(height) || height <= 0) return;
+      setLineHeight(height);
+      setLines(fitLines(el.clientHeight, height, min, max));
     };
 
     measure();
@@ -38,5 +46,5 @@ export function useFittingLines(min = 1, max = 6) {
     return () => ro.disconnect();
   }, [min, max]);
 
-  return { ref, lines };
+  return { ref, lines, lineHeight };
 }

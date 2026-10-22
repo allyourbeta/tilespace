@@ -18,7 +18,7 @@ interface TileCardProps {
 export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLinkDrop, isDragging }: TileCardProps) {
   const linkCount = tile.links?.length || 0;
   // Measured, not predicted: however many lines the card can actually show.
-  const { ref: titleRef, lines: titleLines } = useFittingLines(1, 6);
+  const { ref: titleRef, lines: titleLines, lineHeight } = useFittingLines(1, 6);
   const [isLinkDragOver, setIsLinkDragOver] = useState(false);
   const [isTileDragOver, setIsTileDragOver] = useState(false);
   const [isShiftHeld, setIsShiftHeld] = useState(false);
@@ -94,35 +94,39 @@ export function TileCard({ tile, onClick, onDragStart, onDragOver, onDrop, onLin
         </div>
       )}
 
-      <span
-        className="flex-none flex items-center justify-center w-10 h-10 rounded-[10px] mb-[10px] text-ts-body font-bold tracking-[.015em] [@media(max-height:600px)]:hidden"
-        style={{
-          background: chipTint(tile.color_index),
-          color: chipColor(tile.color_index),
-        }}
-      >
-        {getInitials(tile.title)}
-      </span>
-
-      <h3
-        ref={titleRef as React.RefObject<HTMLHeadingElement>}
-        className="flex-1 text-ink font-semibold text-ts-tile tracking-[-.008em] min-h-0 overflow-hidden"
-        style={{
-          display: '-webkit-box',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: titleLines,
-        }}
-      >
-        {tile.title || '---'}
-      </h3>
-
-      {linkCount > 0 && (
+      <div className="flex-none flex items-center justify-between pr-[18px] mb-2 [@media(max-height:600px)]:hidden">
         <span
-          className="mt-auto flex-none text-ink-muted text-ts-meta pt-[5px] [@media(max-height:600px)]:hidden"
+          className="flex items-center justify-center w-6 h-6 rounded-[7px] text-[11px] font-bold tracking-[.015em]"
+          style={{
+            background: chipTint(tile.color_index),
+            color: chipColor(tile.color_index),
+          }}
         >
-          {linkCount} {linkCount === 1 ? 'item' : 'items'}
+          {getInitials(tile.title)}
         </span>
-      )}
+        {linkCount > 0 && (
+          <span className="text-ink-muted text-ts-meta">
+            {linkCount} {linkCount === 1 ? 'item' : 'items'}
+          </span>
+        )}
+      </div>
+
+      <div
+        ref={titleRef as React.RefObject<HTMLDivElement>}
+        className="flex-1 min-h-0 text-ink font-semibold text-ts-tile tracking-[-.008em]"
+      >
+        <h3
+          className="overflow-hidden"
+          style={{
+            display: '-webkit-box',
+            WebkitBoxOrient: 'vertical',
+            WebkitLineClamp: titleLines,
+            maxHeight: titleLines * lineHeight,
+          }}
+        >
+          {tile.title || '---'}
+        </h3>
+      </div>
     </div>
   );
 }

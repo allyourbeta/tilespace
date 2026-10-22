@@ -38,9 +38,10 @@ src/
 
 ### Testing
 ```bash
-npm run build  # Type check + build
-npm run test   # Run vitest
-npm run dev    # Local development
+npm run typecheck  # Type check (tsc --noEmit)
+npm run build      # Build (does NOT type-check)
+npm run test       # Run vitest
+npm run dev        # Local development
 ```
 
 ### Deployment
@@ -213,10 +214,11 @@ when a value is ambiguous.
   `src/lib/chipColors.ts` — never from the page palette or `tile.accent_color`
   directly. Palettes are muted/monochrome by design, so palette-driven chips
   would look identical on a white card.
-- **Two-line clamp rule**: tile titles are `line-clamp-2`, never 3. A fixed
-  grid row height means a third line gets sliced mid-glyph instead of
-  ellipsing — this was a real v1 bug. `overflow-hidden` plus `min-h-0` on
-  every flex ancestor keeps overflow impossible.
+- **Whole-line rule**: a tile title shows only whole lines. `useFittingLines`
+  measures a wrapper; the `h3` inside gets `WebkitLineClamp` = lines AND
+  `maxHeight` = lines × line-height. Never measure and clamp the same
+  element: Chrome then paints a sliced extra line. Reference:
+  `docs/targets/TARGET_tile_text.html`.
 - **Anchoring rule**: the shell's header height, gutter and title size are
   constants (`LAYOUT` in `src/lib/constants.ts`), identical regardless of
   which page is open or whether the sidebar is collapsed. Switching pages
